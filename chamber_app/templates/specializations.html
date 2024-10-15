@@ -1,0 +1,31 @@
+<!-- templates/specializations.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Specializations</title>
+</head>
+<body>
+    <h1>List of Specializations (Obory specializace)</h1>
+    
+    <table border="1">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for specialization in specializations %}
+            <tr>
+                <td>{{ specialization.id }}</td>
+                <td>{{ specialization.name }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ url_for('upload_file') }}">Back to Upload</a>
+</body>
+</html>

@@ -1,0 +1,64 @@
+{% extends "index.html" %}
+
+{% block content %}
+<!-- Content -->
+<div id="layoutSidenav_content">
+    <main>
+        <div class="container-fluid px-4">
+            <h1 class="mt-4">Přidat Instrumentaci</h1>
+            <div class="row">
+                <form method="POST" id="instrumentation-form">
+                    {{ form.hidden_tag() }}
+                    
+                    <div id="instrumentation-fields">
+                        <div class="col-4">
+                        <div class="mb-3 instrumentation-field">
+                            {{ form.instrument_id.label(class="form-label") }}
+                            {{ form.instrument_id(class="form-control") }}
+                            {% for error in form.instrument_id.errors %}
+                                <span style="color: red;">[{{ error }}]</span>
+                            {% endfor %}
+                            
+                            {{ form.quantity.label(class="form-label") }}
+                            {{ form.quantity(class="form-control", size=5) }}
+                            {% for error in form.quantity.errors %}
+                                <span style="color: red;">[{{ error }}]</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    </div>
+                    
+                    <button type="button" class="btn btn-secondary mt-2" id="add-instrumentation">Přidat Další Instrumentaci</button>
+
+                    <div class="mt-3">
+                        {{ form.submit(class="btn btn-primary") }}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+    {% include "footer.html" %}
+</div>
+
+<script>
+    document.getElementById('add-instrumentation').addEventListener('click', function() {
+        const instrumentationFields = document.getElementById('instrumentation-fields');
+        
+        const newField = document.createElement('div');
+        newField.classList.add('mb-3', 'instrumentation-field');
+        
+        newField.innerHTML = `
+            <label class="form-label">Instrument</label>
+            <select name="instrument_id" class="form-control">
+                {% for id, name in form.instrument_id.choices %}
+                    <option value="{{ id }}">{{ name }}</option>
+                {% endfor %}
+            </select>
+            <label class="form-label">Quantity</label>
+            <input type="number" name="quantity" class="form-control" size="5" min="1" required>
+        `;
+        
+        instrumentationFields.appendChild(newField);
+    });
+</script>
+{% endblock %}

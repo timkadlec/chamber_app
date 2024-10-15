@@ -1,0 +1,185 @@
+{% extends "index.html" %}
+
+{% block content %}
+<!-- Content -->
+<div id="layoutSidenav_content">
+    <main>
+        <div class="container-fluid px-4">
+            <h1 class="mt-4">Přidat skladbu</h1>
+            <div class="row">
+                <form method="POST" action="{{ url_for('library.add_composition') }}">
+                    {{ form_composition.hidden_tag() }}
+
+                    <div class="mb-3">
+                        {{ form_composition.name.label(class="form-label") }}
+                        {{ form_composition.name(class="form-control") }}
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form_composition.durata.label(class="form-label") }}
+                        {{ form_composition.durata(class="form-control") }}
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="d-flex align-items-center">
+                            {{ form_composition.composer_id.label(class="form-label me-2") }}
+                            {{ form_composition.composer_id(class="form-control me-2") }}
+                            <!-- Button to trigger modal -->
+                            <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal"
+                                data-bs-target="#addComposerModal">
+                                +
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form_composition.submit(class="btn btn-primary") }}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal for adding a composer -->
+    <div class="modal fade" id="addComposerModal" tabindex="-1" aria-labelledby="addComposerModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addComposerModalLabel">Přidat skladatele</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+
+
+                    <form id="addComposerForm" method="POST" action="{{ url_for('library.add_composer') }}">
+                        {{ form_composer.hidden_tag() }}
+
+                        <!-- First Name -->
+                        <div class="mb-3">
+                            {{ form_composer.first_name.label(class="form-label") }}
+                            {{ form_composer.first_name(class="form-control") }}
+                            {% if form_composer.first_name.errors %}
+                            <div class="text-danger">
+                                {% for error in form_composer.first_name.errors %}
+                                <span>{{ error }}</span><br>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Last Name -->
+                        <div class="mb-3">
+                            {{ form_composer.last_name.label(class="form-label") }}
+                            {{ form_composer.last_name(class="form-control") }}
+                            {% if form_composer.last_name.errors %}
+                            <div class="text-danger">
+                                {% for error in form_composer.last_name.errors %}
+                                <span>{{ error }}</span><br>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Birth Date -->
+                        <div class="mb-3">
+                            {{ form_composer.birth_date.label(class="form-label") }}
+                            {{ form_composer.birth_date(class="form-control") }}
+                            {% if form_composer.birth_date.errors %}
+                            <div class="text-danger">
+                                {% for error in form_composer.birth_date.errors %}
+                                <span>{{ error }}</span><br>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Death Date -->
+                        <div class="mb-3">
+                            {{ form_composer.death_date.label(class="form-label") }}
+                            {{ form_composer.death_date(class="form-control") }}
+                            {% if form_composer.death_date.errors %}
+                            <div class="text-danger">
+                                {% for error in form_composer.death_date.errors %}
+                                <span>{{ error }}</span><br>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Musical Period -->
+                        <div class="mb-3">
+                            {{ form_composer.musical_period.label(class="form-label") }}
+                            {{ form_composer.musical_period(class="form-control") }}
+                            {% if form_composer.musical_period.errors %}
+                            <div class="text-danger">
+                                {% for error in form_composer.musical_period.errors %}
+                                <span>{{ error }}</span><br>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Nationality -->
+                        <div class="mb-3">
+                            {{ form_composer.nationality.label(class="form-label") }}
+                            {{ form_composer.nationality(class="form-control") }}
+                            {% if form_composer.nationality.errors %}
+                            <div class="text-danger">
+                                {% for error in form_composer.nationality.errors %}
+                                <span>{{ error }}</span><br>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="mb-3">
+                            {{ form_composer.submit(class="btn btn-primary") }}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('addComposerForm').addEventListener('submit', function (event) {
+            event.preventDefault(); // Prevent the default form submission
+
+            const formData = new FormData(this);
+
+            fetch(this.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest' // Indicate AJAX request
+                }
+            })
+                .then(response => {
+                    if (response.ok) {
+                        return response.json(); // Assuming the response is JSON
+                    }
+                    throw new Error('Network response was not ok.');
+                })
+                .then(data => {
+                    // Check if the composer was created successfully
+                    if (data.success) {
+                        // Redirect to the add composition page
+                        window.location.href = "{{ url_for('library.add_composition') }}";
+                    } else {
+                        // Handle errors (e.g., show a message)
+                        alert('Error adding composer: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('There was a problem with the fetch operation:', error);
+                });
+        });
+    </script>
+
+
+    {% include "footer.html" %}
+</div>
+
+{% endblock %}

@@ -1,0 +1,32 @@
+{% extends "index.html" %}
+
+{% block content %}
+<div id="layoutSidenav_content">
+    <main>
+        <div class="container-fluid px-4">
+            <h1 class="mt-4">Detail kompozice</h1>
+            <div class="row">
+                <div class="col-md-6">
+                    <h2>{{ composition.name }}</h2>
+                    <p><strong>Délka:</strong> {{ composition.durata }} minut</p>
+                    <p><strong>Autor:</strong> <a href="{{url_for('library.composer_detail', composer_id=composition.composer.id)}}">{{ composition.composer.first_name }} {{ composition.composer.last_name }}</a></p>
+                    <p><strong>Národnost:</strong> {{ composition.composer.nationality }}</p>
+                    <p><strong>Hudební období:</strong> {{ composition.composer.musical_period }}</p>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12">
+                    {%if not composition.players%}
+                    <h3>Pro tuto kompozici není prozatím k dispozici instrumentace</h3>
+                    {%else%}
+                    <h4>Instrumentace <a href="{{url_for('library.edit_players', composition_id=composition.id)}}"><i class='fas fa-pen-to-square small'></i></a></h4>
+                    <p>{{composition.instrumentation_text}}</p>
+                    {%endif%}
+                </div>
+            </div>
+        </div>
+    </main>
+    {% include "footer.html" %}
+</div>
+{% endblock %}

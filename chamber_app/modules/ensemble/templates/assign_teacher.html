@@ -1,0 +1,72 @@
+{% extends "index.html" %}
+
+{% block content %}
+<!-- Content -->
+<div id="layoutSidenav_content">
+    <main>
+        <div class="container-fluid px-4">
+            <h1 class="mt-4">Přiřadit pedagoga souboru {{ensemble.name}}</h1>
+            <div class="row">
+                <div class="col">
+                    <p>Místo, kde můžete přiřadit pedagoga souboru</p>
+
+
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            Informace o souboru
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <p>Studovaná kompozice: <b>{{ ensemble.composition.composer_full_name }} - {{
+                                        ensemble.composition.name
+                                        }}</b></p>
+                                <p>Obsazení: <b>{{ensemble.composition.instrumentation_text}}</b></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <i class="fas fa-table me-1"></i>
+                            Vybrat profesora
+                        </div>
+
+                        <!-- Tabulka Basic -->
+                        <form method="POST" action="{{url_for('ensemble.assign_teacher', ensemble_id=ensemble.id)}}">
+                        <div class="card-body">
+                            <table id="datatableStudents">
+                                <thead>
+                                    <tr>
+                                        <th>Vybrat</th>
+                                        <th>Jméno</th>
+                                    </tr>
+                                </thead>
+                                <tfoot>
+                                    <tr>
+                                        <th>Vybrat</th>
+                                        <th>Jméno</th>
+                                    </tr>
+                                </tfoot>
+                                <tbody>
+                                    {% for teacher in teachers %}
+                                    <tr>
+                                        <td><input type="radio" name="selected_teacher" value="{{ teacher.id }}"></td>
+                                        <td>{{teacher.name}}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                            <button type="submit" class="btn btn-primary">Přiřadit pedagoga</button>
+                        </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+    </main>
+    {%include "footer.html"%}
+</div>
+
+{% endblock %}ß

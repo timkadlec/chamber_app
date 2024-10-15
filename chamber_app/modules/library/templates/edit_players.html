@@ -1,0 +1,80 @@
+{% extends "index.html" %}
+
+{% block content %}
+<div id="layoutSidenav_content">
+    <main>
+        <div class="container-fluid px-4">
+            <h1 class="mt-4 mb-4">Upravit Instrumentaci</h1>
+
+            <div class="card mb-4">
+                <div class="card-header">
+                    <a href="{{url_for('library.composition_detail', composition_id=composition.id)}}">
+                    <h5>{{ composition.composer.first_name }} {{ composition.composer.last_name }}: {{ composition.name
+                        }}</h5></a>
+                </div>
+            </div>
+            <div class="row">
+            {% for player in composition.players %}
+                <div class="col-4">
+                    <div class="card mt-2 mb-2">
+                        <div class="card-header">
+                            Hráč
+                        </div>
+                        <div class="card-body d-flex justify-content-between">
+                            <div class="col-10">
+                                
+                                {% for instrument in player.instruments %}
+                                <p>{{ instrument.name }}</p>
+                                {% endfor %}
+                            </div>
+                            <div class="col-2 text-end">
+                                <a href="#"><button class="btn btn-info btn-sm">Edit</button></a>
+                                <form method="POST"
+                                    action="{{url_for('library.delete_player', composition_id=composition.id, player_id=player.id)}}">
+                                    <button type="submit" class="btn btn-danger btn-sm mt-2">Delete</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+            <!--place for form-->
+                <div class="col-4">
+                    <div class="card mt-2 mb-2">
+                        <div class="card-header">
+                            Přidat dalšího hráče
+                        </div>
+                        <div class="card-body">
+                            <form action="{{ url_for('library.edit_players', composition_id=composition.id) }}"
+                                method="POST">
+                                <div class="row">
+                                    <div class="col-9">
+                                        {% for instrument in instruments %}
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" value="{{ instrument.id }}"
+                                                id="instruments_{{ loop.index }}" name="instruments">
+                                            <label class="form-check-label" for="instruments_{{ loop.index }}">
+                                                {{ instrument.name }}
+                                            </label>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                    <div class="col-3 d-flex align-items-center">
+                                        <button type="submit" class="btn btn-success"> Přidat</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+
+</div>
+
+</div>
+</main>
+
+{% endblock %}

@@ -1,0 +1,55 @@
+{% extends "index.html" %}
+
+{% block content %}
+<!-- Content -->
+<div id="layoutSidenav_content">
+    <main>
+        <div class="container-fluid px-4">
+            <h1 class="mt-4">Přidat skladatele</h1>
+            <div class="row">
+                <form method="POST" action="">
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="mb-3">
+                        {{ form.first_name.label(class="form-label") }}
+                        {{ form.first_name(class="form-control") }}
+                    </div>
+        
+                    <div class="mb-3">
+                        {{ form.last_name.label(class="form-label") }}
+                        {{ form.last_name(class="form-control") }}
+                    </div>
+        
+                    <div class="mb-3">
+                        {{ form.birth_date.label(class="form-label") }}
+                        {{ form.birth_date(class="form-control") }}
+                    </div>
+        
+                    <div class="mb-3">
+                        {{ form.death_date.label(class="form-label") }}
+                        {{ form.death_date(class="form-control") }}
+                    </div>
+        
+                    <div class="mb-3">
+                        {{ form.musical_period.label(class="form-label") }}
+                        {{ form.musical_period(class="form-control") }}
+                    </div>
+                    
+                    <div class="mb-3">
+                        {{ form.nationality.label(class="form-label") }}
+                        {{ form.nationality(class="form-control") }}
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.submit(class="btn btn-primary") }}
+                    </div>
+                </form>
+            </div>
+
+            
+        </div>
+    </main>
+    {%include "footer.html"%}
+</div>
+
+{% endblock %}ß

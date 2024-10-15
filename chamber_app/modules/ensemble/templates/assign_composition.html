@@ -1,0 +1,106 @@
+{% extends "index.html" %}
+
+{% block content %}
+<!-- Content -->
+<div id="layoutSidenav_content">
+    <main>
+        <div class="container-fluid px-4">
+            <h1 class="mt-4">Přiřadit skladbu komornímu souboru: {{ensemble.name}}</h1>
+            <div class="row">
+                <div class="col">
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            Informace o souboru
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <p>Název: <b>{{ensemble.name}}</b></p>
+                                <p>Pedagog: <b>{{ ensemble.teacher.name }}</b></p>
+                                <p>Obsazení: <b>{{ensemble.composition.instrumentation_text}}</b></p>
+                                <p>Studenti:
+                                    
+                                        {% for student in ensemble.student_members %}
+                                        <b>{{ student.last_name }} {{ student.first_name }}</b> ({{student.instrument.name}}; {{student.year.year}}. {{student.study_program.name}}){% if not loop.last %}, {% endif
+                                        %}
+                                        {% endfor %}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-table me-1"></i>
+                    Seznam skladeb
+                </div>
+
+                <!-- Tabulka Basic -->
+                <form method="POST" action="{{url_for('ensemble.assign_composition', ensemble_id=ensemble.id)}}">
+                    <div class="card-body">
+                        <table id="datatableStudents">
+                            <thead>
+                                <tr>
+                                    <th>Vybrat</th>
+                                    <th>Autor</th>
+                                    <th>Název</th>
+                                    <th>Durata</th>
+                                    <th>Počet hráčů</th>
+                                    <th>Obsazení</th>
+                                </tr>
+                            </thead>
+                            <tfoot>
+                                <tr>
+                                    <th>Vybrat</th>
+                                    <th>Autor</th>
+                                    <th>Název</th>
+                                    <th>Durata</th>
+                                    <th>Počet hráčů</th>
+                                    <th>Obsazení</th>
+                                </tr>
+                            </tfoot>
+                            <tbody>
+                                {% for composition in compositions %}
+                                <tr>
+                                    <td><input type="radio" name="selected_composition" value="{{ composition.id }}">
+                                    </td>
+                                    <td>{{composition.composer.last_name}} {{composition.composer.first_name}}</td>
+                                    <td>{{composition.name}}</td>
+                                    <td>{{composition.durata}} min</td>
+                                    <td>{%if composition.players%}
+                                        {{composition.player_count}}
+                                        {%else%}
+                                        -
+                                        {%endif%}
+                                    </td>
+                                    <td>
+                                        {% if composition.players %}
+                                        {{composition.instrumentation_text}}
+                                        <a href="{{url_for('library.edit_players', composition_id=composition.id)}}"><i
+                                                class="fas fa-pen-to-square"></i></a>
+                                        {%else%}
+                                        <a href="{{url_for('library.edit_players', composition_id=composition.id)}}"><button
+                                                class="btn btn-success btn-sm">Doplnit</button></a>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        <button type="submit" class="btn btn-primary">Zadat skladbu</button>
+                    </div>
+                </form>
+            </div>
+
+
+
+
+
+    </main>
+
+
+    {%include "footer.html"%}
+</div>
+
+{% endblock %}

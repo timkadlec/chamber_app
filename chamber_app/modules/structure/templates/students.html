@@ -1,0 +1,63 @@
+{% extends "index.html" %}
+
+{% block content %}
+<!-- Content -->
+<div id="layoutSidenav_content">
+    <main>
+        <div class="container-fluid px-4">
+            <h1 class="mt-4">Studenti</h1>
+            <div class="row">
+                <p>Místo, kde můžete prohlížet studenty</p>
+            </div>
+
+
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-table me-1"></i>
+                    Seznam studentů
+                </div>
+
+                <!-- Tabulka Basic -->
+                <div class="card-body">
+                    <table id="datatableStudents">
+                        <thead>
+                            <tr>
+                                <th>Příjmení</th>
+                                <th>Jméno</th>
+                                <th>Studijní program</th>
+                                <th>Ročník</th>
+                                <th>Nástroj</th>
+                                <th>Katedra</th>
+                            </tr>
+                        </thead>
+                        <tfoot>
+                            <tr>
+                                <th>Příjmení</th>
+                                <th>Jméno</th>
+                                <th>Studijní program</th>
+                                <th>Ročník</th>
+                                <th>Nástroj</th>
+                                <th>Katedra</th>
+                            </tr>
+                        </tfoot>
+                        <tbody>
+                            {% for student in students %}
+                            <tr>
+                                <td>{{student.last_name}}</td>
+                                <td>{{student.first_name}}</td>
+                                <td>{{student.study_program.name}}</td>
+                                <td>{{student.year.year}}</td>
+                                <td>{{student.instrument.name}}</td>
+                                <td>{{student.department.name}}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+    {%include "footer.html"%}
+</div>
+
+{% endblock %}ß

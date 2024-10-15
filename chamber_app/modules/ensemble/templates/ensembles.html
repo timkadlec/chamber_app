@@ -1,0 +1,93 @@
+{% extends "index.html" %}
+
+{% block content %}
+<!-- Content -->
+<div id="layoutSidenav_content">
+    <main>
+        <div class="container-fluid px-4">
+            <h1 class="mt-4">Komorní soubory</h1>
+            <div class="row">
+                <p>Místo, vidíte přehled všech komorních souborů</p>
+                <ul class="nav nav-pills mb-4 ms-2">
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{url_for('ensemble.ensemble_wizard')}}"><button
+                                class="btn btn-success"><i class="fas fa-wand-magic-sparkles me-1"></i>Tvůrce
+                                souboru</button></a>
+                    </li>
+
+                </ul>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-table me-1"></i>
+                    Seznam souborů
+                </div>
+
+                <!-- Tabulka Basic -->
+                <div class="card-body">
+                    <table id="datatableStudents">
+                        <thead>
+                            <tr>
+                                <th>Název</th>
+                                <th>Repertoár</th>
+                                <th>Obsazení</th>
+                                <th>Studenti</th>
+                                <th>Kompletní?</th>
+                                <th>Pedagog</th>
+                                <th>Akce</th>
+                            </tr>
+                        </thead>
+                        <tfoot>
+                            <tr>
+                                <th>Název</th>
+                                <th>Repertoár</th>
+                                <th>Obsazení</th>
+                                <th>Studenti</th>
+                                <th>Kompletní?</th>
+                                <th>Akce</th>
+                            </tr>
+                        </tfoot>
+                        <tbody>
+                            {%for ensemble in ensembles%}
+                            <tr>
+                                <td><a
+                                        href='{{url_for("ensemble.ensemble_detail", ensemble_id=ensemble.id)}}'>{{ensemble.name}}</a>
+                                </td>
+                                <td>{%if ensemble.composition_id%}
+                                    <b>{{ensemble.composition.composer_full_name}} - {{ensemble.composition.name}}</b>
+                                    {%endif%}
+                                </td>
+                                <td>{{ensemble.composition.instrumentation_text if ensemble.composition else ""}}</td>
+                                <td>příjmení studentů</td>
+                                <td><!-- Progress Bar -->
+                                    <div class="progress">
+                                        <div class="progress-bar" role="progressbar"
+                                            style="width: {{ ensemble.player_completeness }}%;"
+                                            aria-valuenow="{{ ensemble.player_completeness }}" aria-valuemin="0"
+                                            aria-valuemax="100">
+                                            {{ ensemble.player_completeness }}%
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>{{ensemble.teacher.name if ensemble.teacher else ""}}
+                                </td>
+                                <td>
+                                    <form method="post"
+                                        action="{{url_for('ensemble.delete_ensemble', ensemble_id=ensemble.id)}}">
+                                        <button class="btn btn-sm btn-danger">Odebrat</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {%endfor%}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+    {%include "footer.html"%}
+</div>
+
+{% endblock %}ß

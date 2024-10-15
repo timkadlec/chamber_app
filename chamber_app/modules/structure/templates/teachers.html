@@ -1,0 +1,48 @@
+{% extends "index.html" %}
+
+{% block content %}
+<!-- Content -->
+<div id="layoutSidenav_content">
+    <main>
+        <div class="container-fluid px-4">
+            <h1 class="mt-4">Profesoři</h1>
+            <div class="row">
+                <p>Místo, kde můžete prohlížet profesory</p>
+            </div>
+
+
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-table me-1"></i>
+                    Seznam profesorů
+                </div>
+
+                <!-- Tabulka Basic -->
+                <div class="card-body">
+                    <table id="datatableStudents">
+                        <thead>
+                            <tr>
+                                <th>Jméno</th>
+                            </tr>
+                        </thead>
+                        <tfoot>
+                            <tr>
+                                <th>Jméno</th>
+                            </tr>
+                        </tfoot>
+                        <tbody>
+                            {% for teacher in teachers %}
+                            <tr>
+                                <td>{{teacher.name}}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+    {%include "footer.html"%}
+</div>
+
+{% endblock %}ß

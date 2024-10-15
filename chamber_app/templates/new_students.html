@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Newly Added Students</title>
+</head>
+<body>
+    <h1>Newly Added Students</h1>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Příjmení</th>
+                <th>Jméno</th>
+                <th>Osobní čís.</th>
+                <th>Název oboru/specializace</th>
+                <th>Školitel</th>
+                <th>Oborová katedra</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for student in students %}
+            <tr>
+                <td>{{ student.prijmeni }}</td>
+                <td>{{ student.jmeno }}</td>
+                <td>{{ student.osobni_cislo }}</td>
+                <td>{{ student.obor_specializace.name }}</td>
+                <td>{{ student.skolitel.name }}</td>
+                <td>{{ student.oborova_katedra.name }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

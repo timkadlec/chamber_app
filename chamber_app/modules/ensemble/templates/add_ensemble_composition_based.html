@@ -1,0 +1,201 @@
+{% extends "index.html" %}
+
+{% block content %}
+<!-- Content -->
+<div id="layoutSidenav_content">
+    <main>
+        <div class="container-fluid px-4">
+            <h1 class="mt-4">Založit soubor na základě skladby</h1>
+            <div class="row">
+                <p>Průvodce založením komorního souboru na základě skladby</p>
+            </div>
+
+            <!-- Filtering -->
+            <div class="row mt-2 mb-2">
+                <form method="GET" action="{{ url_for('ensemble.add_composition_based') }}" class="form-inline">
+                    <!-- Instrument Filter -->
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown"
+                            aria-expanded="false">
+                            Filtr podle nástroje
+                        </button>
+                        <ul class="dropdown-menu">
+                            {% for instrument in instruments %}
+                            <li>
+                                <label class="dropdown-item">
+                                    <input type="checkbox" name="instruments" value="{{ instrument.id }}" {% if
+                                        instrument.id|string in request.args.getlist('instruments') %} checked {% endif
+                                        %}>
+                                    {{ instrument.name }}
+                                </label>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+
+                    <!-- Duration Filter -->
+                    <div class="btn-group ml-2">
+                        <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown"
+                            aria-expanded="false">
+                            Filtr podle délky skladby
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <label class="dropdown-item">
+                                    <input type="checkbox" name="durations" value="0-5" {% if '0-5' in
+                                        request.args.getlist('durations') %} checked {% endif %}>
+                                    0-5 min
+                                </label>
+                            </li>
+                            <li>
+                                <label class="dropdown-item">
+                                    <input type="checkbox" name="durations" value="5-10" {% if '5-10' in
+                                        request.args.getlist('durations') %} checked {% endif %}>
+                                    5-10 min
+                                </label>
+                            </li>
+                            <li>
+                                <label class="dropdown-item">
+                                    <input type="checkbox" name="durations" value="10-15" {% if '10-15' in
+                                        request.args.getlist('durations') %} checked {% endif %}>
+                                    10-15 min
+                                </label>
+                            </li>
+                            <li>
+                                <label class="dropdown-item">
+                                    <input type="checkbox" name="durations" value="15-20" {% if '15-20' in
+                                        request.args.getlist('durations') %} checked {% endif %}>
+                                    15-20 min
+                                </label>
+                            </li>
+                            <li>
+                                <label class="dropdown-item">
+                                    <input type="checkbox" name="durations" value="20+" {% if '20+' in
+                                        request.args.getlist('durations') %} checked {% endif %}>
+                                    20+ min
+                                </label>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" class="btn btn-primary ml-2">Filtrovat</button>
+                </form>
+            </div>
+
+            <!-- Selected Filters as Bootstrap Badges -->
+            <div class="d-flex align-items-center mt-2">
+                {% if selected_instrument_names or selected_duration_ranges %}
+                <p class="mb-0 mr-2"><strong>Selected filters:</strong></p>
+
+                <!-- Instrument Badges -->
+                {% for instrument_name in selected_instrument_names %}
+                <a href="{{ url_for('library.show_compositions', instruments=request.args.getlist('instruments')|reject('equalto', instrument_name)|list, durations=request.args.getlist('durations')) }}"
+                    class="badge bg-primary ms-1 mr-2">
+                    {{ instrument_name }}
+                    <span aria-hidden="true">&times;</span>
+                </a>
+                {% endfor %}
+
+                <!-- Duration Badges -->
+                {% for duration_range in selected_duration_ranges %}
+                <a href="{{ url_for('library.show_compositions', instruments=request.args.getlist('instruments'), durations=request.args.getlist('durations')|reject('equalto', duration_range)|list) }}"
+                    class="badge bg-primary ms-1 mr-2">
+                    {{ duration_range }}
+                    <span aria-hidden="true">&times;</span>
+                </a>
+                {% endfor %}
+                {% else %}
+                <p class="mb-0"><em>Nejsou vybrány žádné filtry.</em></p>
+                {% endif %}
+            </div>
+
+
+
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-book me-1"></i>
+                    Vyberte repertoár
+                </div>
+                <div class="card-body">
+                    <!-- Tabulka Basic -->
+                    <div class="card-body">
+                        <table id="datatableStudents">
+                            <thead>
+                                <tr>
+                                    <th>Autor</th>
+                                    <th>Název</th>
+                                    <th>Durata</th>
+                                    <th>Obsazení</th>
+                                    <th>Akce</th>
+                                </tr>
+                            </thead>
+                            <tfoot>
+                                <tr>
+                                    <th>Autor</th>
+                                    <th>Název</th>
+                                    <th>Durata</th>
+                                    <th>Obsazení</th>
+                                    <th>Akce</th>
+                                </tr>
+                            </tfoot>
+                            <tbody>
+                                {% for composition in compositions %}
+                                <tr>
+                                    <td>{{composition.composer.last_name}} {{composition.composer.first_name}}</td>
+                                    <td>{{composition.name}}</td>
+                                    <td>{{composition.durata}} min</td>
+                                    <td>
+                                        {% if composition.players %}
+                                        {{composition.instrumentation_text}}
+                                        {%else%}
+                                        <a href="{{url_for('library.edit_players', composition_id=composition.id)}}"><button
+                                                class="btn btn-success btn-sm">Doplnit</button></a>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <!-- Button trigger modal -->
+                                        <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                                            data-bs-target="#selectPiece{{composition.id}}">
+                                            <i class="fas fa-hand-pointer me-1"></i>Vybrat skladbu
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+    </main>
+
+    {% for composition in compositions%}
+    <!-- Modal -->
+    <div class="modal fade" id="selectPiece{{composition.id}}" tabindex="-1" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="exampleModalLabel">Založit soubor</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Chcete založit nový soubor se skladbou:<br>
+                    <b>{{composition.composer.last_name}} {{composition.composer.first_name}}: {{composition.name}}</b>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Zavřít</button>
+                    <button type="button" class="btn btn-primary">Uložit</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {%endfor%}
+
+    {%include "footer.html"%}
+</div>
+
+{% endblock %}
