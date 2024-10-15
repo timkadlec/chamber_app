@@ -29,14 +29,21 @@ class StudyProgram(db.Model):
     years = relationship("Year", backref='study_program', lazy=True)
 
 # Year model
-class Year(db.Model):
-    __tablename__ = 'years'
+class ClassYear(db.Model):
+    __tablename__ = 'class_years'
     
     id = db.Column(db.Integer, primary_key=True)
     year = db.Column(db.Integer, nullable=False)  # 1, 2, 3 (or just 1, 2 for 'N')
     
     # Link each year to a StudyProgram
     study_program_id = db.Column(db.Integer, db.ForeignKey('study_programs.id'), nullable=False)
+
+    def __init__(self, year, study_program_id):
+        self.year = year
+        self.study_program_id = study_program_id
+
+    def __repr__(self):
+        return self.year
 
 # Student model
 class Student(db.Model):
@@ -46,16 +53,17 @@ class Student(db.Model):
     last_name = db.Column(db.String(256), nullable=False)
     first_name = db.Column(db.String(256), nullable=False)
     osobni_cislo = db.Column(db.String(256), unique=True, nullable=False)
+    guest = db.Column(db.Boolean)
     
     instrument_id = db.Column(db.Integer, db.ForeignKey('instrument.id'), nullable=False)
     teacher_id = db.Column(db.Integer, db.ForeignKey('teachers.id'))
     department_id = db.Column(db.Integer, db.ForeignKey('departments.id'), nullable=False)
     study_program_id = db.Column(db.Integer, db.ForeignKey('study_programs.id'))
-    year_id = db.Column(db.Integer, db.ForeignKey('years.id'))
+    class_year_id = db.Column(db.Integer, db.ForeignKey('class_years.id'))
 
     # Relationships
     instrument = relationship("chamber_app.models.library.Instrument", backref='students', lazy=True)
     teacher = relationship("chamber_app.models.structure.Teacher", backref='students', lazy=True)
     department = relationship("chamber_app.models.structure.Department", backref='students', lazy=True)
     study_program = relationship("StudyProgram", backref='students', lazy=True)
-    year = relationship("Year", backref='students', lazy=True)
+    class_year = relationship("ClassYear", backref='students', lazy=True)

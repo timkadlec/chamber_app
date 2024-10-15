@@ -3,7 +3,7 @@ from . import settings_bp
 from chamber_app.extensions import db
 import os
 import pandas as pd
-from chamber_app.models.structure import Department, Student, Teacher, StudyProgram, Year
+from chamber_app.models.structure import Department, Student, Teacher, StudyProgram, ClassYear
 from chamber_app.models.library import Instrument
 from chamber_app.models.ensemble import EnsemblePlayer
 
@@ -48,15 +48,15 @@ def get_or_create_study_program(name):
         db.session.commit()
         return study_program
 
-def get_or_create_year(year_number, study_program_id):
-    year = Year.query.filter_by(year=year_number, study_program_id=study_program_id).first()
-    if year is not None:
-        return year
+def get_or_create_class_year(year_number, study_program_id):
+    class_year = ClassYear.query.filter_by(year=year_number, study_program_id=study_program_id).first()
+    if class_year is not None:
+        return class_year
     else:
-        year = Year(year=year_number, study_program_id=study_program_id)
-        db.session.add(year)
+        class_year = ClassYear(year=year_number, study_program_id=study_program_id)
+        db.session.add(class_year)
         db.session.commit()
-        return year
+        return class_year
 
 def delete_student(student):
     student_to_delete = Student.query.filter_by(id=student.id).first()
@@ -100,14 +100,14 @@ def import_students():
                 teacher = get_or_create_teacher(row['Školitel']) if pd.notna(row['Školitel']) and row['Školitel'].strip() != '' else None
                 department = get_or_create_department(row['Oborová katedra'])
                 study_program = get_or_create_study_program(row['T'])
-                year = get_or_create_year(row['Roč'], study_program.id)
+                class_year = get_or_create_class_year(row['Roč'], study_program.id)
 
                 # Update or create a new student object
                 if existing_student:
                     # Check if the student needs to be reassigned to a higher year
-                    if existing_student.year_id != year.id:
+                    if existing_student.year_id != class_year.id:
                         # If the existing year is lower, update the year_id
-                        existing_student.year_id = year.id
+                        existing_student.year_id = class_year.id
                     
                     # Update only the fields that are missing
                     existing_student.last_name = row['Příjmení'] if existing_student.last_name != row['Příjmení'] else existing_student.last_name
@@ -129,7 +129,7 @@ def import_students():
                         teacher_id=teacher.id if teacher else None,
                         instrument_id=instrument.id,
                         study_program_id=study_program.id,
-                        year_id=year.id
+                        year_id=class_year.id
                     )
                     db.session.add(student_db)
                     new_students.append(student_db)

@@ -100,7 +100,7 @@
                             {% if player.student %}
                                 <p>Student: <b>{{ player.student.last_name }} {{ player.student.first_name }}</b></p>
                                 <p>Nástroj: <b>{{ player.student.instrument.name }}</b></p>
-                                <p>Ročník: <b>{{ player.student.year.year }}. {{ player.student.study_program.name }}</b></p>
+                                <p>Ročník: <b>{{ player.student.class_year }}. {{ player.student.study_program.name }}</b></p>
                                 <p>Katedra: <b>{{ player.student.department.name }}</b></p>
                                 <form method="POST" action="{{ url_for('ensemble.unassign_student', ensemble_player_id=player.id) }}">
                                     <button class="btn btn-danger" type="submit">
