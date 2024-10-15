@@ -1,15 +1,12 @@
-from flask import render_template, request, redirect, url_for, flash
+from flask import render_template
 from . import structure_bp
 from chamber_app.extensions import db
-import os
-import pandas as pd
-from chamber_app.models.structure import Department, Student, Teacher
-from chamber_app.models.library import Instrument
+from chamber_app.models.structure import Student, Teacher
 
 
 @structure_bp.route('/students')
 def show_students():
-    students = Student.query.order_by(Student.last_name).all()
+    students = Student.query.filter_by(active=True, guest=False).order_by(Student.last_name).all()
     return render_template("students.html", students=students)
 
 

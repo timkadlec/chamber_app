@@ -33,17 +33,10 @@ class ClassYear(db.Model):
     __tablename__ = 'class_years'
     
     id = db.Column(db.Integer, primary_key=True)
-    year = db.Column(db.Integer, nullable=False)  # 1, 2, 3 (or just 1, 2 for 'N')
+    number = db.Column(db.Integer, nullable=False)  # 1, 2, 3 (or just 1, 2 for 'N')
     
     # Link each year to a StudyProgram
     study_program_id = db.Column(db.Integer, db.ForeignKey('study_programs.id'), nullable=False)
-
-    def __init__(self, year, study_program_id):
-        self.year = year
-        self.study_program_id = study_program_id
-
-    def __repr__(self):
-        return self.year
 
 class StudentStatus(db.Model):
     __tablename__ = 'student_status'

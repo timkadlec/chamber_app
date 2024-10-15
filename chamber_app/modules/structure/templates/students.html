@@ -1,6 +1,7 @@
 {% extends "index.html" %}
 
 {% block content %}
+
 <!-- Content -->
 <div id="layoutSidenav_content">
     <main>
@@ -9,7 +10,6 @@
             <div class="row">
                 <p>Místo, kde můžete prohlížet studenty</p>
             </div>
-
 
             <div class="card mb-4">
                 <div class="card-header">
@@ -22,9 +22,9 @@
                     <table id="datatableStudents">
                         <thead>
                             <tr>
+                                <th>Výběr</th> <!-- New column for radio buttons -->
                                 <th>Příjmení</th>
                                 <th>Jméno</th>
-                                <th>Studijní program</th>
                                 <th>Ročník</th>
                                 <th>Nástroj</th>
                                 <th>Katedra</th>
@@ -32,9 +32,9 @@
                         </thead>
                         <tfoot>
                             <tr>
+                                <th>Výběr</th> <!-- New footer column for radio buttons -->
                                 <th>Příjmení</th>
                                 <th>Jméno</th>
-                                <th>Studijní program</th>
                                 <th>Ročník</th>
                                 <th>Nástroj</th>
                                 <th>Katedra</th>
@@ -43,12 +43,15 @@
                         <tbody>
                             {% for student in students %}
                             <tr>
-                                <td>{{student.last_name}}</td>
-                                <td>{{student.first_name}}</td>
-                                <td>{{student.study_program.name}}</td>
-                                <td>{{student.class_year}}</td>
-                                <td>{{student.instrument.name}}</td>
-                                <td>{{student.department.name}}</td>
+                                <td>
+                                    <input type="radio" name="studentSelect" value="{{ student.id }}" 
+                                           id="student-{{ student.id }}">
+                                </td>
+                                <td>{{ student.last_name }}</td>
+                                <td>{{ student.first_name }}</td>
+                                <td>{{ student.class_year.number }}. {{ student.study_program.name }}</td>
+                                <td>{{ student.instrument.name }}</td>
+                                <td>{{ student.department.name }}</td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -57,7 +60,26 @@
             </div>
         </div>
     </main>
-    {%include "footer.html"%}
+    {% include "footer.html" %}
 </div>
 
-{% endblock %}ß
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const dataTable = new simpleDatatables.DataTable("#datatableStudents", {
+            labels: {
+                placeholder: "Hledat...",
+                perPage: "záznamů na stránku",
+                noRows: "Žádné záznamy k zobrazení",
+                info: "Zobrazeno {start} až {end} z {rows} záznamů",
+                loading: "Načítání...",
+                infoFiltered: " - filtrováno z celkových {rows} záznamů",
+                next: "Další",
+                previous: "Předchozí",
+            },
+            perPage: 10,
+            perPageSelect: [10, 20, 30, 40, 50],
+        });
+    });
+</script>
+
+{% endblock %}

@@ -1,8 +1,8 @@
-"""Initial migration
+"""empty message
 
-Revision ID: 0d70e0002a0b
+Revision ID: 36bba52bb873
 Revises: 
-Create Date: 2024-10-15 19:58:27.073188
+Create Date: 2024-10-15 20:36:50.985211
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '0d70e0002a0b'
+revision = '36bba52bb873'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -47,6 +47,12 @@ def upgrade():
     sa.Column('id', sa.Integer(), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
+    op.create_table('student_status',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('name', sa.String(length=256), nullable=False),
+    sa.Column('shortcut', sa.String(length=50), nullable=True),
+    sa.PrimaryKeyConstraint('id')
+    )
     op.create_table('study_programs',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(length=1), nullable=False),
@@ -62,7 +68,7 @@ def upgrade():
     )
     op.create_table('class_years',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('year', sa.Integer(), nullable=False),
+    sa.Column('number', sa.Integer(), nullable=False),
     sa.Column('study_program_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['study_program_id'], ['study_programs.id'], ),
     sa.PrimaryKeyConstraint('id')
@@ -105,14 +111,17 @@ def upgrade():
     sa.Column('first_name', sa.String(length=256), nullable=False),
     sa.Column('osobni_cislo', sa.String(length=256), nullable=False),
     sa.Column('guest', sa.Boolean(), nullable=True),
+    sa.Column('active', sa.Boolean(), nullable=True),
     sa.Column('instrument_id', sa.Integer(), nullable=False),
     sa.Column('teacher_id', sa.Integer(), nullable=True),
     sa.Column('department_id', sa.Integer(), nullable=False),
     sa.Column('study_program_id', sa.Integer(), nullable=True),
     sa.Column('class_year_id', sa.Integer(), nullable=True),
+    sa.Column('student_status_id', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['class_year_id'], ['class_years.id'], ),
     sa.ForeignKeyConstraint(['department_id'], ['departments.id'], ),
     sa.ForeignKeyConstraint(['instrument_id'], ['instrument.id'], ),
+    sa.ForeignKeyConstraint(['student_status_id'], ['student_status.id'], ),
     sa.ForeignKeyConstraint(['study_program_id'], ['study_programs.id'], ),
     sa.ForeignKeyConstraint(['teacher_id'], ['teachers.id'], ),
     sa.PrimaryKeyConstraint('id'),
@@ -151,6 +160,7 @@ def downgrade():
     op.drop_table('class_years')
     op.drop_table('teachers')
     op.drop_table('study_programs')
+    op.drop_table('student_status')
     op.drop_table('players')
     op.drop_table('instrument')
     op.drop_table('departments')
