@@ -1,85 +1,82 @@
 {% extends "index.html" %}
 
 {% block content %}
-
-<!-- Content -->
-<div id="layoutSidenav_content">
-    <main>
-        <div class="container-fluid px-4">
-            <h1 class="mt-4">Studenti</h1>
-            <div class="row">
-                <p>Místo, kde můžete prohlížet studenty</p>
-            </div>
-
-            <div class="card mb-4">
-                <div class="card-header">
-                    <i class="fas fa-table me-1"></i>
-                    Seznam studentů
+    <div id="layoutSidenav_content">
+        <main>
+            <div class="container-fluid px-4">
+                <h1 class="mt-4">Studenti</h1>
+                <div class="row">
+                    <p>Místo, kde můžete prohlížet studenty</p>
                 </div>
 
-                <!-- Tabulka Basic -->
-                <div class="card-body">
-                    <table id="datatableStudents">
-                        <thead>
+
+                <!-- Filtering navbar -->
+                {% include "/elements/students_filtering_navbar.html" %}
+                <!-- Badges -->
+                {% include "/elements/students_filtering_badges.html" %}
+
+                <!-- Student JavaScript table -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <i class="fas fa-table me-1"></i>
+                        Seznam studentů
+                    </div>
+
+                    <div class="card-body">
+                        <table id="datatableStudents">
+                            <thead>
                             <tr>
-                                <th>Výběr</th> <!-- New column for radio buttons -->
                                 <th>Příjmení</th>
                                 <th>Jméno</th>
                                 <th>Ročník</th>
                                 <th>Nástroj</th>
                                 <th>Katedra</th>
                             </tr>
-                        </thead>
-                        <tfoot>
+                            </thead>
+                            <tfoot>
                             <tr>
-                                <th>Výběr</th> <!-- New footer column for radio buttons -->
                                 <th>Příjmení</th>
                                 <th>Jméno</th>
                                 <th>Ročník</th>
                                 <th>Nástroj</th>
                                 <th>Katedra</th>
                             </tr>
-                        </tfoot>
-                        <tbody>
+                            </tfoot>
+                            <tbody>
                             {% for student in students %}
-                            <tr>
-                                <td>
-                                    <input type="radio" name="studentSelect" value="{{ student.id }}" 
-                                           id="student-{{ student.id }}">
-                                </td>
-                                <td>{{ student.last_name }}</td>
-                                <td>{{ student.first_name }}</td>
-                                <td>{{ student.class_year.number }}. {{ student.study_program.name }}</td>
-                                <td>{{ student.instrument.name }}</td>
-                                <td>{{ student.department.name }}</td>
-                            </tr>
+                                <tr>
+                                    <td>{{ student.last_name }}</td>
+                                    <td>{{ student.first_name }}</td>
+                                    <td>{{ student.class_year.number }}. {{ student.study_program.name }}</td>
+                                    <td>{{ student.instrument.name }}</td>
+                                    <td>{{ student.department.name }}</td>
+                                </tr>
                             {% endfor %}
-                        </tbody>
-                    </table>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
-        </div>
-    </main>
-    {% include "footer.html" %}
-</div>
-
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const dataTable = new simpleDatatables.DataTable("#datatableStudents", {
-            labels: {
-                placeholder: "Hledat...",
-                perPage: "záznamů na stránku",
-                noRows: "Žádné záznamy k zobrazení",
-                info: "Zobrazeno {start} až {end} z {rows} záznamů",
-                loading: "Načítání...",
-                infoFiltered: " - filtrováno z celkových {rows} záznamů",
-                next: "Další",
-                previous: "Předchozí",
-            },
-            perPage: 10,
-            perPageSelect: [10, 20, 30, 40, 50],
+        </main>
+        {% include "footer.html" %}
+    </div>
+    <!-- Student JavaScript table settings -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const dataTable = new simpleDatatables.DataTable("#datatableStudents", {
+                labels: {
+                    placeholder: "Hledat",
+                    perPage: "záznamů na stránku",
+                    noRows: "Žádné záznamy k zobrazení",
+                    info: "Zobrazeno {start} až {end} z {rows} záznamů",
+                    loading: "Načítání...",
+                    next: "Další",
+                    previous: "Předchozí",
+                },
+                perPage: 10,
+                perPageSelect: [10, 20, 30, 40, 50],
+                searchable: true,
+            });
         });
-    });
-</script>
-
+    </script>
 {% endblock %}

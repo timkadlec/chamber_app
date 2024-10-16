@@ -1,0 +1,72 @@
+<nav class="navbar navbar-expand-lg">
+                    <div class="container-fluid">
+                        <div class="collapse navbar-collapse" id="navbarNav">
+                            <form class="d-flex ms-auto" action="{{ url_for('structure.show_students') }}" method="GET">
+                                <!-- Department filtering -->
+                                <div class="dropdown me-2">
+                                    <button class="btn btn-secondary dropdown-toggle" type="button"
+                                            id="departmentDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                        Filtr dle katedry
+                                    </button>
+                                    <ul class="dropdown-menu" aria-labelledby="departmentDropdown">
+                                        {% for department in departments %}
+                                            <li>
+                                                <label class="dropdown-item">
+                                                    <input type="checkbox" name="departments"
+                                                           value="{{ department.id }}"
+                                                           class="form-check-input"
+                                                           {% if department.id in selected_departments %}checked{% endif %}>
+                                                    {{ department.name }}
+                                                </label>
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+
+                                <!-- Instrument filtering -->
+                                <div class="dropdown me-2">
+                                    <button class="btn btn-secondary dropdown-toggle" type="button"
+                                            id="instrumentDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                        Filtr dle nástroje
+                                    </button>
+                                    <ul class="dropdown-menu" aria-labelledby="instrumentDropdown">
+                                        {% for instrument in instruments %}
+                                            <li>
+                                                <label class="dropdown-item">
+                                                    <input type="checkbox" name="instruments"
+                                                           value="{{ instrument.id }}"
+                                                           class="form-check-input"
+                                                           {% if instrument.id in selected_instruments %}checked{% endif %}>
+                                                    {{ instrument.name }}
+                                                </label>
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+
+                                <!-- Class year filtering -->
+                                <div class="dropdown me-2">
+                                    <button class="btn btn-secondary dropdown-toggle" type="button"
+                                            id="instrumentDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                        Filtr dle ročníku
+                                    </button>
+                                    <ul class="dropdown-menu" aria-labelledby="instrumentDropdown">
+                                        {% for class_year in class_years %}
+                                            <li>
+                                                <label class="dropdown-item">
+                                                    <input type="checkbox" name="class_years"
+                                                           value="{{ class_year.id }}"
+                                                           class="form-check-input"
+                                                           {% if class_year.id in selected_class_years %}checked{% endif %}>
+                                                    {{ class_year.number }}. {{ class_year.study_program.name }}
+                                                </label>
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+
+                                <button class="btn btn-outline-success" type="submit">Hledat</button>
+                            </form>
+                        </div>
+                    </div>
+                </nav>

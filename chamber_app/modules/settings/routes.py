@@ -15,7 +15,6 @@ from chamber_app.models.library import Instrument
 from chamber_app.models.ensemble import EnsemblePlayer
 
 
-# Helper functions to get or create entries
 def get_or_create_department(name):
     department = Department.query.filter_by(name=name).first()
     if department is not None:
@@ -77,7 +76,6 @@ def get_student_status(shortcut):
         return None
 
 
-
 @settings_bp.route("/import_students", methods=["GET", "POST"])
 def import_students():
     if request.method == "POST":
@@ -115,40 +113,61 @@ def import_students():
             try:
                 new_students = []
                 for _, row in df_filtered.iterrows():
-
                     # Create or get related entries
                     instrument = get_or_create_instrument(row["Název oboru/specializace"])
+
                     teacher = (
                         get_or_create_teacher(row["Školitel"])
                         if pd.notna(row["Školitel"]) and row["Školitel"].strip() != ""
                         else None
                     )
+
                     department = get_or_create_department(row["Oborová katedra"])
                     study_program = get_or_create_study_program(row["T"])
                     student_status = get_student_status(row["StS"])
                     class_year = get_class_year(row["Roč"], study_program.id)
                     active = False if row["K"] == "N" else True
 
-                    # Create a new student object
-                    student_db = Student(
-                        last_name=row["Příjmení"],
-                        first_name=row["Jméno"],
-                        osobni_cislo=row["Osobní čís."],
-                        department_id=department.id,
-                        teacher_id=teacher.id if teacher else None,
-                        active=active,
-                        guest=False,
-                        student_status_id=student_status.id,
-                        instrument_id=instrument.id,
-                        study_program_id=study_program.id,
-                        class_year_id=class_year.id,
-                    )
+                    # Check if the student already exists
+                    student_db = Student.query.filter_by(osobni_cislo=row["Osobní čís."]).first()
+
+                    if student_db:
+                        # Update the existing student's details
+                        student_db.last_name = row["Příjmení"]
+                        student_db.first_name = row["Jméno"]
+                        student_db.department_id = department.id
+
+                        # Check if teacher, student_status, and class_year are found before assigning
+                        student_db.teacher_id = teacher.id if teacher else None
+                        student_db.active = active
+                        student_db.guest = False
+                        student_db.student_status_id = student_status.id if student_status else None
+                        student_db.instrument_id = instrument.id
+                        student_db.study_program_id = study_program.id
+                        student_db.class_year_id = class_year.id if class_year else None
+                    else:
+                        # Create a new student object
+                        student_db = Student(
+                            last_name=row["Příjmení"],
+                            first_name=row["Jméno"],
+                            osobni_cislo=row["Osobní čís."],
+                            department_id=department.id,
+                            teacher_id=teacher.id if teacher else None,
+                            active=active,
+                            guest=False,
+                            student_status_id=student_status.id if student_status else None,
+                            instrument_id=instrument.id,
+                            study_program_id=study_program.id,
+                            class_year_id=class_year.id if class_year else None,
+                        )
+
                     new_students.append(student_db)
 
-                
+                # After processing all students, commit the changes
                 db.session.add_all(new_students)
                 db.session.commit()
-                flash(f"{len(new_students)} students added or updated successfully.","success",)
+
+                flash(f"{len(new_students)} students added or updated successfully.", "success", )
             except Exception as e:
                 db.session.rollback()
                 flash(

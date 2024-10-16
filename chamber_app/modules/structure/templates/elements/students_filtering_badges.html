@@ -1,0 +1,52 @@
+<!-- Displaying badges for selected filters -->
+<div class="d-flex flex-wrap mt-2 mb-2 justify-content-end">
+    {% if selected_departments or selected_instruments or selected_class_years %}
+        {% set new_query = request.args.copy() %}
+
+        <!-- Department badges -->
+        {% for department_id in selected_departments %}
+            {% set department = departments | selectattr('id', 'equalto', department_id | int) | first %}
+            {% if department %}
+                <span class="badge bg-primary me-1">
+                    {{ department.name }}
+                    {% set updated_departments = selected_departments | reject('equalto', department_id) | list %}
+                    <a href="?{% if updated_departments %}departments={{ updated_departments | join('&departments=') }}{% endif %}{% if selected_instruments %}&instruments={{ selected_instruments | join('&instruments=') }}{% endif %}{% if selected_class_years %}&class_years={{ selected_class_years | join('&class_years=') }}{% endif %}"
+                       class="text-white" style="text-decoration: none;">&times;</a>
+                </span>
+            {% endif %}
+        {% endfor %}
+
+        <!-- Instrument badges -->
+        {% for instrument_id in selected_instruments %}
+            {% set instrument = instruments | selectattr('id', 'equalto', instrument_id | int) | first %}
+            {% if instrument %}
+                <span class="badge bg-primary me-1">
+                    {{ instrument.name }}
+                    {% set updated_instruments = selected_instruments | reject('equalto', instrument_id) | list %}
+                    <a href="?{% if selected_departments %}departments={{ selected_departments | join('&departments=') }}{% endif %}{% if updated_instruments %}&instruments={{ updated_instruments | join('&instruments=') }}{% endif %}{% if selected_class_years %}&class_years={{ selected_class_years | join('&class_years=') }}{% endif %}"
+                       class="text-white" style="text-decoration: none;">&times;</a>
+                </span>
+            {% endif %}
+        {% endfor %}
+
+        <!-- Class year badges -->
+        {% for class_year_id in selected_class_years %}
+            {% set class_year = class_years | selectattr('id', 'equalto', class_year_id | int) | first %}
+            {% if class_year %}
+                <span class="badge bg-primary me-1">
+                    {{ class_year.number }}. {{ class_year.study_program.name }}
+                    {% set updated_class_years = selected_class_years | reject('equalto', class_year_id) | list %}
+                    <a href="?{% if selected_departments %}departments={{ selected_departments | join('&departments=') }}{% endif %}{% if selected_instruments %}&instruments={{ selected_instruments | join('&instruments=') }}{% endif %}{% if updated_class_years %}&class_years={{ updated_class_years | join('&class_years=') }}{% endif %}"
+                       class="text-white" style="text-decoration: none;">&times;</a>
+                </span>
+            {% endif %}
+        {% endfor %}
+
+        <!-- Remove all filters badge -->
+        <span class="badge bg-danger me-1">
+            Zrušit filtry
+            <a href="{{url_for('structure.show_students')}}"
+               class="text-white" style="text-decoration: none;">&times;</a>
+        </span>
+    {% endif %}
+</div>
