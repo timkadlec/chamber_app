@@ -22,9 +22,11 @@ class Composer(db.Model):
     last_name = db.Column(db.String(256), nullable=False)
     birth_date = db.Column(db.Date, nullable=True)
     death_date = db.Column(db.Date, nullable=True)  # Set to nullable
-    nationality = db.Column(db.String(256))
     musical_period = db.Column(db.String(256), nullable=True)
-    
+
+    nationality_id = db.Column(db.Integer, db.ForeignKey('nationalities.id'))
+
+    instrument = relationship("chamber_app.models.structure.Nationality", backref='composers', lazy=True)
     compositions = relationship('Composition', back_populates='composer')
 
 

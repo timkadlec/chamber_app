@@ -3,7 +3,6 @@ from sqlalchemy.orm import relationship
 from sqlalchemy import ForeignKey, Integer, String
 
 
-# Teacher model
 class Teacher(db.Model):
     __tablename__ = 'teachers'
 
@@ -11,7 +10,6 @@ class Teacher(db.Model):
     name = db.Column(db.String(256), unique=True, nullable=False)
 
 
-# Department model
 class Department(db.Model):
     __tablename__ = 'departments'
 
@@ -75,3 +73,9 @@ class Student(db.Model):
     study_program = relationship("StudyProgram", backref='students', lazy=True)
     class_year = relationship("ClassYear", backref='students', lazy=True)
     student_status = relationship("StudentStatus", backref='students', lazy=True)
+
+
+class Nationality(db.Model):
+    __tablename__ = 'nationalities'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(256), nullable=False)
