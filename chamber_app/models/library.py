@@ -93,12 +93,13 @@ class Composition(db.Model):
         # Join everything with commas and return
         return ', '.join(output)
 
-
     @property
     def instrumentation_list(self):
         instruments = []
         for player in self.players:
-            instruments.extend(player.instruments)  # Append all instruments from each player
+            for instrument in player.instruments:
+                if instrument not in instruments:
+                    instruments.extend(player.instruments)  # Append all instruments from each player
 
         # Sort instruments by the 'order' attribute
         sorted_instruments = sorted(instruments, key=lambda instrument: instrument.order)

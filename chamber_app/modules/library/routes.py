@@ -137,19 +137,21 @@ def show_compositions():
     query = Composition.query
 
     # Instrument filter
-    selected_instrument_names = []
     if selected_instruments:
         selected_instruments = [
             int(instrument_id) for instrument_id in selected_instruments
         ]
-        selected_instrument_names = [
-            instrument.name for instrument in Instrument.query.filter(Instrument.id.in_(selected_instruments)).all()
-        ]
-        query = query.join(Composition.players).filter(
-            Player.instruments.any(Instrument.id.in_(selected_instruments))
-        ).group_by(Composition.id).having(
-            db.func.count(Player.id) == len(selected_instruments)
-        )
+
+        # Subquery to ensure all selected instruments are present in the composition
+        for instrument_id in selected_instruments:
+            subquery = (
+                db.session.query(Composition.id)
+                .join(Composition.players)
+                .join(Player.instruments)
+                .filter(Instrument.id == instrument_id)
+                .subquery()
+            )
+            query = query.filter(Composition.id.in_(subquery))
 
     # Duration filter
     selected_duration_ranges = []
@@ -182,7 +184,6 @@ def show_compositions():
         compositions=compositions,
         instruments=instruments,
         form=form,
-        selected_instrument_names=selected_instrument_names,
         selected_duration_ranges=selected_duration_ranges,
     )
 

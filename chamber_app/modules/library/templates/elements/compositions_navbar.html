@@ -1,7 +1,13 @@
 <nav class="navbar navbar-expand-lg">
     <div class="container-fluid">
         <div class="collapse navbar-collapse" id="navbarNav">
-            <form class="d-flex ms-auto" action="" method="GET">
+            <form class="d-flex ms-auto" action="{{ url_for('library.show_compositions') }}" method="GET">
+                <a class="nav-link me-2" href="{{ url_for('library.add_composition') }}">
+                    <button class="btn btn-primary" type="button" data-bs-toggle="modal"
+                            data-bs-target="#addComposerModal">
+                        <i class="fas fa-plus me-2"></i>Přidat skladbu
+                    </button>
+                </a>
                 <!-- Instrument filtering -->
                 <div class="dropdown me-2">
                     <button class="btn btn-secondary dropdown-toggle" type="button"
@@ -22,12 +28,8 @@
                         {% endfor %}
                     </ul>
                 </div>
-                <a class="nav-link" href="{{ url_for('library.add_composition') }}">
-                    <button class="btn btn-primary" type="button" data-bs-toggle="modal"
-                            data-bs-target="#addComposerModal">
-                        <i class="fas fa-plus me-2"></i>Přidat skladbu
-                    </button>
-                </a>
+                <button type="submit" class="btn btn-outline-secondary">Filtrovat</button>
+
             </form>
         </div>
     </div>
