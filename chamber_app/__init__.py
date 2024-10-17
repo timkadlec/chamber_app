@@ -21,6 +21,7 @@ def create_app(config):
     with app.app_context():
         # Import models here
         from chamber_app.models import structure, library, ensemble
+        register_error_handlers(app)
         register_blueprints(app)
 
     return app

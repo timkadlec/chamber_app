@@ -1,0 +1,98 @@
+<nav class="navbar navbar-expand-lg">
+    <div class="container-fluid">
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <form class="d-flex ms-auto" action="{{ url_for('structure.show_guests') }}" method="GET">
+                <!-- Instrument filtering -->
+                <button class="btn btn-primary me-2" type="button" data-bs-toggle="modal"
+                        data-bs-target="#add_guestModal">
+                    <i class="fas fa-plus me-2"></i>Přidat hosta
+                </button>
+                <div class="dropdown me-2">
+                    <button class="btn btn-outline-secondary dropdown-toggle" type="button"
+                            id="instrumentDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        Filtr dle nástroje
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="instrumentDropdown">
+                        {% for instrument in instruments %}
+                            <li>
+                                <label class="dropdown-item">
+                                    <input type="checkbox" name="instruments"
+                                           value="{{ instrument.id }}"
+                                           class="form-check-input"
+                                           {% if instrument.id in selected_instruments %}checked{% endif %}>
+                                    {{ instrument.name }}
+                                </label>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+
+                <button class="btn btn-outline-info" type="submit">Filtrovat</button>
+            </form>
+        </div>
+    </div>
+</nav>
+
+<!-- Add Guest Modal -->
+<div class="modal fade" id="add_guestModal" tabindex="-1" aria-labelledby="add_guestModaLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="exampleModalLabel">Přidání nového hosta</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="AddGuestFrom" method="POST" action="{{ url_for('structure.add_guest') }}">
+                <div class="modal-body">
+
+
+                    {{ form.hidden_tag() }}
+
+                    <!-- First Name -->
+                    <div class="mb-3">
+                        {{ form.first_name.label(class="form-label") }}
+                        {{ form.first_name(class="form-control") }}
+                        {% if form.first_name.errors %}
+                            <div class="text-danger">
+                                {% for error in form.first_name.errors %}
+                                    <span>{{ error }}</span><br>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Last Name -->
+                    <div class="mb-3">
+                        {{ form.last_name.label(class="form-label") }}
+                        {{ form.last_name(class="form-control") }}
+                        {% if form.last_name.errors %}
+                            <div class="text-danger">
+                                {% for error in form.last_name.errors %}
+                                    <span>{{ error }}</span><br>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.instrument_id.label(class="form-label") }}
+                        {{ form.instrument_id(class="form-control") }}
+                        {% if form.instrument_id.errors %}
+                            <div class="text-danger">
+                                {% for error in form.instrument_id.errors %}
+                                    <span>{{ error }}</span><br>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Zavřít</button>
+                    <button type="submit" class="btn btn-primary">Založit hosta</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

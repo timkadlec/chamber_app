@@ -1,48 +1,57 @@
 {% extends "index.html" %}
 
 {% block content %}
-<!-- Content -->
-<div id="layoutSidenav_content">
-    <main>
-        <div class="container-fluid px-4">
-            <h1 class="mt-4">Profesoři</h1>
-            <div class="row">
-                <p>Místo, kde můžete prohlížet profesory</p>
-            </div>
+    <h1 class="mt-4">Profesoři</h1>
+    <div class="row">
+        <p>Místo, kde můžete prohlížet a vytvářet profesory</p>
+    </div>
 
 
-            <div class="card mb-4">
-                <div class="card-header">
-                    <i class="fas fa-table me-1"></i>
-                    Seznam profesorů
-                </div>
-
-                <!-- Tabulka Basic -->
-                <div class="card-body">
-                    <table id="datatableStudents">
-                        <thead>
-                            <tr>
-                                <th>Jméno</th>
-                            </tr>
-                        </thead>
-                        <tfoot>
-                            <tr>
-                                <th>Jméno</th>
-                            </tr>
-                        </tfoot>
-                        <tbody>
-                            {% for teacher in teachers %}
-                            <tr>
-                                <td>{{teacher.name}}</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-table me-1"></i>
+            Seznam profesorů
         </div>
-    </main>
-    {%include "footer.html"%}
-</div>
 
+        <!-- Tabulka Basic -->
+        <div class="card-body">
+            <table id="datatableStudents">
+                <thead>
+                <tr>
+                    <th>Jméno</th>
+                </tr>
+                </thead>
+                <tfoot>
+                <tr>
+                    <th>Jméno</th>
+                </tr>
+                </tfoot>
+                <tbody>
+                {% for teacher in teachers %}
+                    <tr>
+                        <td>{{ teacher.name }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const dataTable = new simpleDatatables.DataTable("#datatableStudents", {
+                labels: {
+                    placeholder: "Hledat",
+                    perPage: "záznamů na stránku",
+                    noRows: "Žádné záznamy k zobrazení",
+                    info: "Zobrazeno {start} až {end} z {rows} záznamů",
+                    loading: "Načítání...",
+                    next: "Další",
+                    previous: "Předchozí",
+                },
+                perPage: 10,
+                perPageSelect: [10, 20, 30, 40, 50],
+                searchable: true,
+            });
+        });
+    </script>
 {% endblock %}ß

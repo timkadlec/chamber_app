@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
     <meta name="description" content=""/>
     <meta name="author" content=""/>
-    <title>404 Error - SB Admin</title>
+    <title>404 Error - HAMU Chamber APPn</title>
     <link href={{ url_for('static', filename="css/styles.css") }} rel="stylesheet"/>
     <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
 </head>
@@ -18,11 +18,11 @@
                 <div class="row justify-content-center">
                     <div class="col-lg-6">
                         <div class="text-center mt-4">
-                            <img class="mb-4 img-error" src="assets/img/error-404-monochrome.svg"/>
+                            <img class="mb-4 img-error" src="{{ url_for('static', filename="assets/img/error-404-monochrome.svg") }}"/>
                             <p class="lead">This requested URL was not found on this server.</p>
-                            <a href="index.html">
+                            <a href="{{ url_for('dashboard.home_view') }}">
                                 <i class="fas fa-arrow-left me-1"></i>
-                                Return to Dashboard
+                                Zpět na hlavní stránku
                             </a>
                         </div>
                     </div>
@@ -34,12 +34,7 @@
         <footer class="py-4 bg-light mt-auto">
             <div class="container-fluid px-4">
                 <div class="d-flex align-items-center justify-content-between small">
-                    <div class="text-muted">Copyright &copy; Your Website 2023</div>
-                    <div>
-                        <a href="#">Privacy Policy</a>
-                        &middot;
-                        <a href="#">Terms &amp; Conditions</a>
-                    </div>
+                    <div class="text-muted">Copyright &copy; Tim Kadlec 2024</div>
                 </div>
             </div>
         </footer>

@@ -1,10 +1,6 @@
 {% extends "index.html" %}
 
 {% block content %}
-<!-- Content -->
-<div id="layoutSidenav_content">
-    <main>
-        <div class="container-fluid px-4">
             <h1 class="mt-4">Komorní soubory</h1>
             <div class="row">
                 <p>Místo, vidíte přehled všech komorních souborů</p>
@@ -85,9 +81,24 @@
                     </table>
                 </div>
             </div>
-        </div>
-    </main>
-    {%include "footer.html"%}
-</div>
 
-{% endblock %}ß
+    <!-- Student JavaScript table settings -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const dataTable = new simpleDatatables.DataTable("#datatableStudents", {
+                labels: {
+                    placeholder: "Hledat",
+                    perPage: "záznamů na stránku",
+                    noRows: "Žádné záznamy k zobrazení",
+                    info: "Zobrazeno {start} až {end} z {rows} záznamů",
+                    loading: "Načítání...",
+                    next: "Další",
+                    previous: "Předchozí",
+                },
+                perPage: 10,
+                perPageSelect: [10, 20, 30, 40, 50],
+                searchable: true,
+            });
+        });
+    </script>
+{% endblock %}

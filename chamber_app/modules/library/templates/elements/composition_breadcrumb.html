@@ -1,0 +1,8 @@
+<nav class="mt-2" style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="#">Knihovna</a></li>
+ <li class="breadcrumb-item"><a href="{{ url_for('library.show_compositions') }}">Skladby</a></li>
+        <li class="breadcrumb-item"><a href="{{ url_for('library.composer_detail', composer_id=composition.composer.id) }}">{{ composition.composer.full_name }}</a></li>
+        <li class="breadcrumb-item active" aria-current="page">{{ composition.name }}</li>
+    </ol>
+</nav>

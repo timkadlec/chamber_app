@@ -1,12 +1,14 @@
-from flask import render_template, request, redirect, url_for, jsonify, abort
+from flask import render_template, request, redirect, url_for, jsonify, abort, flash
 from . import library_bp
 from chamber_app.models.library import (
     Composer,
     Composition,
     Instrument,
-    Player
+    Player,
+    composition_player
 )
-from chamber_app.forms import ComposerForm, CompositionForm, PlayerForm
+from chamber_app.models.structure import Nationality
+from chamber_app.forms import ComposerForm, CompositionForm
 from chamber_app.extensions import db
 import os
 from datetime import datetime
@@ -16,28 +18,38 @@ from werkzeug.utils import secure_filename
 
 @library_bp.route("/composers")
 def show_composers():
-    form = ComposerForm()
+    form_composer = ComposerForm()
+    form_composer.populate_nationalities()
+    nationalities = Nationality.query.all()
     composers = Composer.query.order_by(Composer.last_name).all()
-    return render_template("composers.html", composers=composers, form=form)
+    return render_template("composers.html",
+                           composers=composers,
+                           nationalities=nationalities,
+                           form_composer=form_composer)
 
 
 @library_bp.route("/composer/add", methods=["POST"])
 def add_composer():
-    form = ComposerForm()
-    if form.validate_on_submit():
+    form_composer = ComposerForm()
+    form_composer.populate_nationalities()
+    if form_composer.validate_on_submit():
         new_composer = Composer(
-            first_name=form.first_name.data,
-            last_name=form.last_name.data,
-            birth_date=form.birth_date.data,
-            death_date=form.death_date.data,
-            musical_period=form.musical_period.data,
-            nationality=form.nationality.data
+            first_name=form_composer.first_name.data,
+            last_name=form_composer.last_name.data,
+            birth_date=form_composer.birth_date.data,
+            death_date=form_composer.death_date.data,
+            musical_period=form_composer.musical_period.data,
+            nationality_id=form_composer.nationality.data
         )
-        db.session.add(new_composer)
-        db.session.commit()
-        return jsonify({'success': True})
+        try:
+            db.session.add(new_composer)
+            db.session.commit()
+            flash(f"Skladatel {new_composer.first_name} {new_composer.last_name} úspešně založen", "success")
+            return redirect(url_for("library.composer_detail", composer_id=new_composer.id))
+        except Exception as e:
+            flash(f"Vyskytla se chyba: {e}", "danger")
 
-    errors = form.errors
+    errors = form_composer.errors
     return jsonify({'success': False, 'error': errors})
 
 
@@ -115,6 +127,7 @@ def composer_detail(composer_id):
 
     return render_template("composer_detail.html", composer=composer)
 
+
 @library_bp.route("/compositions", methods=["GET"])
 def show_compositions():
     form = ComposerForm()
@@ -156,7 +169,7 @@ def show_compositions():
     if "20+" in selected_durations:
         duration_filters.append(Composition.durata > 20)
         selected_duration_ranges.append("20+ min")
-    
+
     if duration_filters:
         query = query.filter(db.or_(*duration_filters))
 
@@ -172,6 +185,7 @@ def show_compositions():
         selected_instrument_names=selected_instrument_names,
         selected_duration_ranges=selected_duration_ranges,
     )
+
 
 @library_bp.route("/composition/add", methods=["GET", "POST"])
 def add_composition():
@@ -204,6 +218,7 @@ def add_composition():
 
     return render_template("add_composition.html", form_composition=form_composition, form_composer=form_composer)
 
+
 @library_bp.route('composition/<int:composition_id>/delete', methods=['POST'])
 def delete_composition(composition_id):
     composition = Composition.query.filter_by(id=composition_id).first()
@@ -214,39 +229,50 @@ def delete_composition(composition_id):
     print("Composition deleted")
     return redirect(url_for('library.show_compositions'))
 
+
 @library_bp.route("/composition/<int:composition_id>/edit_players", methods=["GET", "POST"])
 def edit_players(composition_id):
+    # Fetch the composition
     composition = Composition.query.get_or_404(composition_id)
-    instruments = Instrument.query.order_by(Instrument.order).all()
 
     if request.method == "POST":
-        selected_instruments = request.form.getlist('instruments')
-        print(selected_instruments)
+        # Get the form data
+        role = request.form.get('role')  # Assuming you have a field for role in your form
+        instrument_ids = request.form.getlist('instruments')
 
-        # Create a new Player instance
-        new_player = Player()
+        # Create a new player
+        new_player = Player(
+            role=role if role else None
+        )
+        db.session.add(new_player)
 
-        # Add the selected instruments to the player
-        for instrument_id in selected_instruments:
+        # Assign instruments to the player
+        for instrument_id in instrument_ids:
             instrument = Instrument.query.get(instrument_id)
             if instrument:
                 new_player.instruments.append(instrument)
 
-        # Add the player to the composition
+        # Associate the new player with the composition along with the role
         composition.players.append(new_player)
 
-        db.session.add(new_player)
+
+
+        # Commit the changes
         db.session.commit()
 
-        return redirect(url_for("library.edit_players", composition_id=composition.id))
+        # Redirect to the edit page after adding the player
+        return redirect(url_for('library.edit_players', composition_id=composition_id))
 
-    return render_template("edit_players.html", composition=composition, instruments=instruments)
+    # In case of a GET request, render the template with the current composition and instruments
+    instruments = Instrument.query.all()  # Assuming you have a model for instruments
+    return render_template('edit_players.html', composition=composition, instruments=instruments)
+
 
 @library_bp.route("composition/<int:composition_id>/player/<int:player_id>/delete", methods=['POST'])
 def delete_player(composition_id, player_id):
     # Retrieve the player by ID
     player = Player.query.filter_by(id=player_id).first()
-    
+
     if player:
         # Delete the player if found
         db.session.delete(player)
@@ -258,11 +284,13 @@ def delete_player(composition_id, player_id):
     # Redirect to the edit players page
     return redirect(url_for('library.edit_players', composition_id=composition_id))
 
+
 @library_bp.route("/composition/detail/<int:composition_id>", methods=["GET", "POST"])
 def composition_detail(composition_id):
     composition = Composition.query.get_or_404(composition_id)
     composition.players.sort(key=lambda x: x.id)
     return render_template("composition_detail.html", composition=composition)
+
 
 @library_bp.route("/get_instruments", methods=["GET"])
 def get_instruments():

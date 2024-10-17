@@ -1,0 +1,115 @@
+<nav class="navbar navbar-expand-lg">
+    <div class="container-fluid">
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <form class="d-flex ms-auto" action="" method="GET">
+                <!-- Instrument filtering -->
+                <button class="btn btn-primary" type="button" data-bs-toggle="modal"
+                        data-bs-target="#addComposerModal">
+                    <i class="fas fa-plus me-2"></i>Přidat skladatele
+                </button>
+            </form>
+        </div>
+    </div>
+</nav>
+
+<!-- Modal for adding a composer -->
+<div class="modal fade" id="addComposerModal" tabindex="-1" aria-labelledby="addComposerModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addComposerModalLabel">Přidat skladatele</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+
+                <form id="addComposerForm" method="POST" action="{{ url_for('library.add_composer') }}">
+                    {{ form_composer.hidden_tag() }}
+
+                    <!-- First Name -->
+                    <div class="mb-3">
+                        {{ form_composer.first_name.label(class="form-label") }}
+                        {{ form_composer.first_name(class="form-control") }}
+                        {% if form_composer.first_name.errors %}
+                            <div class="text-danger">
+                                {% for error in form_composer.first_name.errors %}
+                                    <span>{{ error }}</span><br>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Last Name -->
+                    <div class="mb-3">
+                        {{ form_composer.last_name.label(class="form-label") }}
+                        {{ form_composer.last_name(class="form-control") }}
+                        {% if form_composer.last_name.errors %}
+                            <div class="text-danger">
+                                {% for error in form_composer.last_name.errors %}
+                                    <span>{{ error }}</span><br>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Birth Date -->
+                    <div class="mb-3">
+                        {{ form_composer.birth_date.label(class="form-label") }}
+                        {{ form_composer.birth_date(class="form-control") }}
+                        {% if form_composer.birth_date.errors %}
+                            <div class="text-danger">
+                                {% for error in form_composer.birth_date.errors %}
+                                    <span>{{ error }}</span><br>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Death Date -->
+                    <div class="mb-3">
+                        {{ form_composer.death_date.label(class="form-label") }}
+                        {{ form_composer.death_date(class="form-control") }}
+                        {% if form_composer.death_date.errors %}
+                            <div class="text-danger">
+                                {% for error in form_composer.death_date.errors %}
+                                    <span>{{ error }}</span><br>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Musical Period -->
+                    <div class="mb-3">
+                        {{ form_composer.musical_period.label(class="form-label") }}
+                        {{ form_composer.musical_period(class="form-control") }}
+                        {% if form_composer.musical_period.errors %}
+                            <div class="text-danger">
+                                {% for error in form_composer.musical_period.errors %}
+                                    <span>{{ error }}</span><br>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Nationality (Dropdown) -->
+                    <div class="mb-3">
+                        {{ form_composer.nationality.label(class="form-label") }}
+                        {{ form_composer.nationality(class="form-control") }}
+                        {% if form_composer.nationality.errors %}
+                            <div class="text-danger">
+                                {% for error in form_composer.nationality.errors %}
+                                    <span>{{ error }}</span><br>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="mb-3">
+                        {{ form_composer.submit(class="btn btn-primary") }}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

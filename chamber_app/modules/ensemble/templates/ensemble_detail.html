@@ -1,10 +1,7 @@
 {% extends "index.html" %}
 
 {% block content %}
-<!-- Content -->
-<div id="layoutSidenav_content">
-    <main>
-        <div class="container-fluid px-4">
+    <!-- TODO Breadcrumbs-->
             <h1 class="mt-4">Detail komorního souboru: {{ ensemble.name }}</h1>
             <div class="row">
                 <p>Informace o komorním souboru.</p>
@@ -136,9 +133,4 @@
                     </div>
                 </div>
             </div>
-        </div>
-    </main>
-
-    {% include "footer.html" %}
-</div>
 {% endblock %}

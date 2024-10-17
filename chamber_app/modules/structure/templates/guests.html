@@ -1,63 +1,68 @@
 {% extends "index.html" %}
 
 {% block content %}
-<!-- Content -->
-<div id="layoutSidenav_content">
-    <main>
-        <div class="container-fluid px-4">
-            <h1 class="mt-4">Studenti</h1>
-            <div class="row">
-                <p>Místo, kde můžete prohlížet studenty</p>
-            </div>
+    <h1 class="mt-4">Hosté</h1>
+    <div class="row">
+        <p>Místo, kde můžete prohlížet a vytvářet hosty komorních souborů.</p>
+    </div>
 
+    <div class="row mb-2">
+        <!-- Filtering navbar -->
+        {% include "/elements/guests_filtering_navbar.html" %}
+        <!-- Badges -->
+        {% include "/elements/guests_filtering_badges.html" %}
+    </div>
 
-            <div class="card mb-4">
-                <div class="card-header">
-                    <i class="fas fa-table me-1"></i>
-                    Seznam studentů
-                </div>
-
-                <!-- Tabulka Basic -->
-                <div class="card-body">
-                    <table id="datatableStudents">
-                        <thead>
-                            <tr>
-                                <th>Příjmení</th>
-                                <th>Jméno</th>
-                                <th>Studijní program</th>
-                                <th>Ročník</th>
-                                <th>Nástroj</th>
-                                <th>Katedra</th>
-                            </tr>
-                        </thead>
-                        <tfoot>
-                            <tr>
-                                <th>Příjmení</th>
-                                <th>Jméno</th>
-                                <th>Studijní program</th>
-                                <th>Ročník</th>
-                                <th>Nástroj</th>
-                                <th>Katedra</th>
-                            </tr>
-                        </tfoot>
-                        <tbody>
-                            {% for student in students %}
-                            <tr>
-                                <td>{{student.last_name}}</td>
-                                <td>{{student.first_name}}</td>
-                                <td>{{student.study_program.name}}</td>
-                                <td>{{student.class_year}}</td>
-                                <td>{{student.instrument.name}}</td>
-                                <td>{{student.department.name}}</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-table me-1"></i>
+            Seznam hostů
         </div>
-    </main>
-    {%include "footer.html"%}
-</div>
 
-{% endblock %}ß
+        <div class="card-body">
+            <table id="datatableStudents">
+                <thead>
+                <tr>
+                    <th>Příjmení</th>
+                    <th>Jméno</th>
+                    <th>Nástroj</th>
+                </tr>
+                </thead>
+                <tfoot>
+                <tr>
+                    <th>Příjmení</th>
+                    <th>Jméno</th>
+                    <th>Nástroj</th>
+                </tr>
+                </tfoot>
+                <tbody>
+                {% for guest in guests %}
+                    <tr>
+                        <td>{{ guest.last_name }}</td>
+                        <td>{{ guest.first_name }}</td>
+                        <td>{{ guest.instrument.name }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const dataTable = new simpleDatatables.DataTable("#datatableStudents", {
+                labels: {
+                    placeholder: "Hledat",
+                    perPage: "záznamů na stránku",
+                    noRows: "Žádné záznamy k zobrazení",
+                    info: "Zobrazeno {start} až {end} z {rows} záznamů",
+                    loading: "Načítání...",
+                    next: "Další",
+                    previous: "Předchozí",
+                },
+                perPage: 10,
+                perPageSelect: [10, 20, 30, 40, 50],
+                searchable: true,
+            });
+        });
+    </script>
+{% endblock %}

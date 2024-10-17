@@ -1,124 +1,79 @@
 {% extends "index.html" %}
 
 {% block content %}
-<!-- Content -->
-<div id="layoutSidenav_content">
-    <main>
-        <div class="container-fluid px-4">
-            <h1 class="mt-4">Skladatelé</h1>
-            <div class="row">
-                <p>Místo, kde můžete vytvářet, upravovat a vkládat skladatele</p>
-            </div>
+    <h1 class="mt-4">Skladatelé</h1>
+    <div class="row">
+        <p>Místo, kde můžete vytvářet, upravovat a vkládat skladatele</p>
+    </div>
 
-            <div class="row mt-2 mb-2">
-                <ul class="nav">
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('library.add_composer') }}">
-                            <button class="btn btn-success">Přidat skladatele</button>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#importModal">
-                            <button class="btn btn-primary">Importovat skladatele</button>
-                        </a>
-                    </li>
-                </ul>
-            </div>
-            
-            <!-- Filter Block -->
-            <div class="row mb-3 align-items-center">
-                <div class="col-md-8">
-                    <h3>Filtry</h3>
-                </div>
-                <div class="col-md-4 text-end">
-                    <button class="btn btn-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#filterCollapse" aria-expanded="false" aria-controls="filterCollapse">
-                        <i class="fas fa-chevron-down"></i>
-                    </button>
-                </div>
-            </div>
+{% include "/elements/composers_navbar.html" %}
 
-            <div class="collapse" id="filterCollapse">
-                <div class="card card-body mb-2">
-                    <ul class="nav">
-                        <li class="nav-item">
-                          <a class="nav-link active" aria-current="page" href="#">Active</a>
-                        </li>
-                        <li class="nav-item">
-                          <a class="nav-link" href="#">Link</a>
-                        </li>
-                        <li class="nav-item">
-                          <a class="nav-link" href="#">Link</a>
-                        </li>
-                        <li class="nav-item">
-                          <a class="nav-link disabled" aria-disabled="true">Disabled</a>
-                        </li>
-                      </ul>
-                </div>
-            </div>
 
-            <div class="card mb-4">
-                <div class="card-header">
-                    <i class="fas fa-table me-1"></i>
-                    Seznam skladatelů
-                </div>
+    <!-- Místo pro filtry -->
 
-                <!-- Tabulka Basic -->
-                <div class="card-body">
-                    <table id="datatableStudents">
-                        <thead>
-                            <tr>
-                                <th>Příjmení</th>
-                                <th>Jméno</th>
-                                <th>Život</th>
-                                <th>Období</th>
-                            </tr>
-                        </thead>
-                        <tfoot>
-                            <tr>
-                                <th>Příjmení</th>
-                                <th>Jméno</th>
-                                <th>Život</th>
-                                <th>Období</th>
-                            </tr>
-                        </tfoot>
-                        <tbody>
-                            {% for composer in composers %}
-                            <tr>
-                                <td><a href="{{ url_for('library.composer_detail', composer_id=composer.id) }}">{{ composer.last_name }}</a></td>
-                                <td><a href="{{ url_for('library.composer_detail', composer_id=composer.id) }}">{{ composer.first_name }}</a></td>
-                                <td>*{{ composer.birth_date.year }}{% if composer.death_date %} - †{{ composer.death_date.year }}{% endif %}</td>
-                                <td>{{ composer.musical_period }}</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-table me-1"></i>
+            Seznam skladatelů
         </div>
-    </main>
 
-    <!-- Import Modal -->
-    <div class="modal fade" id="importModal" tabindex="-1" aria-labelledby="importModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="importModalLabel">Importovat skladatele</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="importComposerForm" action="{{ url_for('library.import_composer') }}" method="POST" enctype="multipart/form-data">
-                        <div class="mb-3">
-                            <label for="file" class="form-label">Vyberte Excel soubor</label>
-                            <input type="file" class="form-control" id="file" name="file" accept=".xlsx, .xls" required>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Importovat</button>
-                    </form>
-                </div>
-            </div>
+        <!-- Tabulka Basic -->
+        <div class="card-body">
+            <table id="datatableStudents">
+                <thead>
+                <tr>
+                    <th>Příjmení</th>
+                    <th>Jméno</th>
+                    <th>Život</th>
+                    <th>Období</th>
+                </tr>
+                </thead>
+                <tfoot>
+                <tr>
+                    <th>Příjmení</th>
+                    <th>Jméno</th>
+                    <th>Život</th>
+                    <th>Období</th>
+                </tr>
+                </tfoot>
+                <tbody>
+                {% for composer in composers %}
+                    <tr>
+                        <td>
+                            <a href="{{ url_for('library.composer_detail', composer_id=composer.id) }}">{{ composer.last_name }}</a>
+                        </td>
+                        <td>
+                            <a href="{{ url_for('library.composer_detail', composer_id=composer.id) }}">{{ composer.first_name }}</a>
+                        </td>
+                        <td>*{{ composer.birth_date.year }}{% if composer.death_date %} - †
+                            {{ composer.death_date.year }}{% endif %}</td>
+                        <td>{{ composer.musical_period }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
 
-    {% include "footer.html" %}
-</div>
+
+    <!-- Student JavaScript table settings -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const dataTable = new simpleDatatables.DataTable("#datatableStudents", {
+                labels: {
+                    placeholder: "Hledat",
+                    perPage: "záznamů na stránku",
+                    noRows: "Žádné záznamy k zobrazení",
+                    info: "Zobrazeno {start} až {end} z {rows} záznamů",
+                    loading: "Načítání...",
+                    next: "Další",
+                    previous: "Předchozí",
+                },
+                perPage: 10,
+                perPageSelect: [10, 20, 30, 40, 50],
+                searchable: true,
+            });
+        });
+    </script>
 
 {% endblock %}

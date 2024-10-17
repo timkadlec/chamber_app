@@ -1,66 +1,58 @@
 {% extends "index.html" %}
 
 {% block content %}
-    <div id="layoutSidenav_content">
-        <main>
-            <div class="container-fluid px-4">
-                <h1 class="mt-4">Studenti</h1>
-                <div class="row">
-                    <p>Místo, kde můžete prohlížet studenty</p>
-                </div>
-
-
-                <!-- Filtering navbar -->
-                {% include "/elements/students_filtering_navbar.html" %}
-                <!-- Badges -->
-                {% include "/elements/students_filtering_badges.html" %}
-
-                <!-- Student JavaScript table -->
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <i class="fas fa-table me-1"></i>
-                        Seznam studentů
-                    </div>
-
-                    <div class="card-body">
-                        <table id="datatableStudents">
-                            <thead>
-                            <tr>
-                                <th>Příjmení</th>
-                                <th>Jméno</th>
-                                <th>Ročník</th>
-                                <th>Nástroj</th>
-                                <th>Katedra</th>
-                            </tr>
-                            </thead>
-                            <tfoot>
-                            <tr>
-                                <th>Příjmení</th>
-                                <th>Jméno</th>
-                                <th>Ročník</th>
-                                <th>Nástroj</th>
-                                <th>Katedra</th>
-                            </tr>
-                            </tfoot>
-                            <tbody>
-                            {% for student in students %}
-                                <tr>
-                                    <td>{{ student.last_name }}</td>
-                                    <td>{{ student.first_name }}</td>
-                                    <td>{{ student.class_year.number }}. {{ student.study_program.name }}</td>
-                                    <td>{{ student.instrument.name }}</td>
-                                    <td>{{ student.department.name }}</td>
-                                </tr>
-                            {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </main>
-        {% include "footer.html" %}
+    <h1 class="mt-4">Studenti</h1>
+    <div class="row">
+        <p>Místo, kde můžete prohlížet studenty</p>
     </div>
-    <!-- Student JavaScript table settings -->
+
+    <div class="row mb-2">
+        <!-- Filtering navbar -->
+        {% include "/elements/students_filtering_navbar.html" %}
+        <!-- Badges -->
+        {% include "/elements/students_filtering_badges.html" %}
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-table me-1"></i>
+            Seznam studentů
+        </div>
+
+        <div class="card-body">
+            <table id="datatableStudents">
+                <thead>
+                <tr>
+                    <th>Příjmení</th>
+                    <th>Jméno</th>
+                    <th>Ročník</th>
+                    <th>Nástroj</th>
+                    <th>Katedra</th>
+                </tr>
+                </thead>
+                <tfoot>
+                <tr>
+                    <th>Příjmení</th>
+                    <th>Jméno</th>
+                    <th>Ročník</th>
+                    <th>Nástroj</th>
+                    <th>Katedra</th>
+                </tr>
+                </tfoot>
+                <tbody>
+                {% for student in students %}
+                    <tr>
+                        <td>{{ student.last_name }}</td>
+                        <td>{{ student.first_name }}</td>
+                        <td>{{ student.class_year.number }}. {{ student.study_program.name }}</td>
+                        <td>{{ student.instrument.name }}</td>
+                        <td>{{ student.department.name }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             const dataTable = new simpleDatatables.DataTable("#datatableStudents", {

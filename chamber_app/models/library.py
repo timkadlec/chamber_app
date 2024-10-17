@@ -11,7 +11,7 @@ player_instrument = db.Table('player_instrument',
 # Association table for the many-to-many relationship between players and compositions
 composition_player = db.Table('composition_player',
                               db.Column('composition_id', db.Integer, ForeignKey('compositions.id'), primary_key=True),
-                              db.Column('player_id', db.Integer, ForeignKey('players.id'), primary_key=True)
+                              db.Column('player_id', db.Integer, ForeignKey('players.id'), primary_key=True),
                               )
 
 
@@ -27,8 +27,12 @@ class Composer(db.Model):
 
     nationality_id = db.Column(db.Integer, db.ForeignKey('nationalities.id'))
 
-    instrument = relationship("chamber_app.models.structure.Nationality", backref='composers', lazy=True)
+    nationality = relationship("chamber_app.models.structure.Nationality", backref='composers', lazy=True)
     compositions = relationship('Composition', back_populates='composer')
+
+    @property
+    def full_name(self):
+        return f"{self.last_name} {self.first_name}"
 
 
 class Composition(db.Model):
@@ -89,6 +93,7 @@ class Composition(db.Model):
         # Join everything with commas and return
         return ', '.join(output)
 
+
     @property
     def instrumentation_list(self):
         instruments = []
@@ -104,6 +109,7 @@ class Player(db.Model):
     __tablename__ = 'players'
 
     id = db.Column(db.Integer, primary_key=True)
+    role = db.Column(db.String(256))
 
     # Relationship to link players with their instruments
     instruments = relationship('Instrument',

@@ -167,13 +167,10 @@ def import_students():
                 db.session.add_all(new_students)
                 db.session.commit()
 
-                flash(f"{len(new_students)} students added or updated successfully.", "success", )
+                flash(f"{len(new_students)} studentů bylo přidáno nebo aktualizováno.", "info", )
             except Exception as e:
                 db.session.rollback()
-                flash(
-                    "An error occurred while saving to the database: " + str(e),
-                    "danger",
-                )
+                flash(f"Vyskytla se chyba: {e} ","danger",)
 
             # Remove the temporary file
             os.remove(file_path)

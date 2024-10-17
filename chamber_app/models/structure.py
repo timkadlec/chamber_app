@@ -55,13 +55,13 @@ class Student(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     last_name = db.Column(db.String(256), nullable=False)
     first_name = db.Column(db.String(256), nullable=False)
-    osobni_cislo = db.Column(db.String(256), unique=True, nullable=False)
-    guest = db.Column(db.Boolean)
-    active = db.Column(db.Boolean)
+    osobni_cislo = db.Column(db.String(256), unique=True)
+    guest = db.Column(db.Boolean, default=False)
+    active = db.Column(db.Boolean, default=True)
 
     instrument_id = db.Column(db.Integer, db.ForeignKey('instrument.id'), nullable=False)
     teacher_id = db.Column(db.Integer, db.ForeignKey('teachers.id'))
-    department_id = db.Column(db.Integer, db.ForeignKey('departments.id'), nullable=False)
+    department_id = db.Column(db.Integer, db.ForeignKey('departments.id'))
     study_program_id = db.Column(db.Integer, db.ForeignKey('study_programs.id'))
     class_year_id = db.Column(db.Integer, db.ForeignKey('class_years.id'))
     student_status_id = db.Column(db.Integer, db.ForeignKey('student_status.id'))
@@ -73,6 +73,7 @@ class Student(db.Model):
     study_program = relationship("StudyProgram", backref='students', lazy=True)
     class_year = relationship("ClassYear", backref='students', lazy=True)
     student_status = relationship("StudentStatus", backref='students', lazy=True)
+
 
 
 class Nationality(db.Model):

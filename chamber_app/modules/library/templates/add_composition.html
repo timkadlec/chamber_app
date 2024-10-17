@@ -1,10 +1,6 @@
 {% extends "index.html" %}
 
 {% block content %}
-<!-- Content -->
-<div id="layoutSidenav_content">
-    <main>
-        <div class="container-fluid px-4">
             <h1 class="mt-4">Přidat skladbu</h1>
             <div class="row">
                 <form method="POST" action="{{ url_for('library.add_composition') }}">
@@ -37,8 +33,6 @@
                     </div>
                 </form>
             </div>
-        </div>
-    </main>
 
     <!-- Modal for adding a composer -->
     <div class="modal fade" id="addComposerModal" tabindex="-1" aria-labelledby="addComposerModalLabel"
@@ -178,8 +172,5 @@
         });
     </script>
 
-
-    {% include "footer.html" %}
-</div>
 
 {% endblock %}

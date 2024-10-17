@@ -6,10 +6,11 @@ from chamber_app.extensions import db
 from . import ensemble_bp
 from sqlalchemy import func, or_  # Corrected import
 
+
 def generate_ensemble_name_composition(composition):
     # Detect ensemble type based on the number of players required by the composition
     num_players = len(composition.players)
-    
+
     if num_players == 2:
         ensemble_type = "Duo"
     elif num_players == 3:
@@ -18,15 +19,15 @@ def generate_ensemble_name_composition(composition):
         ensemble_type = "Quartet"
     else:
         ensemble_type = "Ensemble"
-    
+
     # Count existing ensembles of this type and append the next number
     existing_ensembles = Ensemble.query.filter(Ensemble.name.like(f"{ensemble_type}%")).all()
     next_number = len(existing_ensembles) + 1
-    
+
     return f"{ensemble_type} {next_number}"
 
+
 def generate_ensemble_name_count(num_players):
-    
     if num_players == 2:
         ensemble_type = "Duo"
     elif num_players == 3:
@@ -41,12 +42,13 @@ def generate_ensemble_name_count(num_players):
         ensemble_type = "Septeto"
     else:
         ensemble_type = "Komorní soubor"
-    
+
     # Count existing ensembles of this type and append the next number
     existing_ensembles = Ensemble.query.filter(Ensemble.name.like(f"{ensemble_type}%")).all()
     next_number = len(existing_ensembles) + 1
-    
+
     return f"{ensemble_type} {next_number}"
+
 
 def create_ensemble_student_based(students):
     new_ensemble = Ensemble(
@@ -56,7 +58,7 @@ def create_ensemble_student_based(students):
         db.session.add(new_ensemble)
         db.session.commit()
     except Exception as e:
-        flash(f"Stala se chyba: {e}", "danger") 
+        flash(f"Stala se chyba: {e}", "danger")
     for student in students:
         selected_student = Student.query.filter_by(id=student).first()
         new_ensemble_member = EnsemblePlayer(
@@ -68,6 +70,7 @@ def create_ensemble_student_based(students):
         print(f"Adding student: {selected_student.first_name} {selected_student.last_name} to the ensemble")
     db.session.commit()
     flash(f"Přidán nový komorní soubor pod jménem: {new_ensemble.name}", "success")
+
 
 def create_ensemble_composition_based(composition):
     new_ensemble = Ensemble(
@@ -82,11 +85,12 @@ def create_ensemble_composition_based(composition):
         db.session.add(new_ensemble_player)
     db.session.commit()
     print("All players added")
-        
+
+
 def get_ensemble_instrumentation(ensemble_id):
     ensemble = Ensemble.query.filter_by(id=ensemble_id).first()
     instruments = []
-    
+
     for player in ensemble.ensemble_players:
         if player.student_id:
             # Check if player.instruments is not None and is iterable
@@ -102,7 +106,7 @@ def rename_ensemble(ensemble_id):
     ensemble = Ensemble.query.filter_by(id=ensemble_id).first()
     player_count = ensemble.count_ensemble_players
     new_name = generate_ensemble_name_count(player_count)
-    ensemble.name=new_name
+    ensemble.name = new_name
     db.session.commit()
     print("Ensemble edited")
 
@@ -112,15 +116,18 @@ def show_ensembles():
     ensembles = Ensemble.query.all()
     return render_template('ensembles.html', ensembles=ensembles)
 
+
 @ensemble_bp.route('/detail/<int:ensemble_id>')
 def ensemble_detail(ensemble_id):
     ensemble = Ensemble.query.filter_by(id=ensemble_id).first()
     return render_template('ensemble_detail.html', ensemble=ensemble)
+
+
 @ensemble_bp.route('/delete/<int:ensemble_id>', methods=["POST"])
 def delete_ensemble(ensemble_id):
     ensemble = Ensemble.query.filter_by(id=ensemble_id).first()
     ensemble.teacher = None  # Clear the association if necessary
-    
+
     try:
         # Delete all players associated with the ensemble
         for player in ensemble.ensemble_players:
@@ -134,7 +141,7 @@ def delete_ensemble(ensemble_id):
     except Exception as e:
         db.session.rollback()  # Rollback if there's an error
         flash(f"Vyskytla se chyba: {e}", "danger")
-    
+
     return redirect(url_for('ensemble.show_ensembles'))
 
 
@@ -143,7 +150,7 @@ def assign_composition(ensemble_id):
     # Get the ensemble by ID
     ensemble = Ensemble.query.get_or_404(ensemble_id)
     compositions = Composition.query.all()
-    
+
     if request.method == "POST":
         try:
             selected_composition = request.form.get('selected_composition')
@@ -157,16 +164,18 @@ def assign_composition(ensemble_id):
 
     return render_template('assign_composition.html', compositions=compositions, ensemble=ensemble)
 
+
 @ensemble_bp.route('/<int:ensemble_id>/unassign_composition/', methods=["POST"])
 def unassign_composition(ensemble_id):
     # Get the ensemble by ID
     ensemble = Ensemble.query.filter_by(id=ensemble_id).first()
-    
+
     if request.method == "POST":
         ensemble.composition_id = None
         db.session.commit()
         print("Composition assigned successfully")
         return redirect(url_for('ensemble.ensemble_detail', ensemble_id=ensemble.id))
+
 
 @ensemble_bp.route('/unassign_student/<int:ensemble_player_id>', methods=["POST"])
 def unassign_student(ensemble_player_id):
@@ -179,6 +188,7 @@ def unassign_student(ensemble_player_id):
         # Return a success message or redirect
         print('Student successfully unassigned from the ensemble.')
         return redirect(url_for('ensemble.ensemble_detail', ensemble_id=ensemble_player.ensemble_id))
+
 
 @ensemble_bp.route('/assign_student/<int:ensemble_player_id>', methods=["GET", "POST"])
 def assign_student(ensemble_player_id):
@@ -196,7 +206,7 @@ def assign_student(ensemble_player_id):
         #         return redirect(url_for("ensemble.ensemble_detail", ensemble_id=ensemble_player.ensemble_id))
 
         # If the student is not found in the ensemble, assign them
-        try:    
+        try:
             ensemble_player.student_id = selected_student
             db.session.commit()
             flash("Student added to the ensemble", "success")
@@ -205,6 +215,7 @@ def assign_student(ensemble_player_id):
         return redirect(url_for("ensemble.ensemble_detail", ensemble_id=ensemble_player.ensemble_id))
 
     return render_template("assign_student.html", ensemble_player=ensemble_player, students=students)
+
 
 @ensemble_bp.route('assign_teacher/<int:ensemble_id>', methods=["GET", "POST"])
 def assign_teacher(ensemble_id):
@@ -218,6 +229,7 @@ def assign_teacher(ensemble_id):
         return redirect(url_for('ensemble.ensemble_detail', ensemble_id=ensemble.id))
     return render_template('assign_teacher.html', ensemble=ensemble, teachers=teachers)
 
+
 @ensemble_bp.route('/<int:ensemble_id>/ensemble_player/add', methods=["POST"])
 def add_ensemble_player(ensemble_id):
     new_ensemble_player = EnsemblePlayer(
@@ -228,6 +240,7 @@ def add_ensemble_player(ensemble_id):
     rename_ensemble(ensemble_id)
     print("New player added to the Ensemble")
     return redirect(url_for("ensemble.ensemble_detail", ensemble_id=ensemble_id))
+
 
 @ensemble_bp.route('/delete/ensemble_player/<int:ensemble_player_id>', methods=["POST"])
 def delete_ensemble_player(ensemble_player_id):
@@ -240,9 +253,11 @@ def delete_ensemble_player(ensemble_player_id):
         print("Ensemble player deleted")
         return redirect(url_for("ensemble.ensemble_detail", ensemble_id=ensemble_id))
 
+
 @ensemble_bp.route('wizard')
 def ensemble_wizard():
     return render_template('ensemble_wizard.html')
+
 
 @ensemble_bp.route('/add/composition_based', methods=['GET', 'POST'])
 def add_composition_based():
@@ -278,15 +293,16 @@ def add_composition_based():
     # Prepare selected filter names for display in the UI
     selected_instrument_names = [Instrument.query.get(inst_id).name for inst_id in instruments]
     selected_duration_ranges = [duration for duration in durations]
-    
+
     if request.method == "POST":
         pass
 
     return render_template('add_ensemble_composition_based.html', compositions=compositions,
-                           instruments=Instrument.query.all(), 
+                           instruments=Instrument.query.all(),
                            selected_instrument_names=selected_instrument_names,
                            selected_duration_ranges=selected_duration_ranges,
                            )
+
 
 @ensemble_bp.route('/add/student_based', methods=['GET', 'POST'])
 def add_ensemble_student_based():

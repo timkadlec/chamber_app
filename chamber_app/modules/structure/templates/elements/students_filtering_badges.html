@@ -1,5 +1,5 @@
 <!-- Displaying badges for selected filters -->
-<div class="d-flex flex-wrap mt-2 mb-2 justify-content-end">
+<div class="d-flex flex-wrap justify-content-end">
     {% if selected_departments or selected_instruments or selected_class_years %}
         {% set new_query = request.args.copy() %}
 
