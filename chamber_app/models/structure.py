@@ -1,6 +1,6 @@
 from chamber_app.extensions import db
 from sqlalchemy.orm import relationship
-from sqlalchemy import ForeignKey, Integer, String
+from datetime import datetime
 
 
 class Teacher(db.Model):
@@ -9,8 +9,21 @@ class Teacher(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(256), unique=True, nullable=False)
 
-    # One-to-many relationship to EnsembleTeacher
-    ensemble_teachers = relationship('EnsembleTeacher', back_populates='teacher')
+    assignments = db.relationship('TeacherAssignment', back_populates='teacher')
+
+
+class TeacherAssignment(db.Model):
+    __tablename__ = "teacher_assignments"
+    id = db.Column(db.Integer, primary_key=True)
+
+    ensemble_id = db.Column(db.Integer, db.ForeignKey('ensembles.id'), nullable=False)
+    teacher_id = db.Column(db.Integer, db.ForeignKey('teachers.id'), nullable=False)
+
+    teacher = db.relationship('Teacher', back_populates='assignments')
+    ensemble = db.relationship('chamber_app.models.ensemble.Ensemble', back_populates="teacher_assignments")
+
+    started_on = db.Column(db.DateTime, default=datetime.utcnow)
+    ended_on = db.Column(db.DateTime)
 
 
 class Department(db.Model):
@@ -70,6 +83,7 @@ class Student(db.Model):
     student_status_id = db.Column(db.Integer, db.ForeignKey('student_status.id'))
 
     # Relationships
+    assignments = db.relationship('StudentAssignment', back_populates='student')
     instrument = relationship("chamber_app.models.library.Instrument", backref='students', lazy=True)
     teacher = relationship("chamber_app.models.structure.Teacher", backref='students', lazy=True)
     department = relationship("chamber_app.models.structure.Department", backref='students', lazy=True)
@@ -78,7 +92,38 @@ class Student(db.Model):
     student_status = relationship("StudentStatus", backref='students', lazy=True)
 
 
+class StudentAssignment(db.Model):
+    __tablename__ = "student_assignments"
+    id = db.Column(db.Integer, primary_key=True)
+
+    ensemble_id = db.Column(db.Integer, db.ForeignKey('ensembles.id'), nullable=False)
+    student_id = db.Column(db.Integer, db.ForeignKey('students.id'), nullable=False)
+
+    student = db.relationship('Student', back_populates='assignments')
+    ensemble = db.relationship('chamber_app.models.ensemble.EnsemblePlayer', back_populates="student_assignments")
+
+    started_on = db.Column(db.DateTime, default=datetime.utcnow)
+    ended_on = db.Column(db.DateTime)
+
+
+
 class Nationality(db.Model):
     __tablename__ = 'nationalities'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(256), nullable=False)
+
+
+class AcademicYear(db.Model):
+    __tablename__ = "academic_years"
+    id = db.Column(db.Integer, primary_key=True)
+    start = db.Column(db.Date)
+    end = db.Column(db.Date)
+
+    semesters = db.relationship("Semestr", backref="academic_year")
+
+
+class Semestr(db.Model):
+    __tablename__ = "semesters"
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    academic_year_id = db.Column(db.Integer, db.ForeignKey('academic_years.id'), nullable=False)

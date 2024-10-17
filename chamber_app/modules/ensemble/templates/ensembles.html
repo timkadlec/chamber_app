@@ -67,7 +67,7 @@
                                         </div>
                                     </div>
                                 </td>
-                                <td>{{ensemble.teacher.name if ensemble.teacher else ""}}
+                                <td>{% for teacher in ensemble.ensemble_teachers %}{{teacher.name}}{% endfor %}
                                 </td>
                                 <td>
                                     <form method="post"

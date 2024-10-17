@@ -1,7 +1,7 @@
 from flask import render_template, request, redirect, url_for, flash
 from chamber_app.models.library import Composition, Composer, Instrument
 from chamber_app.models.structure import Student, Teacher
-from chamber_app.models.ensemble import Ensemble, EnsemblePlayer, EnsembleTeacher
+from chamber_app.models.ensemble import Ensemble, EnsemblePlayer
 from chamber_app.extensions import db
 from . import ensemble_bp
 from sqlalchemy import func, or_  # Corrected import
@@ -224,7 +224,7 @@ def assign_teacher(ensemble_id):
     if request.method == "POST":
         try:
             selected_teacher_id = request.form.get('selected_teacher')
-            selected_teacher = Teacher.query.filter_by(id=selected_teacher_id).first
+            selected_teacher = Teacher.query.filter_by(id=selected_teacher_id).first()
             new_ensemble_teacher = EnsembleTeacher(
                 ensemble_id=ensemble_id,
                 teacher_id=selected_teacher_id

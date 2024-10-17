@@ -2,13 +2,12 @@ from chamber_app.extensions import db
 from sqlalchemy.orm import relationship
 
 # Association table for the many-to-many relationship between ensembles and compositions
-ensemble_composition = db.Table('ensemble_composition',
-                                db.Column('ensemble_id', db.Integer, db.ForeignKey('ensembles.id'), primary_key=True),
-                                db.Column('composition_id', db.Integer, db.ForeignKey('compositions.id'),
-                                          primary_key=True),
-                                db.Column('status', db.String(50), nullable=False, default="studying")
-                                # Track work status (e.g., studying, completed)
-                                )
+ensemble_compositions = db.Table('ensemble_composition',
+                                 db.Column('ensemble_id', db.Integer, db.ForeignKey('ensembles.id'), primary_key=True),
+                                 db.Column('composition_id', db.Integer, db.ForeignKey('compositions.id'),
+                                           primary_key=True),
+                                 db.Column('status', db.String(50), nullable=False, default="studying")
+                                 )
 
 
 # Ensemble model with teacher relationship
@@ -20,11 +19,10 @@ class Ensemble(db.Model):
     composition_id = db.Column(db.Integer, db.ForeignKey('compositions.id'))
 
     # Relationship to Composition
-    composition = relationship('Composition', backref='ensembles', lazy=True)
+    composition = relationship('chamber_app.models.library.Composition', backref='ensembles', lazy=True)
 
     # One-to-many relationship to EnsembleTeacher
-    ensemble_teachers = relationship('EnsembleTeacher', back_populates='ensemble')
-
+    teacher_assignments = relationship("chamber_app.models.structure.TeacherAssignment", back_populates="ensemble")
     # Relationship to Students
     ensemble_players = relationship('EnsemblePlayer', back_populates='ensemble')
 
@@ -91,26 +89,11 @@ class EnsemblePlayer(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     ensemble_id = db.Column(db.Integer, db.ForeignKey('ensembles.id'), nullable=False)
-    student_id = db.Column(db.Integer, db.ForeignKey('students.id'))
+    student_assignment_id = db.Column(db.Integer, db.ForeignKey('student_assignments.id'))
     instrument_id = db.Column(db.Integer, db.ForeignKey('instrument.id'))
 
     # Relationships
     ensemble = relationship('Ensemble', back_populates='ensemble_players')
-    student = relationship('Student', backref='ensemble_assignments', lazy=True)
-    instrument = relationship('Instrument', backref='ensemble_players', lazy=True)
+    student_assignment = relationship('chamber_app.models.structure.StudentAssignment', backref='student_assignments', lazy=True)
+    instrument = relationship('chamber_app.models.library.Instrument', backref='ensemble_players', lazy=True)
 
-
-class EnsembleTeacher(db.Model):
-    __tablename__ = 'ensemble_teachers'
-
-    id = db.Column(db.Integer, primary_key=True)
-    ensemble_id = db.Column(db.Integer, db.ForeignKey('ensembles.id'))
-    teacher_id = db.Column(db.Integer, db.ForeignKey('teachers.id'))
-
-    # Any additional data about the relationship can be added here, such as role, assignment date, etc.
-    role = db.Column(db.String(128))  # Optional field for teacher's role in the ensemble
-    assignment_date = db.Column(db.Date)  # Optional field for when the teacher was assigned to the ensemble
-
-    # Relationship to Ensemble and Teacher
-    ensemble = relationship('Ensemble', back_populates='ensemble_teachers')
-    teacher = relationship('Teacher', back_populates='ensemble_teachers')

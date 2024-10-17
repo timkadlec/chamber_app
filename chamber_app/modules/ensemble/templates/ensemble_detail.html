@@ -78,9 +78,10 @@
                     <div class="row">
                         <p>
                             Pedagog: <b>
-                            {% if ensemble.ensemble_teachers %}{% for teacher in ensemble.ensemble_teachers %}{{ teacher.name }}{% endfor %}{% else %}Není přiřazen{% endif %}</b>
-                            {% if ensemble.ensemble_teachers %}
-                                {% for teacher in ensemble.ensemble_teachers %}<a href="{{ url_for('ensemble.assign_teacher', ensemble_id=ensemble.id) }}">(Změnit)</a>{% endfor %}
+                            {% if ensemble.teachers %}
+                                {% for teacher in ensemble.teachers %}<p><a href="{{ url_for('ensemble.assign_teacher', ensemble_id=ensemble.id) }}">
+                                    {{ teacher.name }} (Změnit)
+                                </a></p>{% endfor %}
                             {% else %}
                                 <a href="{{ url_for('ensemble.assign_teacher', ensemble_id=ensemble.id) }}">
                                     <button class="btn btn-sm btn-info">Přiřadit</button>
