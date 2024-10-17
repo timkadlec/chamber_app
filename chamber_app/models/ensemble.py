@@ -94,6 +94,6 @@ class EnsemblePlayer(db.Model):
 
     # Relationships
     ensemble = relationship('Ensemble', back_populates='ensemble_players')
-    student_assignment = relationship('chamber_app.models.structure.StudentAssignment', backref='student_assignments', lazy=True)
+    student_assignments = relationship('chamber_app.models.structure.StudentAssignment', back_populates='ensemble', lazy=True)
     instrument = relationship('chamber_app.models.library.Instrument', backref='ensemble_players', lazy=True)
 

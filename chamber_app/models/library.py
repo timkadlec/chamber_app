@@ -134,7 +134,7 @@ class Instrument(db.Model):
     # Relationship to link instruments with players
     players = relationship('Player',
                            secondary=player_instrument,
-                           back_populates='instrument')
+                           back_populates='instruments')
 
     # Optional: Self-referential relationship if you want to track main and obligatory instrument
     main_instrument_id = db.Column(db.Integer, ForeignKey('instrument.id'), nullable=True)
