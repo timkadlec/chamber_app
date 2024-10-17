@@ -1,7 +1,7 @@
 from flask import render_template, request, redirect, url_for, flash
 from chamber_app.models.library import Composition, Composer, Instrument
 from chamber_app.models.structure import Student, Teacher
-from chamber_app.models.ensemble import Ensemble, EnsemblePlayer
+from chamber_app.models.ensemble import Ensemble, EnsemblePlayer, EnsembleTeacher
 from chamber_app.extensions import db
 from . import ensemble_bp
 from sqlalchemy import func, or_  # Corrected import
@@ -222,11 +222,20 @@ def assign_teacher(ensemble_id):
     ensemble = Ensemble.query.filter_by(id=ensemble_id).first()
     teachers = Teacher.query.all()
     if request.method == "POST":
-        selected_teacher = request.form.get('selected_teacher')
-        ensemble.teacher_id = selected_teacher
-        db.session.commit()
-        print("Teacher assigned")
-        return redirect(url_for('ensemble.ensemble_detail', ensemble_id=ensemble.id))
+        try:
+            selected_teacher_id = request.form.get('selected_teacher')
+            selected_teacher = Teacher.query.filter_by(id=selected_teacher_id).first
+            new_ensemble_teacher = EnsembleTeacher(
+                ensemble_id=ensemble_id,
+                teacher_id=selected_teacher_id
+            )
+            db.session.add(new_ensemble_teacher)
+            db.session.commit()
+            flash(f"Pedagog {selected_teacher.name} byl přiřazen k souboru {ensemble.name}", "info")
+            return redirect(url_for('ensemble.ensemble_detail', ensemble_id=ensemble.id))
+        except Exception as e:
+            flash(f"Vyskytla se chybe: {e}", "danger")
+            return redirect(url_for('ensemble.ensemble_detail', ensemble_id=ensemble.id))
     return render_template('assign_teacher.html', ensemble=ensemble, teachers=teachers)
 
 

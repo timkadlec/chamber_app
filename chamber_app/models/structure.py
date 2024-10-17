@@ -9,6 +9,9 @@ class Teacher(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(256), unique=True, nullable=False)
 
+    # One-to-many relationship to EnsembleTeacher
+    ensemble_teachers = relationship('EnsembleTeacher', back_populates='teacher')
+
 
 class Department(db.Model):
     __tablename__ = 'departments'
@@ -73,7 +76,6 @@ class Student(db.Model):
     study_program = relationship("StudyProgram", backref='students', lazy=True)
     class_year = relationship("ClassYear", backref='students', lazy=True)
     student_status = relationship("StudentStatus", backref='students', lazy=True)
-
 
 
 class Nationality(db.Model):

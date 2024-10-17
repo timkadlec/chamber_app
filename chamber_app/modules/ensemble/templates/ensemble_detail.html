@@ -2,135 +2,152 @@
 
 {% block content %}
     <!-- TODO Breadcrumbs-->
-            <h1 class="mt-4">Detail komorního souboru: {{ ensemble.name }}</h1>
-            <div class="row">
-                <p>Informace o komorním souboru.</p>
-                <div class="col-4">
-                    <div class="card mb-4">
-                        <div class="card-header">
-                            Informace o souboru
-                        </div>
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-8">
-                                    <div class="mb-3">
-                                        <p>Studovaná kompozice</p>
-                                    </div>
-                                    <div>
-                                        {% if ensemble.composition %}
-                                            <b>{{ ensemble.composition.composer_full_name }} - {{ ensemble.composition.name }}</b>
-                                        {% else %}
-                                            <b>Žádná kompozice není přiřazena.</b>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                                <div class="col-md-4 text-end">
-                                    {% if ensemble.composition_id %}
-                                        <div class="btn-group" role="group" aria-label="Edit and Delete">
-                                            <a href="{{ url_for('ensemble.assign_composition', ensemble_id=ensemble.id) }}">
-                                                <button class="btn btn-primary btn-sm me-2">
-                                                    <i class="fas fa-edit"></i> Změnit
-                                                </button>
-                                            </a>
-                                            <form method="POST" action="{{ url_for('ensemble.unassign_composition', ensemble_id=ensemble.id) }}" class="mb-0 d-inline">
-                                                <button type="submit" class="btn btn-danger btn-sm">
-                                                    <i class="fas fa-trash"></i> Odebrat
-                                                </button>
-                                            </form>
-                                        </div>
-                                    {% else %}
-                                        <a href="{{ url_for('ensemble.assign_composition', ensemble_id=ensemble.id) }}" class="btn btn-success">
-                                            Přiřadit kompozici
-                                        </a>
-                                    {% endif %}
-                                </div>
-                            </div>
-                            <hr>
-                            <div class="row">
-                                <p>Obsazení: <b>{{ ensemble.composition.instrumentation_text if ensemble.composition else "" }}</b></p>
-                                <p>Počet hráčů: {{ ensemble.count_ensemble_players }}</p>
-                                {% if not ensemble.no_assigned_student %}
-                                    <p>Obsazených studentů: {{ ensemble.count_assigned_students }}</p>
-                                {% endif %}
-                                <p>Kompletnost:
-                                    <div class="col">
-                                        <div class="progress">
-                                            <div class="progress-bar" role="progressbar" style="width: {{ ensemble.player_completeness }}%;" aria-valuenow="{{ ensemble.player_completeness }}" aria-valuemin="0" aria-valuemax="100">
-                                                {{ ensemble.player_completeness }}%
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <b>{% if ensemble.missing_instruments %}
-                                        (chybí: {% for i in ensemble.missing_instruments %}{{ i }}{% if not loop.last %}, {% endif %}{% endfor %}){% endif %}</b>
-                                </p>
-                            </div>
-                            <hr>
-                            <div class="row">
-                                <p>
-                                    Pedagog: <b>{% if ensemble.teacher %}{{ ensemble.teacher.name }}{% else %}Není přiřazen{% endif %}</b>
-                                    {% if ensemble.teacher %}
-                                        <a href="{{ url_for('ensemble.assign_teacher', ensemble_id=ensemble.id) }}">(Změnit)</a>
-                                    {% else %}
-                                        <a href="{{ url_for('ensemble.assign_teacher', ensemble_id=ensemble.id) }}">
-                                            <button class="btn btn-sm btn-info">Přiřadit</button>
-                                        </a>
-                                    {% endif %}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
+    <h1 class="mt-4">Detail komorního souboru: {{ ensemble.name }}</h1>
+    <!-- Info section -->
+    <div class="row">
+        <p>Informace o komorním souboru.</p>
+        <div class="col-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    Informace o souboru
                 </div>
-            </div>
-
-            <div class="row">
-                <h5>Členové souboru</h5>
-                {% for player in ensemble.ensemble_players %}
-                <div class="col-3">
-                    <div class="card mb-4">
-                        <div class="card-header">
-                            <form method="POST" action="{{ url_for('ensemble.delete_ensemble_player', ensemble_player_id=player.id) }}">
-                                Člen souboru
-                                <button type="submit" class="btn btn-secondary">Odstranit <i class="fas fa-delete-left"></i></button>
-                            </form>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="mb-3">
+                                <p>Studovaná kompozice</p>
+                            </div>
+                            <div>
+                                {% if ensemble.composition %}
+                                    <b>{{ ensemble.composition.composer_full_name }}
+                                        - {{ ensemble.composition.name }}</b>
+                                {% else %}
+                                    <b>Žádná kompozice není přiřazena.</b>
+                                {% endif %}
+                            </div>
                         </div>
-                        <div class="card-body">
-                            {% if player.student %}
-                                <p>Student: <b>{{ player.student.last_name }} {{ player.student.first_name }}</b></p>
-                                <p>Nástroj: <b>{{ player.student.instrument.name }}</b></p>
-                                <p>Ročník: <b>{{ player.student.class_year.number }}. {{ player.student.study_program.name }}</b></p>
-                                <p>Katedra: <b>{{ player.student.department.name }}</b></p>
-                                <form method="POST" action="{{ url_for('ensemble.unassign_student', ensemble_player_id=player.id) }}">
-                                    <button class="btn btn-danger" type="submit">
-                                        <i class="fas fa-trash me-1"></i> Odebrat studenta ze souboru
-                                    </button>
-                                </form>
+                        <div class="col-md-4 text-end">
+                            {% if ensemble.composition_id %}
+                                <div class="btn-group" role="group" aria-label="Edit and Delete">
+                                    <a href="{{ url_for('ensemble.assign_composition', ensemble_id=ensemble.id) }}">
+                                        <button class="btn btn-primary btn-sm me-2">
+                                            <i class="fas fa-edit"></i> Změnit
+                                        </button>
+                                    </a>
+                                    <form method="POST"
+                                          action="{{ url_for('ensemble.unassign_composition', ensemble_id=ensemble.id) }}"
+                                          class="mb-0 d-inline">
+                                        <button type="submit" class="btn btn-danger btn-sm">
+                                            <i class="fas fa-trash"></i> Odebrat
+                                        </button>
+                                    </form>
+                                </div>
                             {% else %}
-                            <p>Nástroj: {{player.instrument.name if player.instrument.name else "Není vyplněn nástroj hráče"}}</p>
-                                <p>Tento hráč nemá přiřazeného studenta.</p>
-                                
-                                <a href="{{ url_for('ensemble.assign_student', ensemble_player_id=player.id) }}">
-                                    <button class="btn btn-success">
-                                        <i class="fas fa-plus me-1"></i> Přiřadit studenta
-                                    </button>
+                                <a href="{{ url_for('ensemble.assign_composition', ensemble_id=ensemble.id) }}"
+                                   class="btn btn-success">
+                                    Přiřadit kompozici
                                 </a>
                             {% endif %}
                         </div>
                     </div>
-                </div>
-                {% endfor %}
-                <div class="col-3">
-                    <div class="card mb-4">
-                        <div class="card-header">
-                            Přidat člena souboru
+                    <hr>
+                    <div class="row">
+                        <p>Obsazení:
+                            <b>{{ ensemble.composition.instrumentation_text if ensemble.composition else "" }}</b></p>
+                        <p>Počet hráčů: {{ ensemble.count_ensemble_players }}</p>
+                        {% if not ensemble.no_assigned_student %}
+                            <p>Obsazených studentů: {{ ensemble.count_assigned_students }}</p>
+                        {% endif %}
+                        <p>Kompletnost:
+                        <div class="col">
+                            <div class="progress">
+                                <div class="progress-bar" role="progressbar"
+                                     style="width: {{ ensemble.player_completeness }}%;"
+                                     aria-valuenow="{{ ensemble.player_completeness }}" aria-valuemin="0"
+                                     aria-valuemax="100">
+                                    {{ ensemble.player_completeness }}%
+                                </div>
+                            </div>
                         </div>
-                        <div class="card-body">
-                            <form method="POST" action="{{ url_for('ensemble.add_ensemble_player', ensemble_id=ensemble.id) }}">
-                                <button class="btn btn-success" type="submit">
-                                    <i class="fas fa-plus me-1"></i> Přidat dalšího hráče
-                                </button>
-                            </form>
-                        </div>
+                        <b>{% if ensemble.missing_instruments %}
+                            (chybí:{% for i in ensemble.missing_instruments %}{{ i }}{% if not loop.last %},
+                            {% endif %}{% endfor %}){% endif %}</b>
+                        </p>
+                    </div>
+                    <hr>
+                    <div class="row">
+                        <p>
+                            Pedagog: <b>
+                            {% if ensemble.ensemble_teachers %}{% for teacher in ensemble.ensemble_teachers %}{{ teacher.name }}{% endfor %}{% else %}Není přiřazen{% endif %}</b>
+                            {% if ensemble.ensemble_teachers %}
+                                {% for teacher in ensemble.ensemble_teachers %}<a href="{{ url_for('ensemble.assign_teacher', ensemble_id=ensemble.id) }}">(Změnit)</a>{% endfor %}
+                            {% else %}
+                                <a href="{{ url_for('ensemble.assign_teacher', ensemble_id=ensemble.id) }}">
+                                    <button class="btn btn-sm btn-info">Přiřadit</button>
+                                </a>
+                            {% endif %}
+                        </p>
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
+    <!-- EnsemblePlayer section -->
+    <div class="row">
+        <h5>Členové souboru</h5>
+        {% for player in ensemble.ensemble_players %}
+            <div class="col-3">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <form method="POST"
+                              action="{{ url_for('ensemble.delete_ensemble_player', ensemble_player_id=player.id) }}">
+                            Člen souboru
+                            <button type="submit" class="btn btn-secondary">Odstranit <i class="fas fa-delete-left"></i>
+                            </button>
+                        </form>
+                    </div>
+                    <div class="card-body">
+                        {% if player.student %}
+                            <p>Student: <b>{{ player.student.last_name }} {{ player.student.first_name }}</b></p>
+                            <p>Nástroj: <b>{{ player.student.instrument.name }}</b></p>
+                            <p>Ročník:
+                                <b>{{ player.student.class_year.number }}. {{ player.student.study_program.name }}</b>
+                            </p>
+                            <p>Katedra: <b>{{ player.student.department.name }}</b></p>
+                            <form method="POST"
+                                  action="{{ url_for('ensemble.unassign_student', ensemble_player_id=player.id) }}">
+                                <button class="btn btn-danger" type="submit">
+                                    <i class="fas fa-trash me-1"></i> Odebrat studenta ze souboru
+                                </button>
+                            </form>
+                        {% else %}
+                            <p>
+                                Nástroj: {{ player.instrument.name if player.instrument.name else "Není vyplněn nástroj hráče" }}</p>
+                            <p>Tento hráč nemá přiřazeného studenta.</p>
+
+                            <a href="{{ url_for('ensemble.assign_student', ensemble_player_id=player.id) }}">
+                                <button class="btn btn-success">
+                                    <i class="fas fa-plus me-1"></i> Přiřadit studenta
+                                </button>
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+        <div class="col-3">
+            <div class="card mb-4">
+                <div class="card-header">
+                    Přidat člena souboru
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('ensemble.add_ensemble_player', ensemble_id=ensemble.id) }}">
+                        <button class="btn btn-success" type="submit">
+                            <i class="fas fa-plus me-1"></i> Přidat dalšího hráče
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}
