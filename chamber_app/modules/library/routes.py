@@ -147,7 +147,7 @@ def show_compositions():
             subquery = (
                 db.session.query(Composition.id)
                 .join(Composition.players)
-                .join(Player.instruments)
+                .join(Player.instrument)
                 .filter(Instrument.id == instrument_id)
                 .subquery()
             )
@@ -238,25 +238,20 @@ def edit_players(composition_id):
 
     if request.method == "POST":
         # Get the form data
-        role = request.form.get('role')  # Assuming you have a field for role in your form
-        instrument_ids = request.form.getlist('instruments')
+        prefix = request.form.get('prefix')
+        suffix = request.form.get('suffix')
+        instrument_id = int(request.form.get('instrument'))
 
         # Create a new player
         new_player = Player(
-            role=role if role else None
+            prefix=prefix if prefix else None,
+            suffix=suffix if suffix else None,
+            instrument_id=instrument_id
         )
         db.session.add(new_player)
 
-        # Assign instruments to the player
-        for instrument_id in instrument_ids:
-            instrument = Instrument.query.get(instrument_id)
-            if instrument:
-                new_player.instruments.append(instrument)
-
         # Associate the new player with the composition along with the role
         composition.players.append(new_player)
-
-
 
         # Commit the changes
         db.session.commit()
@@ -265,7 +260,7 @@ def edit_players(composition_id):
         return redirect(url_for('library.edit_players', composition_id=composition_id))
 
     # In case of a GET request, render the template with the current composition and instruments
-    instruments = Instrument.query.all()  # Assuming you have a model for instruments
+    instruments = Instrument.query.order_by(Instrument.order).all()  # Assuming you have a model for instruments
     return render_template('edit_players.html', composition=composition, instruments=instruments)
 
 

@@ -1,5 +1,6 @@
 from chamber_app.extensions import db
 from sqlalchemy.orm import relationship
+from datetime import datetime
 
 # Association table for the many-to-many relationship between ensembles and compositions
 ensemble_compositions = db.Table('ensemble_composition',
@@ -23,8 +24,11 @@ class Ensemble(db.Model):
 
     # One-to-many relationship to EnsembleTeacher
     teacher_assignments = relationship("chamber_app.models.structure.TeacherAssignment", back_populates="ensemble")
+    assignments = relationship("EnsembleAssignment", back_populates="ensemble")
     # Relationship to Students
     ensemble_players = relationship('EnsemblePlayer', back_populates='ensemble')
+
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     @property
     def player_completeness(self):
@@ -83,6 +87,19 @@ class Ensemble(db.Model):
         return students
 
 
+class EnsembleAssignment(db.Model):
+    __tablename__ = "ensemble_assignments"
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    ensemble_id = db.Column(db.Integer, db.ForeignKey('ensembles.id'), nullable=False)
+    composition_id = db.Column(db.Integer, db.ForeignKey('compositions.id'), nullable=False)
+
+    # Relationships
+    ensemble = relationship('Ensemble', back_populates='assignments')
+    composition = relationship('Composition', back_populates='ensemble_assignments')
+
+
 # Table to link students with ensembles and their instruments
 class EnsemblePlayer(db.Model):
     __tablename__ = 'ensemble_players'
@@ -94,6 +111,6 @@ class EnsemblePlayer(db.Model):
 
     # Relationships
     ensemble = relationship('Ensemble', back_populates='ensemble_players')
-    student_assignments = relationship('chamber_app.models.structure.StudentAssignment', back_populates='ensemble', lazy=True)
+    student_assignments = relationship('chamber_app.models.structure.StudentAssignment', back_populates='ensemble',
+                                       lazy=True)
     instrument = relationship('chamber_app.models.library.Instrument', backref='ensemble_players', lazy=True)
-

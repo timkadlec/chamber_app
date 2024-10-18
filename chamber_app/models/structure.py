@@ -104,7 +104,7 @@ class StudentAssignment(db.Model):
 
     started_on = db.Column(db.DateTime, default=datetime.utcnow)
     ended_on = db.Column(db.DateTime)
-
+    deleted = db.Column(db.DateTime)
 
 
 class Nationality(db.Model):
@@ -119,10 +119,10 @@ class AcademicYear(db.Model):
     start = db.Column(db.Date)
     end = db.Column(db.Date)
 
-    semesters = db.relationship("Semestr", backref="academic_year")
+    semesters = db.relationship("Semester", backref="academic_year")
 
 
-class Semestr(db.Model):
+class Semester(db.Model):
     __tablename__ = "semesters"
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)

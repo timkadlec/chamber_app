@@ -15,6 +15,18 @@ composition_player = db.Table('composition_player',
                               )
 
 
+def group_instruments_by_id(instruments):
+    grouped_instruments = {}
+
+    for instrument in instruments:
+        instrument_id = instrument.id
+        if instrument_id not in grouped_instruments:
+            grouped_instruments[instrument_id] = []
+        grouped_instruments[instrument_id].append(instrument)
+
+    return grouped_instruments
+
+
 class Composer(db.Model):
     __tablename__ = 'composers'
 
@@ -47,6 +59,7 @@ class Composition(db.Model):
     players = relationship('Player',
                            secondary=composition_player,
                            back_populates='compositions')
+    ensemble_assignments = relationship('chamber_app.models.ensemble.EnsembleAssignment', back_populates='composition')
 
     @property
     def composer_full_name(self):
@@ -58,40 +71,37 @@ class Composition(db.Model):
 
     @property
     def instrumentation_text(self):
-        instrument_count = {}
+        """Returns a dictionary where the key is the Instrument object, sorted by 'order',
+        and the value is a list of all players associated with that instrument."""
+        instrument_player_dict = {}
 
-        # Count how many players play each instrument
+        # Group players by instruments
         for player in self.players:
-            for instrument in player.instruments:
-                # Only count normal (not obligatory) instruments
-                if instrument.name in instrument_count:
-                    instrument_count[instrument.name] += 1
+            instrument = player.instrument  # Get the instrument for the player
+            if instrument not in instrument_player_dict:
+                instrument_player_dict[instrument] = []  # Initialize list for this instrument
+            instrument_player_dict[instrument].append(player)  # Add player to the instrument's list
+
+        # Sort the dictionary by the 'order' attribute of Instrument
+        sorted_instrument_player_dict = dict(
+            sorted(instrument_player_dict.items(), key=lambda item: item[0].order)
+        )
+        instrumentation_text = ""
+        dict_length = len(sorted_instrument_player_dict)
+
+        for index, (key, value) in enumerate(sorted_instrument_player_dict.items()):
+            if len(value) == 1:
+                if index == dict_length - 1:  # Last iteration
+                    instrumentation_text += f"{key.name}"
                 else:
-                    instrument_count[instrument.name] = 1
-
-        # Create a list of instruments and their counts
-        instrument_list = [(name, count) for name, count in instrument_count.items()]
-
-        # Get order values for the instruments
-        ordered_instruments = []
-        for instrument_name, count in instrument_list:
-            instrument = Instrument.query.filter_by(name=instrument_name).first()
-            order = instrument.order if instrument else float('inf')  # Use float('inf') if not found
-            ordered_instruments.append((instrument_name, count, order))
-
-        # Sort instruments by their order attribute
-        ordered_instruments.sort(key=lambda x: x[2])  # Sort by the order (3rd element in tuple)
-
-        # Prepare the output based on counts
-        output = []
-        for instrument_name, count, _ in ordered_instruments:
-            if count == 1:
-                output.append(f"{instrument_name}")  # Omit "x" for a single instrument
+                    instrumentation_text += f"{key.name}, "
             else:
-                output.append(f"{count} x {instrument_name}")  # Include "x" for multiple instruments
+                if index == dict_length - 1:  # Last iteration
+                    instrumentation_text += f"{len(value)} {key.name}"
+                else:
+                    instrumentation_text += f"{len(value)} {key.name}, "
 
-        # Join everything with commas and return
-        return ', '.join(output)
+        return instrumentation_text
 
     @property
     def instrumentation_list(self):
@@ -110,17 +120,16 @@ class Player(db.Model):
     __tablename__ = 'players'
 
     id = db.Column(db.Integer, primary_key=True)
-    role = db.Column(db.String(256))
-
+    prefix = db.Column(db.String(256))
+    suffix = db.Column(db.String(256))
     # Relationship to link players with their instruments
-    instruments = relationship('Instrument',
-                               secondary=player_instrument,
-                               back_populates='players')
+    instrument_id = db.Column(db.Integer, ForeignKey('instrument.id'), nullable=True)
 
     # Relationship to link players with compositions
     compositions = relationship('Composition',
                                 secondary=composition_player,
                                 back_populates='players')
+    instrument = relationship("Instrument", back_populates="players")
 
 
 class Instrument(db.Model):
@@ -128,14 +137,8 @@ class Instrument(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(256), nullable=False)
+    shortcut = db.Column(db.String(15))
     order = db.Column(db.String(20))
-    is_obligatory = db.Column(Boolean, default=False)  # Added to distinguish between main and obligatory instruments
 
     # Relationship to link instruments with players
-    players = relationship('Player',
-                           secondary=player_instrument,
-                           back_populates='instruments')
-
-    # Optional: Self-referential relationship if you want to track main and obligatory instrument
-    main_instrument_id = db.Column(db.Integer, ForeignKey('instrument.id'), nullable=True)
-    main_instrument = relationship('Instrument', remote_side=[id], backref='obligatory_instruments')
+    players = relationship('Player', back_populates='instrument')

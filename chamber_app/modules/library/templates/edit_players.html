@@ -20,9 +20,9 @@
                     </div>
                     <div class="card-body d-flex justify-content-between">
                         <div class="col-10">
-                            {% for instrument in player.instruments %}
-                                <p>{% if player.role %}{{ player.role }} {% endif %}{{ instrument.name }}</p>
-                            {% endfor %}
+                            {% if player.instrument %}
+                                <p>{{player.prefix if player.prefix else ""}} {{ player.instrument.name }}{{ player.suffix if player.suffix else "" }}</p>
+                            {% endif %}
                         </div>
                         <div class="col-2 text-end">
                             <a href="#">
@@ -50,18 +50,24 @@
                 <div class="card-body">
                     <form action="{{ url_for('library.edit_players', composition_id=composition.id) }}" method="POST">
                         <div class="mb-3">
-                            <label for="role" class="form-label">Role</label>
-                            <input type="text" class="form-control" id="role" name="role"
+                            <label for="role" class="form-label">Prefix</label>
+                            <input type="text" class="form-control" id="prefix" name="prefix"
                                    placeholder="Např. První housle">
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">Vyberte nástroje</label>
-                            <select class="form-control" id="instruments" name="instruments" multiple>
+                            <label class="form-label">Vyberte nástroj</label>
+                            <select class="form-control" id="instruments" name="instrument">
                                 {% for instrument in instruments %}
                                     <option value="{{ instrument.id }}">{{ instrument.name }}</option>
                                 {% endfor %}
                             </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="role" class="form-label">Role</label>
+                            <input type="text" class="form-control" id="suffix" name="suffix"
+                                   placeholder="Např. (Pic))">
                         </div>
 
                         <button type="submit" class="btn btn-success">Přidat</button>
@@ -78,7 +84,6 @@
             $(document).ready(function () {
                 // Initialize Select2 on the instruments dropdown
                 $('#instruments').select2({
-                    tags: true, // Allow users to add custom entries
                     placeholder: "Začněte psát nebo vyberte nástroj...",
                     allowClear: true
                 });
