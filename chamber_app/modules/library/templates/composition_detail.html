@@ -19,9 +19,13 @@
                         {{ composition.composer.death_date.year }}{% endif %})</a><br>
                         <strong>Národnost:</strong> {{ composition.composer.nationality.name }}<br>
                         <strong>Hudební období:</strong> {{ composition.composer.musical_period }}<br>
-
-
                     </p>
+                    {% if composition.youtube_link %}
+                        <iframe width="560" height="315" src="{{ composition.youtube_link }}"
+                                title="YouTube video player" frameborder="0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -53,9 +57,58 @@
     <div class="row">
         <div class="col-md-12">
             <h4>Historie interpretace</h4>
-            <!-- TODO Tabulka s historií souborů-->
-            Tabulka se soubory
+            <table id="datatableEnsembleAssignments">
+                <thead>
+                <tr>
+                    <th>Datum</th>
+                    <th>Název souboru</th>
+                    <th>Hráči</th>
+                </tr>
+                </thead>
+                <tfoot>
+                <tr>
+                    <th>Datum</th>
+                    <th>Název souboru</th>
+                    <th>Hráči</th>
+                </tr>
+                </tfoot>
+                <tbody>
+                {% for a in composition.ensemble_assignments %}
+
+                    <tr>
+                        <td>{{ a.ended if a.ended else a.created }}</td>
+                        <td>{{ a.ensemble.name }}</td>
+                        <td>{% if a.ensemble.active_student_assignments %}
+                            {% for student in a.ensemble.active_student_assignments %}
+                                {{ student.last_name }}{% if not loop.last %}, {% endif %}
+                            {% else %}
+                                Žádní studenti
+                            {% endfor %}
+                        {% endif %}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
+    <!-- Student JavaScript table settings -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const dataTable = new simpleDatatables.DataTable("#datatableEnsembleAssignments", {
+                labels: {
+                    placeholder: "Hledat",
+                    perPage: "záznamů na stránku",
+                    noRows: "Žádné záznamy k zobrazení",
+                    info: "Zobrazeno {start} až {end} z {rows} záznamů",
+                    loading: "Načítání...",
+                    next: "Další",
+                    previous: "Předchozí",
+                },
+                perPage: 10,
+                perPageSelect: [10, 20, 30, 40, 50],
+                searchable: true,
+            });
+        });
+    </script>
 
 {% endblock %}

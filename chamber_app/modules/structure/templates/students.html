@@ -14,45 +14,49 @@
     </div>
 
     <div class="card mb-4">
-        <div class="card-header">
-            <i class="fas fa-table me-1"></i>
-            Seznam studentů
-        </div>
-
-        <div class="card-body">
-            <table id="datatableStudents">
-                <thead>
-                <tr>
-                    <th>Příjmení</th>
-                    <th>Jméno</th>
-                    <th>Ročník</th>
-                    <th>Nástroj</th>
-                    <th>Katedra</th>
-                </tr>
-                </thead>
-                <tfoot>
-                <tr>
-                    <th>Příjmení</th>
-                    <th>Jméno</th>
-                    <th>Ročník</th>
-                    <th>Nástroj</th>
-                    <th>Katedra</th>
-                </tr>
-                </tfoot>
-                <tbody>
-                {% for student in students %}
-                    <tr>
-                        <td>{{ student.last_name }}</td>
-                        <td>{{ student.first_name }}</td>
-                        <td>{{ student.class_year.number }}. {{ student.study_program.name }}</td>
-                        <td>{{ student.instrument.name }}</td>
-                        <td>{{ student.department.name }}</td>
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
-        </div>
+    <div class="card-header">
+        <i class="fas fa-table me-1"></i>
+        Seznam studentů
     </div>
+
+
+    <div class="card-body">
+        <table id="datatableStudents">
+            <thead>
+            <tr>
+                <th>Příjmení</th>
+                <th>Jméno</th>
+                <th>Ročník</th>
+                <th>Nástroj</th>
+                <th>Katedra</th>
+                <th>Stav</th>
+            </tr>
+            </thead>
+            <tfoot>
+            <tr>
+                <th>Příjmení</th>
+                <th>Jméno</th>
+                <th>Ročník</th>
+                <th>Nástroj</th>
+                <th>Katedra</th>
+                <th>Stav</th>
+            </tr>
+            </tfoot>
+            <tbody>
+            {% for student in students %}
+                <tr data-status-id="{{ student.student_status_id }}">
+                    <td>{{ student.last_name }}</td>
+                    <td>{{ student.first_name }}</td>
+                    <td>{{ student.class_year.number }}. {{ student.study_program.name }}</td>
+                    <td>{{ student.instrument.name }}</td>
+                    <td>{{ student.department.name }}</td>
+                    <td>{{ student.student_status.name }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             const dataTable = new simpleDatatables.DataTable("#datatableStudents", {
@@ -69,6 +73,19 @@
                 perPageSelect: [10, 20, 30, 40, 50],
                 searchable: true,
             });
+
+            // Apply styles based on student_status_id
+            const rows = document.querySelectorAll("#datatableStudents tbody tr");
+            rows.forEach(row => {
+                const statusId = row.getAttribute('data-status-id');
+                if (statusId === "2") { // Compare as string
+                    row.style.backgroundColor = "yellow"; // Set background color to yellow for status 2
+                } else if (statusId === "3") { // Compare as string
+                    row.style.backgroundColor = "red";    // Set background color to red for status 3
+                }
+            });
         });
     </script>
+
+
 {% endblock %}

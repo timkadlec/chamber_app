@@ -8,6 +8,9 @@ class Teacher(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(256), unique=True, nullable=False)
+    academic_position_id = db.Column(db.Integer, db.ForeignKey('academic_positions.id'))
+
+    academic_position = db.relationship('AcademicPosition', backref='teachers')
 
     assignments = db.relationship('TeacherAssignment', back_populates='teacher')
 
@@ -22,8 +25,8 @@ class TeacherAssignment(db.Model):
     teacher = db.relationship('Teacher', back_populates='assignments')
     ensemble = db.relationship('chamber_app.models.ensemble.Ensemble', back_populates="teacher_assignments")
 
-    started_on = db.Column(db.DateTime, default=datetime.utcnow)
-    ended_on = db.Column(db.DateTime)
+    started = db.Column(db.DateTime, default=datetime.utcnow)
+    ended = db.Column(db.DateTime)
 
 
 class Department(db.Model):
@@ -96,15 +99,16 @@ class StudentAssignment(db.Model):
     __tablename__ = "student_assignments"
     id = db.Column(db.Integer, primary_key=True)
 
-    ensemble_id = db.Column(db.Integer, db.ForeignKey('ensembles.id'), nullable=False)
+    ensemble_player_id = db.Column(db.Integer, db.ForeignKey('ensemble_players.id'),
+                                   nullable=False)  # Foreign key to EnsemblePlayer
     student_id = db.Column(db.Integer, db.ForeignKey('students.id'), nullable=False)
 
+    # Relationships
     student = db.relationship('Student', back_populates='assignments')
-    ensemble = db.relationship('chamber_app.models.ensemble.EnsemblePlayer', back_populates="student_assignments")
+    ensemble_player = db.relationship('EnsemblePlayer', back_populates='student_assignments')
 
-    started_on = db.Column(db.DateTime, default=datetime.utcnow)
-    ended_on = db.Column(db.DateTime)
-    deleted = db.Column(db.DateTime)
+    created = db.Column(db.DateTime, default=datetime.utcnow)
+    ended = db.Column(db.DateTime)
 
 
 class Nationality(db.Model):
@@ -127,3 +131,13 @@ class Semester(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     academic_year_id = db.Column(db.Integer, db.ForeignKey('academic_years.id'), nullable=False)
+
+
+class AcademicPosition(db.Model):
+    __tablename__ = 'academic_positions'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    shortcut = db.Column(db.String(100), nullable=False)
+    weight = db.Column(db.Integer)
+
+    full_time = db.Column(db.Integer, nullable=False)

@@ -1,0 +1,7 @@
+<nav class="mt-2" style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ url_for('ensemble.show_ensembles') }}">Komorní soubory</a></li>
+        <li class="breadcrumb-item">Detail</li>
+        <li class="breadcrumb-item active" aria-current="page">{{ ensemble.name }}</li>
+    </ol>
+</nav>

@@ -53,6 +53,7 @@ class Composition(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(256), unique=True, nullable=False)
     durata = db.Column(db.Float, nullable=False)
+    youtube_link = db.Column(db.String(256))
     composer_id = db.Column(db.Integer, ForeignKey('composers.id'), nullable=False)
 
     composer = relationship('Composer', back_populates='compositions')

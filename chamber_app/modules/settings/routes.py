@@ -96,7 +96,6 @@ def import_students():
             # Process the file
             df = pd.read_excel(file_path)
 
-            # Extract required columns
             required_columns = [
                 "Příjmení",
                 "Jméno",
@@ -106,9 +105,13 @@ def import_students():
                 "Oborová katedra",
                 "T",
                 "Roč",
-                "StS",
-                "K"
+                "StS"
             ]
+
+            # If "K" column is present, include it in required columns
+            if "K" in df.columns:
+                required_columns.append("K")
+
             df_filtered = df[required_columns]
             try:
                 new_students = []
@@ -126,8 +129,9 @@ def import_students():
                     study_program = get_or_create_study_program(row["T"])
                     student_status = get_student_status(row["StS"])
                     class_year = get_class_year(row["Roč"], study_program.id)
-                    active = False if row["K"] == "N" else True
-
+                    active = True  # Default to active if "K" is not present
+                    if "K" in df.columns and pd.notna(row.get("K")):
+                        active = False if row["K"] == "N" else True
                     # Check if the student already exists
                     student_db = Student.query.filter_by(osobni_cislo=row["Osobní čís."]).first()
 
@@ -170,7 +174,7 @@ def import_students():
                 flash(f"{len(new_students)} studentů bylo přidáno nebo aktualizováno.", "info", )
             except Exception as e:
                 db.session.rollback()
-                flash(f"Vyskytla se chyba: {e} ","danger",)
+                flash(f"Vyskytla se chyba: {e} ", "danger", )
 
             # Remove the temporary file
             os.remove(file_path)

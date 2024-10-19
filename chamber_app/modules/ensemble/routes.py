@@ -1,10 +1,11 @@
-from flask import render_template, request, redirect, url_for, flash
+from flask import render_template, request, redirect, url_for, flash, abort
 from chamber_app.models.library import Composition, Composer, Instrument
-from chamber_app.models.structure import Student, Teacher, TeacherAssignment
+from chamber_app.models.structure import Student, Teacher, TeacherAssignment, StudentAssignment
 from chamber_app.models.ensemble import Ensemble, EnsemblePlayer, EnsembleAssignment
 from chamber_app.extensions import db
 from . import ensemble_bp
 from sqlalchemy import func, or_  # Corrected import
+from datetime import datetime
 
 
 def name_ensemble(num_players):
@@ -68,6 +69,25 @@ def create_ensemble_student_based(students):
     flash(f"Přidán nový komorní soubor pod jménem: {new_ensemble.name}", "success")
 
 
+def create_empty_ensemble():
+    new_ensemble = Ensemble(
+        name=generate_ensemble_name_count(2)
+    )
+    try:
+        db.session.add(new_ensemble)
+        db.session.commit()
+        for student in range(2):
+            new_ensemble_member = EnsemblePlayer(
+                ensemble_id=new_ensemble.id,
+            )
+            db.session.add(new_ensemble_member)
+        db.session.commit()
+        flash(f"Přidán nový komorní soubor pod jménem: {new_ensemble.name}", "success")
+        return new_ensemble
+    except Exception as e:
+        flash(f"Stala se chyba: {e}", "danger")
+
+
 def create_ensemble_composition_based(composition_id):
     assigned_composition = Composition.query.filter_by(id=composition_id).first()
     # Create ensemble model
@@ -123,6 +143,32 @@ def rename_ensemble(ensemble_id):
     print("Ensemble edited")
 
 
+def delete_ensemble(ensemble_id):
+    try:
+        teacher_assignments = TeacherAssignment.query.filter_by(ensemble_id=ensemble_id).all()
+        for assignment in teacher_assignments:
+            db.session.delete(assignment)
+
+        ensemble_assignments = EnsembleAssignment.query.filter_by(ensemble_id=ensemble_id).all()
+        for assignment in ensemble_assignments:
+            db.session.delete(assignment)
+
+        ensemble_players = EnsemblePlayer.query.filter_by(ensemble_id=ensemble_id).all()
+        for player in ensemble_players:
+            student_assignments = StudentAssignment.query.filter_by(ensemble_player_id=player.id).all()
+            for assignment in student_assignments:
+                db.session.delete(assignment)
+            db.session.delete(player)
+
+        ensemble = Ensemble.query.get_or_404(ensemble_id)
+        db.session.delete(ensemble)
+        db.session.commit()
+        flash(f"Komorní soubor kompletně odstraněn.", "success")
+    except Exception as e:
+        db.session.rollback()  # Rollback if there's an error
+        flash(f"Vyskytla se chyba: {e}", "danger")
+
+
 @ensemble_bp.route('/')
 def show_ensembles():
     ensembles = Ensemble.query.all()
@@ -136,43 +182,24 @@ def ensemble_detail(ensemble_id):
 
 
 @ensemble_bp.route('/delete/<int:ensemble_id>', methods=["POST"])
-def delete_ensemble(ensemble_id):
-    # TODO Delete ensemble respectively
-    #  first unassign student, teachers,
-    #  their respective assignments connected to this ensemble (maybe only archive rather)
-    #  Delete Ensemble players and then also Ensemble assignments
-
-    ensemble = Ensemble.query.filter_by(id=ensemble_id).first()
-    ensemble.teacher = None  # Clear the association if necessary
-
-    try:
-        # Delete all players associated with the ensemble
-        for player in ensemble.ensemble_players:
-            db.session.delete(player)
-
-        # Now delete the ensemble
-        db.session.delete(ensemble)
-        db.session.commit()  # Commit after all deletions
-
-        flash(f"Komorní soubor {ensemble.name} odstraněn.", "success")
-    except Exception as e:
-        db.session.rollback()  # Rollback if there's an error
-        flash(f"Vyskytla se chyba: {e}", "danger")
-
+def ensemble_delete(ensemble_id):
+    delete_ensemble(ensemble_id)
     return redirect(url_for('ensemble.show_ensembles'))
 
 
 @ensemble_bp.route('/<int:ensemble_id>/assign_composition/', methods=["GET", "POST"])
 def assign_composition(ensemble_id):
-    # TODO Assign composition as EnsembleAssignment
-    # Get the ensemble by ID
     ensemble = Ensemble.query.get_or_404(ensemble_id)
     compositions = Composition.query.all()
 
     if request.method == "POST":
         try:
-            selected_composition = request.form.get('selected_composition')
-            ensemble.composition_id = selected_composition
+            selected_composition_id = request.form.get('selected_composition')
+            new_ensemble_assignment = EnsembleAssignment(
+                ensemble_id=ensemble_id,
+                composition_id=selected_composition_id
+            )
+            db.session.add(new_ensemble_assignment)
             db.session.commit()
             flash("Composition assigned successfully", "success")
         except Exception as e:
@@ -183,59 +210,49 @@ def assign_composition(ensemble_id):
     return render_template('assign_composition.html', compositions=compositions, ensemble=ensemble)
 
 
-@ensemble_bp.route('/<int:ensemble_id>/unassign_composition/', methods=["POST"])
-def unassign_composition(ensemble_id):
-    # TODO Unassign composition as EnsembleAssignment
-    #  also bear in mind on what conditions it has been unassigned - completed, performed?
-
-    # Get the ensemble by ID
-    ensemble = Ensemble.query.filter_by(id=ensemble_id).first()
-
-    if request.method == "POST":
-        ensemble.composition_id = None
-        db.session.commit()
-        print("Composition assigned successfully")
-        return redirect(url_for('ensemble.ensemble_detail', ensemble_id=ensemble.id))
-
-
-@ensemble_bp.route('/unassign_student/<int:ensemble_player_id>', methods=["POST"])
-def unassign_student(ensemble_player_id):
-    if request.method == "POST":
-        ensemble_player = EnsemblePlayer.query.get_or_404(ensemble_player_id)
-        ensemble_player.student_id = None
-        # Commit the change to the database
-        db.session.commit()
-
-        # Return a success message or redirect
-        print('Student successfully unassigned from the ensemble.')
-        return redirect(url_for('ensemble.ensemble_detail', ensemble_id=ensemble_player.ensemble_id))
+@ensemble_bp.route('/unassign_composition/<int:ensemble_assignment_id>', methods=["POST"])
+def unassign_composition(ensemble_assignment_id):
+    a = EnsembleAssignment.query.filter_by(id=ensemble_assignment_id).first()
+    a.ended = datetime.utcnow()
+    db.session.commit()
+    print("Composition assigned successfully")
+    return redirect(url_for('ensemble.ensemble_detail', ensemble_id=a.ensemble_id))
 
 
 @ensemble_bp.route('/assign_student/<int:ensemble_player_id>', methods=["GET", "POST"])
 def assign_student(ensemble_player_id):
-    ensemble_player = EnsemblePlayer.query.filter_by(id=ensemble_player_id).first()
-    students = Student.query.all()
+    ensemble_player = EnsemblePlayer.query.get_or_404(ensemble_player_id)
+    students = Student.query.filter_by(instrument_id=ensemble_player.instrument_id).all()
 
     if request.method == "POST":
-        selected_student = request.form.get('selected_student')
-
-        # # Check if the student is already part of the ensemble
-        # for player in ensemble_current_players:
-        #     if player.student_id == int(selected_student):
-        #         print("This student is already in the ensemble!")
-        #         # Redirect back to the detail page immediately
-        #         return redirect(url_for("ensemble.ensemble_detail", ensemble_id=ensemble_player.ensemble_id))
-
-        # If the student is not found in the ensemble, assign them
+        selected_student_id = request.form.get('selected_student')
         try:
-            ensemble_player.student_id = selected_student
+            new_assignment = StudentAssignment(
+                ensemble_player_id=ensemble_player.id,
+                student_id=selected_student_id
+            )
+            db.session.add(new_assignment)
             db.session.commit()
             flash("Student added to the ensemble", "success")
         except Exception as e:
+            db.session.rollback()
             flash(f"Vyskytla se chyba {e}", "danger")
         return redirect(url_for("ensemble.ensemble_detail", ensemble_id=ensemble_player.ensemble_id))
 
     return render_template("assign_student.html", ensemble_player=ensemble_player, students=students)
+
+
+@ensemble_bp.route('/unassign_student/<int:active_student_assignment>', methods=["POST"])
+def unassign_student(active_student_assignment):
+    a = StudentAssignment.query.get_or_404(active_student_assignment)
+    a.ended = datetime.utcnow()
+    try:
+        db.session.commit()
+        flash('Student úspěšně odebrán z komorního souboru. Záznam o jeho členství je zachován v archivu.', "success")
+    except Exception as e:
+        flash(f"Vyskytla se chyba {e}", "danger")
+        abort(404)
+    return redirect(url_for('ensemble.ensemble_detail', ensemble_id=a.ensemble_player.ensemble_id))
 
 
 @ensemble_bp.route('assign_teacher/<int:ensemble_id>', methods=["GET", "POST"])
@@ -252,11 +269,23 @@ def assign_teacher(ensemble_id):
             db.session.add(teacher_assignment)
             db.session.commit()
             flash(f"Pedagog {teacher_assignment.teacher.name} byl přiřazen k souboru {ensemble.name}", "info")
-            return redirect(url_for('ensemble.ensemble_detail', ensemble_id=ensemble.id))
         except Exception as e:
             flash(f"Vyskytla se chybe: {e}", "danger")
-            return redirect(url_for('ensemble.ensemble_detail', ensemble_id=ensemble.id))
+        return redirect(url_for('ensemble.ensemble_detail', ensemble_id=ensemble.id))
     return render_template('assign_teacher.html', ensemble=ensemble, teachers=teachers)
+
+
+@ensemble_bp.route('unassign_teacher/<int:teacher_assignment_id>', methods=["POST"])
+def unassign_teacher(teacher_assignment_id):
+    a = TeacherAssignment.query.get_or_404(teacher_assignment_id)
+    try:
+        a.ended = datetime.utcnow()
+        db.session.commit()
+        flash(f"Pedagog {a.teacher.name} byl odebrán od souboru: {a.ensemble.name}. Pedagog zůstává v archivu souboru.",
+              "info")
+    except Exception as e:
+        flash(f"Vyskytla se chybe: {e}", "danger")
+    return redirect(url_for('ensemble.ensemble_detail', ensemble_id=a.ensemble.id))
 
 
 @ensemble_bp.route('/<int:ensemble_id>/ensemble_player/add', methods=["POST"])
@@ -288,7 +317,7 @@ def ensemble_wizard():
     return render_template('ensemble_wizard.html')
 
 
-@ensemble_bp.route('/add/composition_based', methods=['GET', 'POST'])
+@ensemble_bp.route('/create/composition_based', methods=['GET', 'POST'])
 def add_composition_based():
     instruments = request.args.getlist('instruments')
     durations = request.args.getlist('durations')
@@ -335,7 +364,7 @@ def add_composition_based():
                            )
 
 
-@ensemble_bp.route('/add/student_based', methods=['GET', 'POST'])
+@ensemble_bp.route('/create/student_based', methods=['GET', 'POST'])
 def add_ensemble_student_based():
     students = Student.query.all()
     if request.method == "POST":
@@ -351,3 +380,9 @@ def add_ensemble_student_based():
             return redirect(url_for('ensemble.add_ensemble_student_based'))
 
     return render_template('add_ensemble_student_based.html', students=students)
+
+
+@ensemble_bp.route('/create/empty', methods=['POST'])
+def add_empty_ensemble():
+    new_ensemble = create_empty_ensemble()
+    return redirect(url_for('ensemble.ensemble_detail', ensemble_id=new_ensemble.id))

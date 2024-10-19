@@ -19,17 +19,20 @@
                 <thead>
                 <tr>
                     <th>Jméno</th>
+                    <th>Úvazek</th>
                 </tr>
                 </thead>
                 <tfoot>
                 <tr>
                     <th>Jméno</th>
+                    <th>Úvazek</th>
                 </tr>
                 </tfoot>
                 <tbody>
                 {% for teacher in teachers %}
                     <tr>
-                        <td>{{ teacher.name }}</td>
+                        <td>{{ teacher.academic_position.shortcut if teacher.academic_position.shortcut }} {{ teacher.name }}</td>
+                    <td>0,8</td>
                     </tr>
                 {% endfor %}
                 </tbody>

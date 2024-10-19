@@ -1,86 +1,110 @@
 {% extends "index.html" %}
 
 {% block content %}
-            <h1 class="mt-4">Komorní soubory</h1>
-            <div class="row">
-                <p>Místo, vidíte přehled všech komorních souborů</p>
-                <ul class="nav nav-pills mb-4 ms-2">
+    <h1 class="mt-4">Komorní soubory</h1>
+    <div class="row">
+        <p>Místo, vidíte přehled všech komorních souborů</p>
+        <ul class="nav nav-pills mb-4 ms-2">
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('ensemble.ensemble_wizard') }}">
+                    <button class="btn btn-success">
+                        <i class="fas fa-wand-magic-sparkles me-1"></i>Tvůrce souboru
+                    </button>
+                </a>
+            </li>
+        </ul>
+    </div>
 
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{url_for('ensemble.ensemble_wizard')}}"><button
-                                class="btn btn-success"><i class="fas fa-wand-magic-sparkles me-1"></i>Tvůrce
-                                souboru</button></a>
-                    </li>
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-table me-1"></i> Seznam souborů
+        </div>
 
-                </ul>
-            </div>
-
-            <div class="card mb-4">
-                <div class="card-header">
-                    <i class="fas fa-table me-1"></i>
-                    Seznam souborů
-                </div>
-
-                <!-- Tabulka Basic -->
-                <div class="card-body">
-                    <table id="datatableStudents">
-                        <thead>
-                            <tr>
-                                <th>Název</th>
-                                <th>Repertoár</th>
-                                <th>Obsazení</th>
-                                <th>Studenti</th>
-                                <th>Kompletní?</th>
-                                <th>Pedagog</th>
-                                <th>Akce</th>
-                            </tr>
-                        </thead>
-                        <tfoot>
-                            <tr>
-                                <th>Název</th>
-                                <th>Repertoár</th>
-                                <th>Obsazení</th>
-                                <th>Studenti</th>
-                                <th>Kompletní?</th>
-                                <th>Akce</th>
-                            </tr>
-                        </tfoot>
-                        <tbody>
-                            {%for ensemble in ensembles%}
-                            <tr>
-                                <td><a
-                                        href='{{url_for("ensemble.ensemble_detail", ensemble_id=ensemble.id)}}'>{{ensemble.name}}</a>
-                                </td>
-                                <td>{%if ensemble.composition_id%}
-                                    <b>{{ensemble.composition.composer_full_name}} - {{ensemble.composition.name}}</b>
-                                    {%endif%}
-                                </td>
-                                <td>{{ensemble.composition.instrumentation_text if ensemble.composition else ""}}</td>
-                                <td>příjmení studentů</td>
-                                <td><!-- Progress Bar -->
-                                    <div class="progress">
-                                        <div class="progress-bar" role="progressbar"
-                                            style="width: {{ ensemble.player_completeness }}%;"
-                                            aria-valuenow="{{ ensemble.player_completeness }}" aria-valuemin="0"
-                                            aria-valuemax="100">
-                                            {{ ensemble.player_completeness }}%
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>{% for teacher in ensemble.ensemble_teachers %}{{teacher.name}}{% endfor %}
-                                </td>
-                                <td>
-                                    <form method="post"
-                                        action="{{url_for('ensemble.delete_ensemble', ensemble_id=ensemble.id)}}">
-                                        <button class="btn btn-sm btn-danger">Odebrat</button>
-                                    </form>
-                                </td>
-                            </tr>
-                            {%endfor%}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+        <!-- Tabulka Basic -->
+        <div class="card-body">
+            <table id="datatableStudents">
+                <thead>
+                <tr>
+                    <th>Název</th>
+                    <th>Repertoár</th>
+                    <th>Obsazení</th>
+                    <th>Studenti</th>
+                    <th>Kompletní?</th>
+                    <th>Pedagog</th>
+                    <th>Akce</th>
+                </tr>
+                </thead>
+                <tfoot>
+                <tr>
+                    <th>Název</th>
+                    <th>Repertoár</th>
+                    <th>Obsazení</th>
+                    <th>Studenti</th>
+                    <th>Kompletní?</th>
+                    <th>Pedagog</th>
+                    <th>Akce</th>
+                </tr>
+                </tfoot>
+                <tbody>
+                {% for ensemble in ensembles %}
+                    <tr>
+                        <td>
+                            <a href="{{ url_for('ensemble.ensemble_detail', ensemble_id=ensemble.id) }}">
+                                {{ ensemble.name }}
+                            </a>
+                        </td>
+                        <td>
+                            {% if ensemble.active_ensemble_assignments %}
+                                {% for a in ensemble.active_ensemble_assignments %}
+                                    <b>{{ a.composition.composer_full_name }} - {{ a.composition.name }}</b>
+                                {% endfor %}
+                            {% else %}
+                                Soubor v současné době nemá zadanou skladbu ke studiu.
+                            {% endif %}
+                        </td>
+                        <td>{{ ensemble.instrumentation_text if ensemble.ensemble_players else "" }}</td>
+                        <td>
+                            {% if ensemble.active_student_assignments %}
+                                {% for student in ensemble.active_student_assignments %}
+                                    {{ student.last_name }}{% if not loop.last %}, {% endif %}
+                                {% else %}
+                                    Žádní studenti
+                                {% endfor %}
+                            {% endif %}
+                        </td>
+                        <td>
+                            <!-- Progress Bar with label -->
+                            <div class="progress" style="height: 20px;">
+                                <div class="progress-bar" role="progressbar"
+                                     style="width: {{ ensemble.student_completeness }}%;"
+                                     aria-valuenow="{{ ensemble.student_completeness }}" aria-valuemin="0"
+                                     aria-valuemax="100">
+                                    {{ ensemble.student_completeness }}%
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            {% if ensemble.active_teacher_assignments %}
+                                {% for teacher in ensemble.active_teacher_assignments %}
+                                    {{ teacher.name }}{% if not loop.last %}, {% endif %}
+                                {% endfor %}
+                            {% endif %}
+                        </td>
+                        <td class="text-end">
+                            <form method="POST"
+                                  action="{{ url_for('ensemble.ensemble_delete', ensemble_id=ensemble.id) }}"
+                                  class="d-inline">
+                                <button class="btn btn-sm btn-danger">
+                                    <i class="fas fa-trash"></i> Odebrat
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
 
     <!-- Student JavaScript table settings -->
     <script>

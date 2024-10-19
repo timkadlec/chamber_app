@@ -14,18 +14,6 @@ class ComposerForm(FlaskForm):
     nationality = SelectField('Národnost', coerce=int, validators=[Optional()])
     submit = SubmitField('Vytvořit skladatele')
 
-    # Custom validation method to check for duplicate composer based on name and birth date
-    def validate_first_name(self, field):
-        composer = Composer.query.filter_by(
-            first_name=field.data,
-            last_name=self.last_name.data,
-            birth_date=self.birth_date.data
-        ).first()
-
-        if composer:
-            raise ValidationError(
-                f'A composer named {field.data} {self.last_name.data} with the same birth date already exists.')
-
     def __init__(self, *args, **kwargs):
         super(ComposerForm, self).__init__(*args, **kwargs)
         self.populate_nationalities()

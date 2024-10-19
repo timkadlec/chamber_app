@@ -2,14 +2,6 @@ from chamber_app.extensions import db
 from sqlalchemy.orm import relationship
 from datetime import datetime
 
-# Association table for the many-to-many relationship between ensembles and compositions
-ensemble_compositions = db.Table('ensemble_composition',
-                                 db.Column('ensemble_id', db.Integer, db.ForeignKey('ensembles.id'), primary_key=True),
-                                 db.Column('composition_id', db.Integer, db.ForeignKey('compositions.id'),
-                                           primary_key=True),
-                                 db.Column('status', db.String(50), nullable=False, default="studying")
-                                 )
-
 
 # Ensemble model with teacher relationship
 class Ensemble(db.Model):
@@ -28,15 +20,16 @@ class Ensemble(db.Model):
     # Relationship to Students
     ensemble_players = relationship('EnsemblePlayer', back_populates='ensemble')
 
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created = db.Column(db.DateTime, default=datetime.utcnow)
+    ended = db.Column(db.DateTime)
 
     @property
-    def player_completeness(self):
-        total_players = self.composition.player_count
-        assigned_players = self.count_assigned_students
-        if total_players == 0:
+    def student_completeness(self):
+        players_in_ensemble = len(self.ensemble_players)
+        students_assigned = self.count_assigned_students
+        if players_in_ensemble == 0:
             return "No players required"
-        return (assigned_players / total_players) * 100
+        return (students_assigned / players_in_ensemble) * 100
 
     @property
     def no_assigned_student(self):
@@ -50,8 +43,8 @@ class Ensemble(db.Model):
     def count_assigned_students(self):
         assigned_students = []
         for player in self.ensemble_players:
-            if player.student_id:
-                assigned_students.append(assigned_students)
+            if player.active_student_assignment:
+                assigned_students.append(player.active_student_assignment)
         return len(assigned_students)
 
     @property
@@ -79,12 +72,60 @@ class Ensemble(db.Model):
         return list(missing)  # Return as a list for easier usage
 
     @property
-    def student_members(self):
-        students = []
+    def instrumentation_text(self):
+        """Returns a dictionary where the key is the Instrument object, sorted by 'order',
+        and the value is a list of all players associated with that instrument."""
+        instrument_player_dict = {}
+
+        # Group players by instruments
         for player in self.ensemble_players:
-            if player.student_id:
-                students.append(player.student)
-        return students
+            instrument = player.instrument  # Get the instrument for the player
+            if instrument not in instrument_player_dict:
+                instrument_player_dict[instrument] = []  # Initialize list for this instrument
+            instrument_player_dict[instrument].append(player)  # Add player to the instrument's list
+
+        # Sort the dictionary by the 'order' attribute of Instrument
+        sorted_instrument_player_dict = dict(
+            sorted(instrument_player_dict.items(), key=lambda item: item[0].order)
+        )
+        instrumentation_text = ""
+        dict_length = len(sorted_instrument_player_dict)
+
+        for index, (key, value) in enumerate(sorted_instrument_player_dict.items()):
+            if len(value) == 1:
+                if index == dict_length - 1:  # Last iteration
+                    instrumentation_text += f"{key.name}"
+                else:
+                    instrumentation_text += f"{key.name}, "
+            else:
+                if index == dict_length - 1:  # Last iteration
+                    instrumentation_text += f"{len(value)} {key.name}"
+                else:
+                    instrumentation_text += f"{len(value)} {key.name}, "
+
+        return instrumentation_text
+
+    @property
+    def active_ensemble_assignments(self):
+        return [assignment for assignment in self.assignments if assignment.ended is None]
+
+    @property
+    def active_student_assignments(self):
+        active_students = []
+        for player in self.ensemble_players:
+            if player.active_student:
+                active_students.append(player.active_student)
+
+        # Sort the active students by the order of their instrument
+        return sorted(active_students, key=lambda student: student.instrument.order)
+
+    @property
+    def active_teacher_assignments(self):
+        active_teachers = []
+        for a in self.teacher_assignments:
+            if not a.ended:
+                active_teachers.append(a.teacher)
+        return active_teachers
 
 
 class EnsembleAssignment(db.Model):
@@ -99,6 +140,9 @@ class EnsembleAssignment(db.Model):
     ensemble = relationship('Ensemble', back_populates='assignments')
     composition = relationship('Composition', back_populates='ensemble_assignments')
 
+    created = db.Column(db.DateTime, default=datetime.utcnow)
+    ended = db.Column(db.DateTime)
+
 
 # Table to link students with ensembles and their instruments
 class EnsemblePlayer(db.Model):
@@ -106,11 +150,23 @@ class EnsemblePlayer(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     ensemble_id = db.Column(db.Integer, db.ForeignKey('ensembles.id'), nullable=False)
-    student_assignment_id = db.Column(db.Integer, db.ForeignKey('student_assignments.id'))
     instrument_id = db.Column(db.Integer, db.ForeignKey('instrument.id'))
 
     # Relationships
-    ensemble = relationship('Ensemble', back_populates='ensemble_players')
-    student_assignments = relationship('chamber_app.models.structure.StudentAssignment', back_populates='ensemble',
-                                       lazy=True)
-    instrument = relationship('chamber_app.models.library.Instrument', backref='ensemble_players', lazy=True)
+    ensemble = db.relationship('Ensemble', back_populates='ensemble_players')
+    student_assignments = db.relationship('StudentAssignment', back_populates='ensemble_player', lazy=True)
+    instrument = db.relationship('Instrument', backref='ensemble_players', lazy=True)
+
+    created = db.Column(db.DateTime, default=datetime.utcnow)
+    ended = db.Column(db.DateTime)
+
+    @property
+    def active_student_assignment(self):
+        # Return the active assignment where 'ended_on' is None
+        return next((assignment for assignment in self.student_assignments if assignment.ended is None), None)
+
+    @property
+    def active_student(self):
+        # Return the student linked to the active assignment
+        active_assignment = self.active_student_assignment
+        return active_assignment.student if active_assignment else None

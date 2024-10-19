@@ -28,11 +28,27 @@ def show_composers():
                            form_composer=form_composer)
 
 
+def validate_composer(form):
+    composer = Composer.query.filter_by(
+        first_name=form.first_name.data,
+        last_name=form.last_name.data,
+        birth_date=form.birth_date.data
+    ).first()
+
+    if composer:
+        flash(
+            f'A composer named {form.first_name.data.data} {form.last_name.data} with the same birth date already exists.',
+            "danger")
+        return False
+    else:
+        return True
+
+
 @library_bp.route("/composer/add", methods=["POST"])
 def add_composer():
     form_composer = ComposerForm()
-    form_composer.populate_nationalities()
-    if form_composer.validate_on_submit():
+    if form_composer.validate_on_submit() and validate_composer(form_composer):
+
         new_composer = Composer(
             first_name=form_composer.first_name.data,
             last_name=form_composer.last_name.data,
