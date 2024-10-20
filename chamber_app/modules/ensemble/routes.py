@@ -242,6 +242,29 @@ def assign_student(ensemble_player_id):
     return render_template("assign_student.html", ensemble_player=ensemble_player, students=students)
 
 
+@ensemble_bp.route('/assign_guest/<int:ensemble_player_id>', methods=["GET", "POST"])
+def assign_guest(ensemble_player_id):
+    ensemble_player = EnsemblePlayer.query.get_or_404(ensemble_player_id)
+    guests = Student.query.filter_by(instrument_id=ensemble_player.instrument_id, guest=1).all()
+
+    if request.method == "POST":
+        selected_student_id = request.form.get('selected_guest_id')
+        try:
+            new_assignment = StudentAssignment(
+                ensemble_player_id=ensemble_player.id,
+                student_id=selected_student_id
+            )
+            db.session.add(new_assignment)
+            db.session.commit()
+            flash("Guest added to the ensemble", "success")
+        except Exception as e:
+            db.session.rollback()
+            flash(f"Vyskytla se chyba {e}", "danger")
+        return redirect(url_for("ensemble.ensemble_detail", ensemble_id=ensemble_player.ensemble_id))
+
+    return render_template("assign_guest.html", ensemble_player=ensemble_player, guests=guests)
+
+
 @ensemble_bp.route('/unassign_student/<int:active_student_assignment>', methods=["POST"])
 def unassign_student(active_student_assignment):
     a = StudentAssignment.query.get_or_404(active_student_assignment)

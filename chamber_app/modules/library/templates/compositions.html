@@ -8,9 +8,10 @@
     </div>
 
 
-
-    {% include "/elements/compositions_navbar.html" %}
-
+    <div class="row mb-2">
+        {% include "/elements/compositions_navbar.html" %}
+        {% include "/elements/compositions_filtering_badges.html" %}
+    </div>
 
     <div class="card mb-4">
         <div class="card-header">
@@ -44,11 +45,15 @@
                 <tbody>
                 {% for composition in compositions %}
                     <tr>
-                        <td><a href="{{ url_for('library.composer_detail', composer_id=composition.composer.id) }}">{{ composition.composer.last_name }} {{ composition.composer.first_name }}</a></td>
-                        <td><a href="{{ url_for('library.composition_detail', composition_id=composition.id) }}">{{ composition.name }}</a></td>
+                        <td>
+                            <a href="{{ url_for('library.composer_detail', composer_id=composition.composer.id) }}">{{ composition.composer.last_name }} {{ composition.composer.first_name }}</a>
+                        </td>
+                        <td>
+                            <a href="{{ url_for('library.composition_detail', composition_id=composition.id) }}">{{ composition.name }}</a>
+                        </td>
                         <td>{{ composition.durata }} min</td>
                         <td>{% if composition.players %}
-                            {{ composition.player_count }}
+                            {{ composition.players | length }}
                         {% else %}
                             -
                         {% endif %}

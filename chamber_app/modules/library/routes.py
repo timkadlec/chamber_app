@@ -14,6 +14,8 @@ import os
 from datetime import datetime
 import pandas as pd
 from werkzeug.utils import secure_filename
+from urllib.parse import urlencode
+
 
 
 @library_bp.route("/composers")
@@ -147,60 +149,47 @@ def composer_detail(composer_id):
 @library_bp.route("/compositions", methods=["GET"])
 def show_compositions():
     form = ComposerForm()
-    selected_instruments = request.args.getlist("instruments")
-    selected_durations = request.args.getlist("durations")
 
+    filters = request.args.copy()
+
+    # Pass the full URL-encoded query string to the template
+    query_string = urlencode(filters)
+
+    # Get selected instrument IDs from the request args (list)
+    selected_instruments = request.args.getlist("instruments")
+
+    # Convert selected instrument IDs to integers
+    selected_instruments = [int(instr_id) for instr_id in selected_instruments if instr_id.isdigit()]
+
+    # Start the query
     query = Composition.query
 
-    # Instrument filter
     if selected_instruments:
-        selected_instruments = [
-            int(instrument_id) for instrument_id in selected_instruments
-        ]
+        # Get the number of selected instruments
+        num_selected_instruments = len(selected_instruments)
 
-        # Subquery to ensure all selected instruments are present in the composition
-        for instrument_id in selected_instruments:
-            subquery = (
-                db.session.query(Composition.id)
-                .join(Composition.players)
-                .join(Player.instrument)
-                .filter(Instrument.id == instrument_id)
-                .subquery()
-            )
-            query = query.filter(Composition.id.in_(subquery))
+        # Join with players and instruments, filter by selected instruments
+        query = (
+            query.join(Composition.players)
+                 .join(Player.instrument)
+                 .filter(Instrument.id.in_(selected_instruments))
+                 .group_by(Composition.id)
+                 .having(db.func.count(db.distinct(Instrument.id)) == num_selected_instruments)
+        )
 
-    # Duration filter
-    selected_duration_ranges = []
-    duration_filters = []
-    if "0-5" in selected_durations:
-        duration_filters.append(Composition.durata <= 5)
-        selected_duration_ranges.append("0-5 min")
-    if "5-10" in selected_durations:
-        duration_filters.append(db.and_(Composition.durata > 5, Composition.durata <= 10))
-        selected_duration_ranges.append("5-10 min")
-    if "10-15" in selected_durations:
-        duration_filters.append(db.and_(Composition.durata > 10, Composition.durata <= 15))
-        selected_duration_ranges.append("10-15 min")
-    if "15-20" in selected_durations:
-        duration_filters.append(db.and_(Composition.durata > 15, Composition.durata <= 20))
-        selected_duration_ranges.append("15-20 min")
-    if "20+" in selected_durations:
-        duration_filters.append(Composition.durata > 20)
-        selected_duration_ranges.append("20+ min")
-
-    if duration_filters:
-        query = query.filter(db.or_(*duration_filters))
-
+    # Execute the query and get results
     compositions = query.all()
 
-    instruments = Instrument.query.order_by(Instrument.order).all()
+    # Retrieve all instruments for the filter dropdown
+    instruments = Instrument.query.all()
 
     return render_template(
         "compositions.html",
         compositions=compositions,
         instruments=instruments,
         form=form,
-        selected_duration_ranges=selected_duration_ranges,
+        selected_instruments=selected_instruments,
+        query_string=query_string
     )
 
 

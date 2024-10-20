@@ -175,6 +175,11 @@
                                        class="btn btn-success btn-sm">
                                         <i class="fas fa-plus me-1"></i> Přiřadit studenta
                                     </a>
+                                     <!-- Assign Guest -->
+                                    <a href="{{ url_for('ensemble.assign_guest', ensemble_player_id=player.id) }}"
+                                       class="btn btn-success btn-sm">
+                                        <i class="fas fa-plus me-1"></i> Přiřadit hosta
+                                    </a>
                                 {% endif %}
 
                                 <!-- Delete Ensemble Player -->

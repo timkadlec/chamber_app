@@ -1,0 +1,27 @@
+<!-- Displaying badges for selected filters -->
+<div class="d-flex flex-wrap justify-content-end">
+    {% if selected_instruments %}
+        {% set new_query = request.args.copy() %}
+
+        <!-- Instrument badges -->
+        {% for instrument_id in selected_instruments %}
+            {% set instrument = instruments | selectattr('id', 'equalto', instrument_id | int) | first %}
+            {% if instrument %}
+                <span class="badge bg-primary me-1">
+                    {{ instrument.name }}
+                    {% set updated_instruments = selected_instruments | reject('equalto', instrument_id) | list %}
+                    <a href="?{% if selected_departments %}departments={{ selected_departments | join('&departments=') }}{% endif %}{% if updated_instruments %}&instruments={{ updated_instruments | join('&instruments=') }}{% endif %}{% if selected_class_years %}&class_years={{ selected_class_years | join('&class_years=') }}{% endif %}"
+                       class="text-white" style="text-decoration: none;">&times;</a>
+                </span>
+            {% endif %}
+        {% endfor %}
+
+
+        <!-- Remove all filters badge -->
+        <span class="badge bg-danger me-1">
+            Zrušit filtry
+            <a href="{{url_for('library.show_compositions')}}"
+               class="text-white" style="text-decoration: none;">&times;</a>
+        </span>
+    {% endif %}
+</div>
