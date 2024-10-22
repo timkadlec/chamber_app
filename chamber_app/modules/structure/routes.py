@@ -114,3 +114,9 @@ def add_guest():
 def show_teachers():
     teachers = Teacher.query.order_by(Teacher.name).all()
     return render_template("teachers.html", teachers=teachers)
+
+
+@structure_bp.route("teacher_detail/<int:teacher_id>")
+def teacher_detail(teacher_id):
+    teacher = Teacher.query.filter_by(id=teacher_id).first()
+    return render_template("teacher_detail.html", teacher=teacher)

@@ -1,0 +1,82 @@
+{% extends "index.html" %}
+
+{% block content %}
+    <h1 class="mt-4">Karta pedagoga {{ teacher.name }}</h1>
+    <div class="row">
+        <p>Místo, kde můžete prohlížet profesora</p>
+    </div>
+
+    <div class="row mt-3 mb-3">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">{{ teacher.name }}</h5>
+                    <h6 class="card-subtitle mb-2 text-body-secondary">
+                        <strong>Akademická
+                            pozice:</strong> {{ teacher.academic_position.name if teacher.academic_position.name else "Není vyplněna akademická pozice" }}
+                    </h6>
+                    <h6 class="card-subtitle mb-2 text-body-secondary">
+                        <strong>Úvazek:</strong> {{ teacher.employment_time if teacher.employment_time else "Úvazek není vyplněn" }}
+                    </h6>
+                    <h6 class="card-subtitle mb-2 text-body-secondary">
+                        <strong>Hodin do úvazku:</strong> {{ teacher.required_hours }}
+                    </h6>
+                    <p class="card-text">
+
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-table me-1"></i>
+            Seznam úvazků
+        </div>
+
+        <!-- Tabulka Basic -->
+        <div class="card-body">
+            <table id="datatableStudents">
+                <thead>
+                <tr>
+                    <th>Jméno souboru</th>
+                    <th>Hodinová dotace</th>
+                </tr>
+                </thead>
+                <tfoot>
+                <tr>
+                    <th>Jméno souboru</th>
+                    <th>Hodinová dotace</th>
+                </tr>
+                </tfoot>
+                <tbody>
+                {% for a in teacher.active_assignments %}
+                    <tr>
+                        <td>{{ a.ensemble.name }}</td>
+                        <td>{{ a.hour_donation }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const dataTable = new simpleDatatables.DataTable("#datatableStudents", {
+                labels: {
+                    placeholder: "Hledat",
+                    perPage: "záznamů na stránku",
+                    noRows: "Žádné záznamy k zobrazení",
+                    info: "Zobrazeno {start} až {end} z {rows} záznamů",
+                    loading: "Načítání...",
+                    next: "Další",
+                    previous: "Předchozí",
+                },
+                perPage: 10,
+                perPageSelect: [10, 20, 30, 40, 50],
+                searchable: false,
+            });
+        });
+    </script>
+{% endblock %}
