@@ -22,6 +22,9 @@ class Ensemble(db.Model):
         'EnsemblePlayer',
         back_populates='ensemble',
     )
+
+    hour_donation = db.Column(db.Integer, default=2)
+
     created = db.Column(db.DateTime, default=datetime.utcnow)
     ended = db.Column(db.DateTime)
 
@@ -122,12 +125,27 @@ class Ensemble(db.Model):
         return sorted(active_students, key=lambda student: student.instrument.order)
 
     @property
-    def active_teacher_assignments(self):
+    def active_teachers(self):
         active_teachers = []
         for a in self.teacher_assignments:
             if not a.ended:
                 active_teachers.append(a.teacher)
         return active_teachers
+
+    @property
+    def active_teacher_assignments(self):
+        active_teacher_assignments = []
+        for a in self.teacher_assignments:
+            if not a.ended:
+                active_teacher_assignments.append(a)
+        return active_teacher_assignments
+
+    @property
+    def remaining_hour_donation(self):
+        total_donation = self.hour_donation
+        assigned_donation = sum(a.hour_donation for a in self.active_teacher_assignments)
+        remaining_donation = total_donation - assigned_donation
+        return remaining_donation
 
 
 class EnsembleAssignment(db.Model):

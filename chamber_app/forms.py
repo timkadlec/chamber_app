@@ -1,8 +1,9 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, DateField, SubmitField, IntegerField, SelectField, FloatField, FieldList, FormField
+from wtforms import StringField, DateField, SubmitField, IntegerField, SelectField, FloatField, HiddenField
 from wtforms.validators import DataRequired, Optional, ValidationError, NumberRange, Length
 from chamber_app.models.library import Composer, Instrument
-from chamber_app.models.structure import Nationality
+from chamber_app.models.structure import Nationality, Teacher
+from chamber_app.models.ensemble import Ensemble
 
 
 class ComposerForm(FlaskForm):
@@ -74,3 +75,34 @@ class InstrumentSelectForm(FlaskForm):
 
     def populate_instruments(self, obj):
         self.instrument_id.choices = [(i.id, i.name) for i in Instrument.query.all()]
+
+
+class HourDonationForm(FlaskForm):
+    hour_donation = SelectField('Hodinová dotace', coerce=int, validators=[DataRequired()])
+
+    def __init__(self, *args, **kwargs):
+        super(HourDonationForm, self).__init__(*args, **kwargs)
+        # Dynamically populate choices from the database
+        self.populate_hour_donation(self)
+
+    def populate_hour_donation(self, obj):
+        self.hour_donation.choices = [i for i in range(1, 5)]
+
+
+class TeacherAssignmentForm(FlaskForm):
+    teacher_id = SelectField('Pedagog', coerce=int, validators=[DataRequired()])
+    hour_donation = SelectField('Hodinová dotace', coerce=int, validators=[DataRequired()])
+
+    def __init__(self, ensemble_id=None, *args, **kwargs):
+        super(TeacherAssignmentForm, self).__init__(*args, **kwargs)
+        self.populate_teachers()
+        if ensemble_id:
+            self.populate_hour_donation(ensemble_id)
+
+    def populate_teachers(self):
+        # Populate teachers from the Teacher model
+        self.teacher_id.choices = [(i.id, i.name) for i in Teacher.query.all()]
+
+    def populate_hour_donation(self, ensemble_id):
+        ensemble = Ensemble.query.get(ensemble_id)
+        self.hour_donation.choices = [(i, f"{i} hodiny") for i in range(1, ensemble.remaining_hour_donation + 1)]

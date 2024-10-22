@@ -15,7 +15,7 @@
                     <h5 class="mb-0">Informace o souboru</h5>
                 </div>
                 <div class="card-body">
-
+                    <!-- Zadané skladby ke studiu -->
                     <div class="mb-4">
                         <h6 class="text-muted">Zadané skladby ke studiu</h6>
                         {% if ensemble.active_ensemble_assignments %}
@@ -48,9 +48,75 @@
                         {% endif %}
                     </div>
 
-
                     <hr>
+                    <!-- Hodinová dotace -->
+                    <div class="mb-4">
+                        {% if ensemble.hour_donation %}
+                            <h6 class="text-muted d-inline">Hodinová dotace:
+                                {{ ensemble.hour_donation }}h
+                                {% if ensemble.remaining_hour_donation and ensemble.remaining_hour_donation != 0 %}
+                                    (Nerozděleno: {{ ensemble.remaining_hour_donation }}h)
+                                {% endif %}
+                            </h6>
 
+                            <!-- Button trigger modal -->
+                            <button type="button" class="btn btn-outline-warning btn-sm d-inline ms-2"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#HourDonationForm">
+                                Změnit
+                            </button>
+
+                        {% else %}
+                            <h6 class="text-muted d-inline">Hodinová dotace nezadána</h6>
+                            <button type="button" class="btn btn-outline-info btn-sm d-inline ms-2"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#HourDonationForm">
+                                Doplnit
+                            </button>
+                        {% endif %}
+
+                        <!-- Hour Donation Modal -->
+                        <div class="modal fade" id="HourDonationForm" tabindex="-1"
+                             aria-labelledby="HourDonationFormLabel" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h1 class="modal-title fs-5" id="exampleModalLabel">Hodinová dotace komorního souboru</h1>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                aria-label="Close"></button>
+                                    </div>
+                                    <form method="POST"
+                                          action="{{ url_for('ensemble.set_hour_donation', ensemble_id=ensemble.id) }}"
+                                          class="d-inline">
+                                        {{ hour_donation_form.hidden_tag() }}
+                                        <div class="modal-body">
+                                            <div class="mb-3">
+                                                {{ hour_donation_form.hour_donation.label(class="form-label") }}
+                                                {{ hour_donation_form.hour_donation(class="form-select") }}
+                                                {% if hour_donation_form.hour_donation.errors %}
+                                                    <div class="invalid-feedback">
+                                                        {% for error in hour_donation_form.hour_donation.errors %}
+                                                            {{ error }}
+                                                        {% endfor %}
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                                Zavřít
+                                            </button>
+                                            <button type="submit" class="btn btn-primary">Uložit hodinovou dotaci
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <!-- Obsazení a hráči -->
                     <div class="mb-4">
                         <h6 class="text-muted">Obsazení a hráči</h6>
                         <p><b>{{ ensemble.instrumentation_text }}</b></p>
@@ -60,6 +126,7 @@
                         {% endif %}
                     </div>
 
+                    <!-- Kompletnost -->
                     <div class="mb-4">
                         <h6 class="text-muted">Kompletnost</h6>
                         <div class="progress">
@@ -81,35 +148,126 @@
                     </div>
 
                     <hr>
-
+                    <!-- Pedagog -->
                     <div>
-                        <h6 class="text-muted">Pedagog</h6>
+                        <h6 class="text-muted d-inline">Pedagog</h6>
+
                         {% if ensemble.teacher_assignments %}
                             {% for a in ensemble.teacher_assignments %}
                                 {% if not a.ended %}
-                                    <div class="d-flex justify-content-between align-items-center mb-2">
-                                        <span>{{ a.teacher.name }}</span>
-                                        <form method="post"
-                                              action="{{ url_for('ensemble.unassign_teacher', teacher_assignment_id=a.id) }}">
-                                            <button class="btn btn-sm btn-outline-danger">
-                                                <i class="fas fa-minus me-1"></i>
-                                                Odebrat
+                                    <div>
+                                        <div class="d-inline justify-content-between align-items-center mb-2">
+                                            <span class="d-inline me-1">{{ a.teacher.name }} (Hodinová dotace: {{ a.hour_donation }})</span>
+                                            {#<!-- Change Hours modal Button -->
+                                            <button type="button" class="btn btn-sm btn-outline-warning d-inline" data-bs-toggle="modal"
+                                                    data-bs-target="#ChangeHoursModal">
+                                                <i class="fas fa-minus me-1"></i> Změnit hodiny
                                             </button>
-                                        </form>
+
+                                            <!-- Change Hours modal -->
+                                            <div class="modal fade" id="ChangeHoursModal" tabindex="-1"
+                                                 aria-labelledby="ChangeHoursModalLabel" aria-hidden="true">
+                                                <div class="modal-dialog">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h1 class="modal-title fs-5" id="exampleModalLabel">Změnit hodinovou dotaci pedagoga</h1>
+                                                            <button type="button" class="btn-close"
+                                                                    data-bs-dismiss="modal" aria-label="Close"></button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            ...
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-secondary"
+                                                                    data-bs-dismiss="modal">Close
+                                                            </button>
+                                                            <button type="button" class="btn btn-primary">Save changes
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>#}
+                                            <form method="post"
+                                                  action="{{ url_for('ensemble.unassign_teacher', teacher_assignment_id=a.id) }}"
+                                                  class="d-inline ms-2">
+                                                <button class="btn btn-sm btn-outline-danger d-inline">
+                                                    <i class="fas fa-minus me-1"></i> Odebrat
+                                                </button>
+                                            </form>
+                                        </div>
                                     </div>
                                 {% endif %}
                             {% endfor %}
-                            <a href="{{ url_for('ensemble.assign_teacher', ensemble_id=ensemble.id) }}"
-                               class="btn btn-outline-info btn-sm">
-                                <i class="fas fa-plus me-1"></i> Přiřadit dalšího pedagoga
-                            </a>
+                            <div>
+                                {% if ensemble.remaining_hour_donation != 0 %}
+                                    <!-- Button to assign another teacher -->
+                                    <button type="button" class="btn btn-outline-info btn-sm mt-2"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#AssignTeacherForm">
+                                        Přiřadit dalšího pedagoga
+                                    </button>
+                                {% else %}
+                                    <p>Byl vyčerpán počet hodin. Pro přidání pedagoga navyšte hodinovou dotaci.</p>
+                                {% endif %}
+                            </div>
                         {% else %}
-                            Žádný pedagog
-                            <a href="{{ url_for('ensemble.assign_teacher', ensemble_id=ensemble.id) }}"
-                               class="btn btn-outline-info btn-sm">
-                                <i class="fas fa-plus me-1"></i>Přiřadit
-                            </a>
+                            <span>Žádný pedagog</span>
+
+                            <!-- Button to assign a teacher -->
+                            <button type="button" class="btn btn-outline-info btn-sm ms-2" data-bs-toggle="modal"
+                                    data-bs-target="#AssignTeacherForm">
+                                Přiřadit pedagoga
+                            </button>
                         {% endif %}
+                    </div>
+
+                    <!-- Assign Teacher Modal -->
+                    <div class="modal fade" id="AssignTeacherForm" tabindex="-1"
+                         aria-labelledby="AssignTeacherFormLabel"
+                         aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h1 class="modal-title fs-5" id="exampleModalLabel">Přiřadit pedagoga</h1>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                            aria-label="Close"></button>
+                                </div>
+                                <form method="POST"
+                                      action="{{ url_for('ensemble.assign_teacher', ensemble_id=ensemble.id) }}"
+                                      class="d-inline">
+                                    {{ hour_donation_form.hidden_tag() }}
+                                    <div class="modal-body">
+                                        <div class="mb-3">
+                                            {{ teacher_assignment_form.teacher_id.label(class="form-label") }}
+                                            {{ teacher_assignment_form.teacher_id(class="form-select") }}
+                                            {% if teacher_assignment_form.teacher_id.errors %}
+                                                <div class="invalid-feedback">
+                                                    {% for error in hour_donation_form.teacher_id.errors %}
+                                                        {{ error }}
+                                                    {% endfor %}
+                                                </div>
+                                            {% endif %}
+                                            {{ teacher_assignment_form.hour_donation.label(class="form-label") }}
+                                            {{ teacher_assignment_form.hour_donation(class="form-select") }}
+                                            {% if teacher_assignment_form.hour_donation.errors %}
+                                                <div class="invalid-feedback">
+                                                    {% for error in hour_donation_form.hour_donation.errors %}
+                                                        {{ error }}
+                                                    {% endfor %}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                            Zavřít
+                                        </button>
+                                        <button type="submit" class="btn btn-primary">Přiřadit pedagoga
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

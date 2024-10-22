@@ -3,7 +3,7 @@ from chamber_app.models.library import Composition, Composer, Instrument
 from chamber_app.models.structure import Student, Teacher, TeacherAssignment, StudentAssignment
 from chamber_app.models.ensemble import Ensemble, EnsemblePlayer, EnsembleAssignment
 from chamber_app.extensions import db
-from chamber_app.forms import InstrumentSelectForm
+from chamber_app.forms import InstrumentSelectForm, HourDonationForm, TeacherAssignmentForm
 from . import ensemble_bp
 from sqlalchemy import func, or_  # Corrected import
 from datetime import datetime
@@ -197,13 +197,15 @@ def ensemble_activities(ensemble_id):
                 activities.append({
                     'date': a.created,
                     'type': 'composition',
-                    'details': Markup('Zadána skladba <b>{}: {}</b>').format(a.composition.composer_full_name, a.composition.name)
+                    'details': Markup('Zadána skladba <b>{}: {}</b>').format(a.composition.composer_full_name,
+                                                                             a.composition.name)
                 })
             if a.ended:
                 activities.append({
                     'date': a.ended,
                     'type': 'composition',
-                    'details': Markup('Ukončeno studium skladby <b>{}: {}</b>').format(a.composition.composer_full_name, a.composition.name)
+                    'details': Markup('Ukončeno studium skladby <b>{}: {}</b>').format(a.composition.composer_full_name,
+                                                                                       a.composition.name)
                 })
         elif isinstance(a, StudentAssignment):
             if a.created:
@@ -211,16 +213,19 @@ def ensemble_activities(ensemble_id):
                     'date': a.created,
                     'type': 'student',
                     'details': (
-                        Markup('Přiřazen student <b>{} {}, {}</b>').format(a.student.first_name, a.student.last_name, a.student.instrument.name)
+                        Markup('Přiřazen student <b>{} {}, {}</b>').format(a.student.first_name, a.student.last_name,
+                                                                           a.student.instrument.name)
                         if not a.student.guest else
-                        Markup('Přiřazen host <b>{} {}, {}</b>').format(a.student.first_name, a.student.last_name, a.student.instrument.name))
+                        Markup('Přiřazen host <b>{} {}, {}</b>').format(a.student.first_name, a.student.last_name,
+                                                                        a.student.instrument.name))
                 })
             if a.ended:
                 activities.append({
                     'date': a.ended,
                     'type': 'student',
                     'details': (
-                        Markup('Odebrán student <b>{} {}, {}</b>').format(a.student.first_name, a.student.last_name, a.student.instrument.name)
+                        Markup('Odebrán student <b>{} {}, {}</b>').format(a.student.first_name, a.student.last_name,
+                                                                          a.student.instrument.name)
                         if not a.student.guest else
                         Markup('Odebrán host <b>{} {}, {}</b>').format(a.student.first_name, a.student.last_name,
                                                                        a.student.instrument.name))
@@ -253,19 +258,36 @@ def show_ensembles():
 @ensemble_bp.route('/detail/<int:ensemble_id>')
 def ensemble_detail(ensemble_id):
     instrument_form = InstrumentSelectForm()
+    hour_donation_form = HourDonationForm()
+    teacher_assignment_form = TeacherAssignmentForm(ensemble_id=ensemble_id)
     ensemble = Ensemble.query.filter_by(id=ensemble_id).first()
     ensemble_activities_list = ensemble_activities(ensemble_id)
 
     return render_template('ensemble_detail.html',
                            ensemble=ensemble,
                            ensemble_activities_list=ensemble_activities_list,
-                           instrument_form=instrument_form)
+                           instrument_form=instrument_form,
+                           hour_donation_form=hour_donation_form,
+                           teacher_assignment_form=teacher_assignment_form)
 
 
 @ensemble_bp.route('/delete/<int:ensemble_id>', methods=["POST"])
 def ensemble_delete(ensemble_id):
     delete_ensemble(ensemble_id)
     return redirect(url_for('ensemble.show_ensembles'))
+
+
+@ensemble_bp.route('/<int:ensemble_id>/hour_donation/set', methods=["POST"])
+def set_hour_donation(ensemble_id):
+    form = HourDonationForm()
+    if form.validate_on_submit():
+        ensemble = Ensemble.query.get_or_404(ensemble_id)
+        ensemble.hour_donation = form.hour_donation.data
+        db.session.commit()
+        flash(f"Hodinová dotace pro soubor {ensemble.name} byla nastavena na {form.hour_donation.data}", 'success')
+        return redirect(url_for('ensemble.ensemble_detail', ensemble_id=ensemble.id))
+    flash("Chyba při ukládání hodinové dotace.", 'danger')
+    return redirect(url_for('ensemble.ensemble_detail', ensemble_id=ensemble_id))
 
 
 @ensemble_bp.route('/player/<int:player_id>/assign_instrument', methods=['POST'])
@@ -371,24 +393,62 @@ def unassign_student(active_student_assignment):
     return redirect(url_for('ensemble.ensemble_detail', ensemble_id=a.ensemble_player.ensemble_id))
 
 
-@ensemble_bp.route('assign_teacher/<int:ensemble_id>', methods=["GET", "POST"])
+@ensemble_bp.route('/<int:ensemble_id>/assign_teacher/', methods=["GET", "POST"])
 def assign_teacher(ensemble_id):
+    form = TeacherAssignmentForm(ensemble_id=ensemble_id)  # Pass the ensemble_id here
     ensemble = Ensemble.query.filter_by(id=ensemble_id).first()
-    teachers = Teacher.query.all()
-    if request.method == "POST":
-        try:
-            selected_teacher_id = int(request.form.get('selected_teacher'))
-            teacher_assignment = TeacherAssignment(
-                ensemble_id=ensemble.id,
-                teacher_id=selected_teacher_id
-            )
-            db.session.add(teacher_assignment)
-            db.session.commit()
-            flash(f"Pedagog {teacher_assignment.teacher.name} byl přiřazen k souboru {ensemble.name}", "info")
-        except Exception as e:
-            flash(f"Vyskytla se chybe: {e}", "danger")
-        return redirect(url_for('ensemble.ensemble_detail', ensemble_id=ensemble.id))
-    return render_template('assign_teacher.html', ensemble=ensemble, teachers=teachers)
+
+    # Ensure remaining hour donation is valid
+    if ensemble and ensemble.remaining_hour_donation != 0:
+        if form.validate_on_submit():
+            try:
+                selected_teacher_id = int(form.teacher_id.data)
+                hour_donation = int(form.hour_donation.data)
+
+                # Check for existing active assignment of the selected teacher
+                existing_assignment = TeacherAssignment.query.filter_by(
+                    ensemble_id=ensemble.id,
+                    teacher_id=selected_teacher_id,
+                    ended=None  # Ensure it's active
+                ).first()
+
+                if existing_assignment:
+                    # If an active assignment exists, increase the hour donation
+                    existing_assignment.hour_donation += hour_donation
+                    # Check if the teacher exists
+                    if existing_assignment.teacher:
+                        flash(
+                            f"Hodinová dotace pro pedagoga {existing_assignment.teacher.name} byla zvýšena o {hour_donation}.",
+                            "info")
+                    else:
+                        flash(f"Hodinová dotace byla zvýšena, ale pedagog nebyl nalezen.", "warning")
+                else:
+                    # Create a new assignment if none exists
+                    teacher_assignment = TeacherAssignment(
+                        ensemble_id=ensemble.id,
+                        teacher_id=selected_teacher_id,
+                        hour_donation=hour_donation
+                    )
+                    db.session.add(teacher_assignment)
+                    db.session.commit()  # Commit after adding a new assignment
+
+                    # Ensure the new assignment's teacher exists
+                    if teacher_assignment.teacher:
+                        flash(f"Pedagog {teacher_assignment.teacher.name} byl přiřazen k souboru {ensemble.name}.",
+                              "info")
+                    else:
+                        flash(f"Pedagog byl přiřazen, ale nebyl nalezen.", "warning")
+
+                db.session.commit()  # Commit changes after assignment adjustment
+                return redirect(url_for('ensemble.ensemble_detail', ensemble_id=ensemble.id))
+
+            except Exception as e:
+                db.session.rollback()  # Rollback in case of an error
+                flash(f"Vyskytla se chybe: {e}", "danger")
+    else:
+        flash(f"Hodinová dotace souboru {ensemble.name} byla vyčerpána.", "danger")
+
+    return redirect(url_for("ensemble.ensemble_detail", ensemble_id=ensemble.id))
 
 
 @ensemble_bp.route('unassign_teacher/<int:teacher_assignment_id>', methods=["POST"])
