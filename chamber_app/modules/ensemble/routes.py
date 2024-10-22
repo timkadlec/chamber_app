@@ -3,9 +3,12 @@ from chamber_app.models.library import Composition, Composer, Instrument
 from chamber_app.models.structure import Student, Teacher, TeacherAssignment, StudentAssignment
 from chamber_app.models.ensemble import Ensemble, EnsemblePlayer, EnsembleAssignment
 from chamber_app.extensions import db
+from chamber_app.forms import InstrumentSelectForm
 from . import ensemble_bp
 from sqlalchemy import func, or_  # Corrected import
 from datetime import datetime
+from itertools import chain
+from markupsafe import Markup
 
 
 def name_ensemble(num_players):
@@ -169,6 +172,78 @@ def delete_ensemble(ensemble_id):
         flash(f"Vyskytla se chyba: {e}", "danger")
 
 
+def ensemble_activities(ensemble_id):
+    ensemble = Ensemble.query.filter_by(id=ensemble_id).first()
+    activities = []
+
+    # Fetch assignments
+    ensemble_assignments = EnsembleAssignment.query.filter_by(ensemble_id=ensemble_id).all()
+    student_assignments = StudentAssignment.query.filter(
+        StudentAssignment.ensemble_player_id.in_([player.id for player in ensemble.ensemble_players])
+    ).all()
+    teacher_assignments = TeacherAssignment.query.filter_by(ensemble_id=ensemble_id).all()
+
+    # Combine all assignments
+    combined_assignments = list(chain(ensemble_assignments, student_assignments, teacher_assignments))
+    sorted_assignments = sorted(
+        combined_assignments,
+        key=lambda entry: entry.created if entry.created is not None else datetime.min,
+        reverse=True  # Sorts in descending order
+    )
+
+    for a in sorted_assignments:
+        if isinstance(a, EnsembleAssignment):
+            if a.created:
+                activities.append({
+                    'date': a.created,
+                    'type': 'composition',
+                    'details': Markup('Zadána skladba <b>{}: {}</b>').format(a.composition.composer_full_name, a.composition.name)
+                })
+            if a.ended:
+                activities.append({
+                    'date': a.ended,
+                    'type': 'composition',
+                    'details': Markup('Ukončeno studium skladby <b>{}: {}</b>').format(a.composition.composer_full_name, a.composition.name)
+                })
+        elif isinstance(a, StudentAssignment):
+            if a.created:
+                activities.append({
+                    'date': a.created,
+                    'type': 'student',
+                    'details': (
+                        Markup('Přiřazen student <b>{} {}, {}</b>').format(a.student.first_name, a.student.last_name, a.student.instrument.name)
+                        if not a.student.guest else
+                        Markup('Přiřazen host <b>{} {}, {}</b>').format(a.student.first_name, a.student.last_name, a.student.instrument.name))
+                })
+            if a.ended:
+                activities.append({
+                    'date': a.ended,
+                    'type': 'student',
+                    'details': (
+                        Markup('Odebrán student <b>{} {}, {}</b>').format(a.student.first_name, a.student.last_name, a.student.instrument.name)
+                        if not a.student.guest else
+                        Markup('Odebrán host <b>{} {}, {}</b>').format(a.student.first_name, a.student.last_name,
+                                                                       a.student.instrument.name))
+                })
+        elif isinstance(a, TeacherAssignment):
+            if a.created:
+                activities.append({
+                    'date': a.created,
+                    'type': 'teacher',
+                    'details': Markup('Přiřazen profesor <b>{}</b>').format(a.teacher.name)
+                })
+            if a.ended:
+                activities.append({
+                    'date': a.ended,
+                    'type': 'teacher',
+                    'details': Markup('Odebrán profesor <b>{}</b>').format(a.teacher.name)
+                })
+
+    # Sort activities by date
+    activities.sort(key=lambda x: x['date'], reverse=True)  # In-place sorting
+    return activities  # Return the sorted list
+
+
 @ensemble_bp.route('/')
 def show_ensembles():
     ensembles = Ensemble.query.all()
@@ -177,14 +252,32 @@ def show_ensembles():
 
 @ensemble_bp.route('/detail/<int:ensemble_id>')
 def ensemble_detail(ensemble_id):
+    instrument_form = InstrumentSelectForm()
     ensemble = Ensemble.query.filter_by(id=ensemble_id).first()
-    return render_template('ensemble_detail.html', ensemble=ensemble)
+    ensemble_activities_list = ensemble_activities(ensemble_id)
+
+    return render_template('ensemble_detail.html',
+                           ensemble=ensemble,
+                           ensemble_activities_list=ensemble_activities_list,
+                           instrument_form=instrument_form)
 
 
 @ensemble_bp.route('/delete/<int:ensemble_id>', methods=["POST"])
 def ensemble_delete(ensemble_id):
     delete_ensemble(ensemble_id)
     return redirect(url_for('ensemble.show_ensembles'))
+
+
+@ensemble_bp.route('/player/<int:player_id>/assign_instrument', methods=['POST'])
+def assign_player_instrument(player_id):
+    form = InstrumentSelectForm()
+    player = EnsemblePlayer.query.filter_by(id=player_id).first()
+    if form.validate_on_submit():
+        player.instrument_id = form.instrument_id.data  # Use the form data
+        db.session.commit()
+        return redirect(url_for('ensemble.ensemble_detail', ensemble_id=player.ensemble_id))
+    # Handle invalid form (optional)
+    return redirect(url_for('ensemble.ensemble_detail', ensemble_id=player.ensemble_id))
 
 
 @ensemble_bp.route('/<int:ensemble_id>/assign_composition/', methods=["GET", "POST"])
@@ -327,12 +420,15 @@ def add_ensemble_player(ensemble_id):
 def delete_ensemble_player(ensemble_player_id):
     if request.method == "POST":
         ensemble_player = EnsemblePlayer.query.filter_by(id=ensemble_player_id).first()
-        ensemble_id = ensemble_player.ensemble_id
+        ensemble = Ensemble.query.filter_by(id=ensemble_player_id).first()
+        student_assignments = StudentAssignment.query.filter_by(ensemble_player_id=ensemble_player_id).all()
+        for assignment in student_assignments:
+            db.session.delete(assignment)
         db.session.delete(ensemble_player)
         db.session.commit()
-        rename_ensemble(ensemble_id)
+        rename_ensemble(ensemble.id)
         print("Ensemble player deleted")
-        return redirect(url_for("ensemble.ensemble_detail", ensemble_id=ensemble_id))
+        return redirect(url_for("ensemble.ensemble_detail", ensemble_id=ensemble.id))
 
 
 @ensemble_bp.route('wizard')

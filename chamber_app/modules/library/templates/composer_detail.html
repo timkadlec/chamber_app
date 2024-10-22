@@ -25,6 +25,9 @@
         <div class="col-md-12">
             {% if not composer.compositions %}
                 <h3>Pro daného autora nejsou k dispozici zatím žádné kompozice</h3>
+                <a href="{{ url_for('library.add_composition', composer_id=composer.id) }}">
+                <button class="btn btn-primary">Přidat skladbu</button>
+                </a>
             {% else %}
                 <h3>Dílo</h3>
 

@@ -25,7 +25,7 @@ class TeacherAssignment(db.Model):
     teacher = db.relationship('Teacher', back_populates='assignments')
     ensemble = db.relationship('chamber_app.models.ensemble.Ensemble', back_populates="teacher_assignments")
 
-    started = db.Column(db.DateTime, default=datetime.utcnow)
+    created = db.Column(db.DateTime, default=datetime.utcnow)
     ended = db.Column(db.DateTime)
 
 

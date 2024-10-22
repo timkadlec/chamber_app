@@ -18,8 +18,10 @@ class Ensemble(db.Model):
     teacher_assignments = relationship("chamber_app.models.structure.TeacherAssignment", back_populates="ensemble")
     assignments = relationship("EnsembleAssignment", back_populates="ensemble")
     # Relationship to Students
-    ensemble_players = relationship('EnsemblePlayer', back_populates='ensemble')
-
+    ensemble_players = relationship(
+        'EnsemblePlayer',
+        back_populates='ensemble',
+    )
     created = db.Column(db.DateTime, default=datetime.utcnow)
     ended = db.Column(db.DateTime)
 

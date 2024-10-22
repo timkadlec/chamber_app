@@ -93,7 +93,8 @@
                                               action="{{ url_for('ensemble.unassign_teacher', teacher_assignment_id=a.id) }}">
                                             <button class="btn btn-sm btn-outline-danger">
                                                 <i class="fas fa-minus me-1"></i>
-                                                Odebrat</button>
+                                                Odebrat
+                                            </button>
                                         </form>
                                     </div>
                                 {% endif %}
@@ -125,7 +126,7 @@
             <table class="table table-striped align-middle">
                 <thead>
                 <tr>
-                    <th scope="col">Student</th>
+                    <th scope="col">Jméno</th>
                     <th scope="col">Nástroj</th>
                     <th scope="col">Ročník</th>
                     <th scope="col">Katedra</th>
@@ -146,12 +147,69 @@
                             {% if player.active_student %}
                                 <b>{{ player.active_student.instrument.name }}</b>
                             {% else %}
-                                {{ player.instrument.name if player.instrument.name else "Není vyplněn nástroj hráče" }}
+                                {% if player.instrument.name %}
+                                    {{ player.instrument.name }}
+                                {% else %}
+                                    <!-- Button trigger modal -->
+                                    <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal"
+                                            data-bs-target="#exampleModalCenter">
+                                        Přiřadit nástroj
+                                    </button>
+
+                                    <!-- Add Player Instrument Modal -->
+                                    <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog"
+                                         aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered" role="document">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="exampleModalLongTitle">Přidat nástroj
+                                                        hráči</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                            aria-label="Close"></button>
+                                                </div>
+                                                <form method="POST"
+                                                      action="{{ url_for('ensemble.assign_player_instrument', player_id=player.id) }}">
+
+                                                    {{ instrument_form.hidden_tag() }}
+                                                    <!-- To include CSRF protection -->
+
+                                                    <div class="modal-body">
+                                                        <div class="mb-3">
+                                                            {{ instrument_form.instrument_id.label(class="form-label") }}
+                                                            {{ instrument_form.instrument_id(class="form-select") }}
+                                                            <!-- Bootstrap Select Field -->
+                                                            {% if instrument_form.instrument_id.errors %}
+                                                                <div class="invalid-feedback">
+                                                                    {% for error in instrument_form.instrument_id.errors %}
+                                                                        {{ error }}
+                                                                    {% endfor %}
+                                                                </div>
+                                                            {% endif %}
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary"
+                                                                data-bs-dismiss="modal">Zavřít
+                                                        </button>
+                                                        <button type="submit" class="btn btn-primary">Uložit změny
+                                                        </button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                {% endif %}
                             {% endif %}
                         </td>
                         <td>
                             {% if player.active_student %}
-                                <b>{{ player.active_student.class_year.number }}. {{ player.active_student.study_program.name }}</b>
+                                {% if not player.active_student.guest %}
+                                    <b>{{ player.active_student.class_year.number }}. {{ player.active_student.study_program.name }}</b>
+                                {% else %}
+                                    Host
+                                {% endif %}
                             {% endif %}
                         </td>
                         <td>
@@ -165,21 +223,29 @@
                                     <!-- Remove Student -->
                                     <form method="POST" class="d-inline"
                                           action="{{ url_for('ensemble.unassign_student', active_student_assignment=player.active_student_assignment.id) }}">
-                                        <button class="btn btn-danger btn-sm">
-                                            <i class="fas fa-trash me-1"></i> Odebrat studenta
-                                        </button>
+                                        {% if not player.active_student.guest %}
+                                            <button class="btn btn-danger btn-sm">
+                                                <i class="fas fa-trash me-1"></i> Odebrat studenta
+                                            </button>
+                                        {% else %}
+                                            <button class="btn btn-danger btn-sm">
+                                                <i class="fas fa-trash me-1"></i> Odebrat hosta
+                                            </button>
+                                        {% endif %}
                                     </form>
                                 {% else %}
-                                    <!-- Assign Student -->
-                                    <a href="{{ url_for('ensemble.assign_student', ensemble_player_id=player.id) }}"
-                                       class="btn btn-success btn-sm">
-                                        <i class="fas fa-plus me-1"></i> Přiřadit studenta
-                                    </a>
-                                     <!-- Assign Guest -->
-                                    <a href="{{ url_for('ensemble.assign_guest', ensemble_player_id=player.id) }}"
-                                       class="btn btn-success btn-sm">
-                                        <i class="fas fa-plus me-1"></i> Přiřadit hosta
-                                    </a>
+                                    {% if player.instrument.name %}
+                                        <!-- Assign Student -->
+                                        <a href="{{ url_for('ensemble.assign_student', ensemble_player_id=player.id) }}"
+                                           class="btn btn-success btn-sm">
+                                            <i class="fas fa-plus me-1"></i> Přiřadit studenta
+                                        </a>
+                                        <!-- Assign Guest -->
+                                        <a href="{{ url_for('ensemble.assign_guest', ensemble_player_id=player.id) }}"
+                                           class="btn btn-success btn-sm">
+                                            <i class="fas fa-plus me-1"></i> Přiřadit hosta
+                                        </a>
+                                    {% endif %}
                                 {% endif %}
 
                                 <!-- Delete Ensemble Player -->
@@ -208,5 +274,23 @@
             </table>
         </div>
     </div>
+
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Aktivity</h5>
+                </div>
+                <div class="card-body">
+                    {% for activity in ensemble_activities_list %}
+                        <p>{{ activity.date }} {{ activity.details }}</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+
 
 {% endblock %}

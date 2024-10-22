@@ -62,3 +62,15 @@ class AddGuestForm(FlaskForm):
 
     def populate_instruments(self, obj):
         self.instrument_id.choices = [(i.id, i.name) for i in Instrument.query.all()]
+
+
+class InstrumentSelectForm(FlaskForm):
+    instrument_id = SelectField('Nástroj', coerce=int, validators=[DataRequired()])
+
+    def __init__(self, *args, **kwargs):
+        super(InstrumentSelectForm, self).__init__(*args, **kwargs)
+        # Dynamically populate choices from the database
+        self.populate_instruments(self)
+
+    def populate_instruments(self, obj):
+        self.instrument_id.choices = [(i.id, i.name) for i in Instrument.query.all()]

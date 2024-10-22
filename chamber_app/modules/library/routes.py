@@ -17,6 +17,15 @@ from werkzeug.utils import secure_filename
 from urllib.parse import urlencode
 
 
+def get_unique_musical_periods():
+    # Query for distinct musical periods
+    unique_periods = db.session.query(Composer.musical_period).distinct().all()
+
+    # Extract the periods from the query result
+    periods_list = [period[0] for period in unique_periods if period[0] is not None]
+
+    return periods_list
+
 
 @library_bp.route("/composers")
 def show_composers():
@@ -171,10 +180,10 @@ def show_compositions():
         # Join with players and instruments, filter by selected instruments
         query = (
             query.join(Composition.players)
-                 .join(Player.instrument)
-                 .filter(Instrument.id.in_(selected_instruments))
-                 .group_by(Composition.id)
-                 .having(db.func.count(db.distinct(Instrument.id)) == num_selected_instruments)
+            .join(Player.instrument)
+            .filter(Instrument.id.in_(selected_instruments))
+            .group_by(Composition.id)
+            .having(db.func.count(db.distinct(Instrument.id)) == num_selected_instruments)
         )
 
     # Execute the query and get results
@@ -197,6 +206,9 @@ def show_compositions():
 def add_composition():
     form_composition = CompositionForm()
     form_composer = ComposerForm()
+    selected_composer = int(request.args.get('composer_id'))
+    if selected_composer:
+        form_composition.composer_id.data = selected_composer
     if form_composition.validate_on_submit():
         new_composition = Composition(
             name=form_composition.name.data,
