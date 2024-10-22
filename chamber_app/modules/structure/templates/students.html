@@ -58,39 +58,24 @@
     </div>
 
     <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const dataTable = new simpleDatatables.DataTable("#datatableStudents", {
-            labels: {
-                placeholder: "Hledat",
-                perPage: "záznamů na stránku",
-                noRows: "Žádné záznamy k zobrazení",
-                info: "Zobrazeno {start} až {end} z {rows} záznamů",
-                loading: "Načítání...",
-                next: "Další",
-                previous: "Předchozí",
-            },
-            perPage: 10,
-            perPageSelect: [10, 20, 30, 40, 50],
-            searchable: true,
-        });
+        document.addEventListener("DOMContentLoaded", function () {
+            const dataTable = new simpleDatatables.DataTable("#datatableStudents", {
+                labels: {
+                    placeholder: "Hledat",
+                    perPage: "záznamů na stránku",
+                    noRows: "Žádné záznamy k zobrazení",
+                    info: "Zobrazeno {start} až {end} z {rows} záznamů",
+                    loading: "Načítání...",
+                    next: "Další",
+                    previous: "Předchozí",
+                },
+                perPage: 10,
+                perPageSelect: [10, 20, 30, 40, 50],
+                searchable: true,
+            });
 
-        // Apply styles based on data-status attribute
-        const rows = document.querySelectorAll("#datatableStudents table tbody tr");
-        rows.forEach(row => {
-            const status = row.getAttribute("data-status"); // Get the status from the attribute
-
-            if (status === "studuje") {
-                row.style.backgroundColor = "#d4edda"; // Light green for active status
-            } else if (status === "rozloženo") {
-                row.style.backgroundColor = "#f8d7da"; // Light red for inactive status
-            } else if (status === "Graduated") {
-                row.style.backgroundColor = "#fff3cd"; // Light yellow for graduated status
-            } else {
-                row.style.backgroundColor = "#e2e3e5"; // Default grey for others
-            }
         });
-    });
-</script>
+    </script>
 
 
 

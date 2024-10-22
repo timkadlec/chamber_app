@@ -1,6 +1,7 @@
 from chamber_app.extensions import db
 from sqlalchemy.orm import relationship
 from datetime import datetime
+import math
 
 
 class Teacher(db.Model):
@@ -8,11 +9,24 @@ class Teacher(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(256), unique=True, nullable=False)
+    employment_time = db.Column(db.Float)
     academic_position_id = db.Column(db.Integer, db.ForeignKey('academic_positions.id'))
 
     academic_position = db.relationship('AcademicPosition', backref='teachers')
 
     assignments = db.relationship('TeacherAssignment', back_populates='teacher')
+
+    @property
+    def active_assignments(self):
+        return [assignment for assignment in self.assignments if assignment.ended is None]
+
+    @property
+    def required_hours(self):
+        if self.employment_time is None:
+            return "Bez úvazku nelze vypočítat"  # Return the message as a string
+        full_time = self.academic_position.full_time
+        required_time = self.employment_time * full_time
+        return math.ceil(required_time)
 
 
 class TeacherAssignment(db.Model):
@@ -94,6 +108,10 @@ class Student(db.Model):
     study_program = relationship("StudyProgram", backref='students', lazy=True)
     class_year = relationship("ClassYear", backref='students', lazy=True)
     student_status = relationship("StudentStatus", backref='students', lazy=True)
+
+    @property
+    def active_assignments(self):
+        return [assignment for assignment in self.assignments if assignment.ended is None]
 
 
 class StudentAssignment(db.Model):
