@@ -18,6 +18,7 @@ class Teacher(db.Model):
 class TeacherAssignment(db.Model):
     __tablename__ = "teacher_assignments"
     id = db.Column(db.Integer, primary_key=True)
+    hour_donation = db.Column(db.Integer)
 
     ensemble_id = db.Column(db.Integer, db.ForeignKey('ensembles.id'), nullable=False)
     teacher_id = db.Column(db.Integer, db.ForeignKey('teachers.id'), nullable=False)

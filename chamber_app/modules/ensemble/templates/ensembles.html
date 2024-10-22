@@ -85,8 +85,8 @@
                         </td>
                         <td>
                             {% if ensemble.active_teacher_assignments %}
-                                {% for teacher in ensemble.active_teacher_assignments %}
-                                    {{ teacher.name }}{% if not loop.last %}, {% endif %}
+                                {% for a in ensemble.active_teacher_assignments %}
+                                    {{ a.teacher.name }} ({{ a.hour_donation }}h){% if not loop.last %}, {% endif %}
                                 {% endfor %}
                             {% endif %}
                         </td>
