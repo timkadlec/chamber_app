@@ -11,8 +11,10 @@ setup(
     version="0.1",  # Your project version
     packages=find_packages(),  # Automatically find packages in the project
     include_package_data=True,  # Include files from MANIFEST.in
-    install_requires=[         # Add required packages from requirements.txt
-        line.strip() for line in open("requirements.txt").readlines() if not line.startswith('#')
+    install_requires=[
+        "Flask>=3.0.3",
+        "SQLAlchemy>=2.0.35",
+        # add other dependencies here
     ],
     entry_points={
         'console_scripts': [

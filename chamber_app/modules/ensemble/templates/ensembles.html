@@ -91,13 +91,42 @@
                             {% endif %}
                         </td>
                         <td class="text-end">
-                            <form method="POST"
-                                  action="{{ url_for('ensemble.ensemble_delete', ensemble_id=ensemble.id) }}"
-                                  class="d-inline">
-                                <button class="btn btn-sm btn-danger">
-                                    <i class="fas fa-trash"></i> Odebrat
-                                </button>
-                            </form>
+                            <button class="btn btn-sm btn-danger" data-bs-toggle="modal"
+                                    data-bs-target="#deleteEnsembleModal">
+                                <i class="fas fa-trash"></i> Smazat
+                            </button>
+
+                            <!-- Modal -->
+                            <div class="modal fade" id="deleteEnsembleModal" tabindex="-1"
+                                 aria-labelledby="deleteEnsembleModalLabel"
+                                 aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h1 class="modal-title fs-5" id="exampleModalLabel">Smazat komorní soubor</h1>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                    aria-label="Close"></button>
+                                        </div>
+                                        <form method="POST"
+                                              action="{{ url_for('ensemble.ensemble_delete', ensemble_id=ensemble.id) }}"
+                                              class="d-inline">
+                                            <div class="modal-body">
+                                                Jste si jistí, že chcete <b>kompletně vymazat komorní soubor {{ ensemble.name }}</b>?
+                                                Touto akcí vymažete kompletně záznamy profesorů o jejich přidělení, stejně tak historii studentů a archiv studovaných skladeb.
+                                            </div>
+
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                                    Rozmyslel jsem si to
+                                                </button>
+                                                <button type="submit" class="btn btn-danger"><i class="fas fa-skull-crossbones me-2"></i>Jsem si jistý</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+
+
                         </td>
                     </tr>
                 {% endfor %}

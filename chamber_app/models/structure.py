@@ -21,12 +21,37 @@ class Teacher(db.Model):
         return [assignment for assignment in self.assignments if assignment.ended is None]
 
     @property
+    def active_assignments_hours(self):
+        active_hours = 0
+        for a in self.active_assignments:
+            active_hours += a.hour_donation
+        return active_hours
+
+    @property
     def required_hours(self):
         if self.employment_time is None:
             return "Bez úvazku nelze vypočítat"  # Return the message as a string
         full_time = self.academic_position.full_time
         required_time = self.employment_time * full_time
         return math.ceil(required_time)
+
+    @property
+    def remaining_hours(self):
+        if self.employment_time is None:
+            return "Bez úvazku nelze vypočítat"  # Return the message as a string
+        active_assignments_hours = self.active_assignments_hours
+        needed_hours = self.required_hours
+        required_time = needed_hours - active_assignments_hours
+        return required_time
+
+    @property
+    def employment_time_fulfilment(self):
+        if self.employment_time and self.academic_position:
+            percentage = self.required_hours / 100 * self.active_assignments_hours
+            return percentage
+        else:
+            return 0
+
 
 
 class TeacherAssignment(db.Model):

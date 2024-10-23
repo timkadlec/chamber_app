@@ -1,9 +1,9 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, DateField, SubmitField, IntegerField, SelectField, FloatField, HiddenField, \
-    PasswordField, EmailField
+    PasswordField, EmailField, DecimalField
 from wtforms.validators import DataRequired, Optional, ValidationError, NumberRange, Length, EqualTo
 from chamber_app.models.library import Composer, Instrument
-from chamber_app.models.structure import Nationality, Teacher
+from chamber_app.models.structure import Nationality, Teacher, AcademicPosition
 from chamber_app.models.ensemble import Ensemble
 
 
@@ -123,3 +123,18 @@ class LoginForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
     password = PasswordField('Password', validators=[DataRequired()])
     submit = SubmitField('Login')
+
+
+class EditTeacherForm(FlaskForm):
+    name = StringField('Jméno pedagoga', validators=[DataRequired(), Length(min=1, max=150)])
+    academic_position_id = SelectField('Akademický pozice', coerce=int, validators=[DataRequired()])
+    employment_time = FloatField("Úvazek", validators=[Optional()])  # Optional to avoid issues with empty fields
+    submit = SubmitField('Uložit')
+
+    def __init__(self, *args, **kwargs):
+        super(EditTeacherForm, self).__init__(*args, **kwargs)
+        # Dynamically populate choices from the database
+        self.populate_academic_positions(self)
+
+    def populate_academic_positions(self, obj):
+        self.academic_position_id.choices = [(p.id, p.name) for p in AcademicPosition.query.all()]

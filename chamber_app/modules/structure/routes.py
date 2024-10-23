@@ -3,7 +3,7 @@ from chamber_app.models.structure import Student, Teacher, ClassYear, Department
 from chamber_app.models.library import Instrument
 from flask import request, render_template, flash, redirect, url_for
 from urllib.parse import urlencode
-from chamber_app.forms import AddGuestForm
+from chamber_app.forms import AddGuestForm, EditTeacherForm
 from chamber_app.extensions import db
 
 
@@ -113,10 +113,56 @@ def add_guest():
 @structure_bp.route('/teachers')
 def show_teachers():
     teachers = Teacher.query.order_by(Teacher.name).all()
-    return render_template("teachers.html", teachers=teachers)
+    edit_teacher_form = EditTeacherForm()
+    return render_template("teachers.html", teachers=teachers,
+                           edit_teacher_form=edit_teacher_form)
 
 
 @structure_bp.route("teacher_detail/<int:teacher_id>")
 def teacher_detail(teacher_id):
     teacher = Teacher.query.filter_by(id=teacher_id).first()
-    return render_template("teacher_detail.html", teacher=teacher)
+    edit_teacher_form = EditTeacherForm()
+
+    # Pre-filling the form with the teacher's current details
+    if teacher:
+        edit_teacher_form.name.data = teacher.name
+        edit_teacher_form.academic_position_id.data = teacher.academic_position_id
+        edit_teacher_form.employment_time.data = teacher.employment_time
+
+    return render_template("teacher_detail.html", teacher=teacher, edit_teacher_form=edit_teacher_form)
+
+
+@structure_bp.route('teacher/<int:teacher_id>/edit', methods=['POST'])
+def teacher_edit(teacher_id):
+    # Create the form instance with submitted data
+    edit_teacher_form = EditTeacherForm()
+    # Check if the form is submitted and validated
+
+    teacher = Teacher.query.filter_by(id=teacher_id).first()
+    if teacher:
+        # Update teacher fields with submitted form data
+        teacher.name = edit_teacher_form.name.data
+        teacher.academic_position_id = edit_teacher_form.academic_position_id.data
+        print(edit_teacher_form.employment_time.data)
+        teacher.employment_time = float(edit_teacher_form.employment_time.data)
+
+        # Commit changes to the database
+        db.session.commit()
+        flash("Pedagog úspěšně aktualizován", "success")
+
+        return redirect(url_for('structure.teacher_detail', teacher_id=teacher_id))
+
+
+@structure_bp.route('teacher/add', methods=['POST'])
+def teacher_add():
+    edit_teacher_form = EditTeacherForm()
+    teacher = Teacher(
+        name=edit_teacher_form.name.data,
+        academic_position_id=edit_teacher_form.academic_position_id.data,
+        employment_time=float(edit_teacher_form.employment_time.data)
+    )
+    db.session.add(teacher)
+    db.session.commit()
+    flash("Pedagog úspěšně přidán", "success")
+
+    return redirect(url_for('structure.teacher_detail', teacher_id=teacher.id))

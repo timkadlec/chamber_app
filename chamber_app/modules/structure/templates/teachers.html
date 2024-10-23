@@ -5,7 +5,10 @@
     <div class="row">
         <p>Místo, kde můžete prohlížet a vytvářet profesory</p>
     </div>
-
+    <div class="row mb-2">
+        <!-- navbar -->
+        {% include "/elements/teachers_navbar.html" %}
+    </div>
 
     <div class="card mb-4">
         <div class="card-header">
@@ -36,7 +39,7 @@
                                 {{ teacher.academic_position.shortcut if teacher.academic_position.shortcut }} {{ teacher.name }}
                             </a>
                         </td>
-                        <td>{{ teacher.employment_time if teacher.employment_time else "Úvazek není vyplněn"}}</td>
+                        <td>{{ teacher.employment_time if teacher.employment_time else "Úvazek není vyplněn" }}</td>
                     </tr>
                 {% endfor %}
                 </tbody>

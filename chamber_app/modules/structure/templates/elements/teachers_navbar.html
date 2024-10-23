@@ -1,0 +1,52 @@
+<nav class="navbar navbar-expand-lg">
+    <div class="container-fluid">
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <button class="btn btn-primary me-2" type="button" data-bs-toggle="modal"
+                    data-bs-target="#AddTeacherModal">
+                <i class="fas fa-plus me-2"></i>Přidat pedagoga
+            </button>
+        </div>
+    </div>
+</nav>
+
+<!-- Add Guest Modal -->
+<div class="modal fade" id="AddTeacherModal" tabindex="-1" aria-labelledby="AddTeacherModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST"
+                  action="{{ url_for('structure.teacher_add') }}">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="EditTeacherModalLabel">Upravit
+                        pedagoga</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Teacher Name -->
+                    <div class="mb-3">
+                        <label for="teacherName" class="form-label">Jméno pedagoga</label>
+                        {{ edit_teacher_form.name(class="form-control", id="teacherName") }}
+                    </div>
+                    <!-- Academic Position -->
+                    <div class="mb-3">
+                        <label for="academicPosition" class="form-label">Akademický
+                            pozice</label>
+                        {{ edit_teacher_form.academic_position_id(class="form-select", id="academicPosition") }}
+                    </div>
+                    <!-- Employment Time -->
+                    <div class="mb-3">
+                        <label for="employmentTime" class="form-label">Úvazek</label>
+                        {{ edit_teacher_form.employment_time(class="form-control", id="employmentTime", type="number", step="0.01", min="0.1", max="1") }}
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        Close
+                    </button>
+                    <button type="submit" class="btn btn-primary">Save changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

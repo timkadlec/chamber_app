@@ -1,79 +1,77 @@
 {% extends "index.html" %}
 
 {% block content %}
-    <h1 class="mt-4">Dashboard</h1>
-    <ol class="breadcrumb mb-4">
-        <li class="breadcrumb-item active">Dashboard</li>
-    </ol>
+    <h1 class="mt-4 mb-4">Nástěnka</h1>
     <div class="row">
+        <!-- Existing cards -->
         <div class="col-xl-3 col-md-6">
             <div class="card bg-primary text-white mb-4">
-                <div class="card-body">Primary Card</div>
+                <div class="card-body"><i class="fas fa-people-group me-2"></i>Komorní soubory</div>
                 <div class="card-footer d-flex align-items-center justify-content-between">
-                    <a class="small text-white stretched-link" href="#">View Details</a>
+                    <a class="small text-white stretched-link" href="{{ url_for('ensemble.show_ensembles') }}">Zobrazit</a>
                     <div class="small text-white"><i class="fas fa-angle-right"></i></div>
                 </div>
             </div>
         </div>
         <div class="col-xl-3 col-md-6">
             <div class="card bg-warning text-white mb-4">
-                <div class="card-body">Warning Card</div>
+                <div class="card-body"><i class="fas fa-graduation-cap me-2"></i>Studenti</div>
                 <div class="card-footer d-flex align-items-center justify-content-between">
-                    <a class="small text-white stretched-link" href="#">View Details</a>
+                    <a class="small text-white stretched-link" href="{{ url_for('structure.show_students') }}">Zobrazit</a>
                     <div class="small text-white"><i class="fas fa-angle-right"></i></div>
                 </div>
             </div>
         </div>
         <div class="col-xl-3 col-md-6">
             <div class="card bg-success text-white mb-4">
-                <div class="card-body">Success Card</div>
+                <div class="card-body"><i class="fas fa-person-chalkboard me-2"></i>Pedagogové</div>
                 <div class="card-footer d-flex align-items-center justify-content-between">
-                    <a class="small text-white stretched-link" href="#">View Details</a>
-                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
-                </div>
-            </div>
-        </div>
-        <div class="col-xl-3 col-md-6">
-            <div class="card bg-danger text-white mb-4">
-                <div class="card-body">Danger Card</div>
-                <div class="card-footer d-flex align-items-center justify-content-between">
-                    <a class="small text-white stretched-link" href="#">View Details</a>
+                    <a class="small text-white stretched-link" href="{{ url_for('structure.show_teachers') }}">Zobrazit</a>
                     <div class="small text-white"><i class="fas fa-angle-right"></i></div>
                 </div>
             </div>
         </div>
     </div>
-    <div class="row">
-        <div class="col-xl-6">
-            <div class="card mb-4">
-                <div class="card-header">
-                    <i class="fas fa-chart-area me-1"></i>
-                    Area Chart Example
-                </div>
-                <div class="card-body">
-                    <canvas id="myAreaChart" width="100%" height="40"></canvas>
-                </div>
-            </div>
+
+    <!-- Updates Section -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-bullhorn me-1"></i>
+            Aktuální informace
         </div>
-        <div class="col-xl-6">
-            <div class="card mb-4">
-                <div class="card-header">
-                    <i class="fas fa-chart-bar me-1"></i>
-                    Bar Chart Example
-                </div>
-                <div class="card-body">
-                    <canvas id="myBarChart" width="100%" height="40"></canvas>
-                </div>
-            </div>
+        <div class="card-body">
+            <ul class="list-group">
+                <li class="list-group-item">
+                    <strong>V přípravě:</strong> Karta studenta - náhled souborů studentů.
+                </li>
+                <li class="list-group-item">
+                    <strong>V přípravě:</strong> Zadávání, odkládání skladeb, historie vystoupení souboru, připadně zkoušky?.
+                </li>
+                <li class="list-group-item">
+                    <strong>V přípravě:</strong> Možnost zobrazit detailní seznam nástrojů pro každého studenta.
+                </li>
+                <li class="list-group-item">
+                    <strong>Hotovo:</strong> Zěmna jména pedagoga, pvazku, funkce a vytvoření nového pedagoga.
+                </li>
+                <li class="list-group-item">
+                    <strong>Hotovo:</strong> Úvazky pedagogů, karta pedagoga s proklikem, výpočet plnění úvazku.
+                </li>
+                <li class="list-group-item">
+                    <strong>Hotovo:</strong> Historie přiřazených pedagogů a studentů.
+                </li>
+                <li class="list-group-item">
+                    <strong>Hotovo:</strong> Katalog hostů, možnost přiřadit ke komornímu souboru.
+                </li>
+            </ul>
         </div>
     </div>
+
+    <!-- Existing table of students without an ensemble -->
     <div class="card mb-4">
         <div class="card-header">
             <i class="fas fa-table me-1"></i>
             Seznam studentů bez komorního souboru
         </div>
-
-        <!-- Tabulka Basic -->
         <div class="card-body">
             <table id="datatableStudents">
                 <thead>
@@ -102,6 +100,7 @@
             </table>
         </div>
     </div>
+
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             const dataTable = new simpleDatatables.DataTable("#datatableStudents", {
@@ -118,7 +117,6 @@
                 perPageSelect: [10, 20, 30, 40, 50],
                 searchable: true,
             });
-
         });
     </script>
 {% endblock %}

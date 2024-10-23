@@ -1,7 +1,7 @@
 {% extends "index.html" %}
 
 {% block content %}
-    <h1 class="mt-4">Karta pedagoga {{ teacher.name }}</h1>
+    <h1 class="mt-4">Karta pedagoga: {{ teacher.name }}</h1>
     <div class="row">
         <p>Místo, kde můžete prohlížet profesora</p>
     </div>
@@ -10,20 +10,72 @@
         <div class="col-md-6">
             <div class="card">
                 <div class="card-body">
-                    <h5 class="card-title">{{ teacher.name }}</h5>
+                    <div class="d-flex mb-3 justify-content-between align-items-center">
+                        <h5 class="card-title">{{ teacher.name }}</h5>
+                        <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal"
+                                data-bs-target="#EditTeacherModal">
+                            <i class="fas fa-edit"></i> Editovat
+                        </button>
+                    </div>
+
+                    <!-- Modal -->
+                    <div class="modal fade" id="EditTeacherModal" tabindex="-1" aria-labelledby="EditTeacherModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <form method="POST" action="{{ url_for('structure.teacher_edit', teacher_id=teacher.id) }}">
+                                    <div class="modal-header">
+                                        <h1 class="modal-title fs-5" id="EditTeacherModalLabel">Upravit pedagoga</h1>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="mb-3">
+                                            <label for="teacherName" class="form-label">Jméno pedagoga</label>
+                                            {{ edit_teacher_form.name(class="form-control", id="teacherName") }}
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="academicPosition" class="form-label">Akademická pozice</label>
+                                            {{ edit_teacher_form.academic_position_id(class="form-select", id="academicPosition") }}
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="employmentTime" class="form-label">Úvazek</label>
+                                            {{ edit_teacher_form.employment_time(class="form-control", id="employmentTime", type="number", step="0.01", min="0.1", max="1") }}
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Zavřít</button>
+                                        <button type="submit" class="btn btn-primary">Uložit změny</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
                     <h6 class="card-subtitle mb-2 text-body-secondary">
-                        <strong>Akademická
-                            pozice:</strong> {{ teacher.academic_position.name if teacher.academic_position.name else "Není vyplněna akademická pozice" }}
+                        <strong>Akademická pozice:</strong> {{ teacher.academic_position.name or "Není vyplněna akademická pozice" }}
                     </h6>
                     <h6 class="card-subtitle mb-2 text-body-secondary">
-                        <strong>Úvazek:</strong> {{ teacher.employment_time if teacher.employment_time else "Úvazek není vyplněn" }}
+                        <strong>Úvazek:</strong> {{ teacher.employment_time or "Úvazek není vyplněn" }}
                     </h6>
                     <h6 class="card-subtitle mb-2 text-body-secondary">
                         <strong>Hodin do úvazku:</strong> {{ teacher.required_hours }}
                     </h6>
-                    <p class="card-text">
-
-                    </p>
+                    <h6 class="card-subtitle mb-2 text-body-secondary">
+                        <strong>Přidělených hodin:</strong> {{ teacher.active_assignments_hours }}
+                    </h6>
+                    <h6 class="card-subtitle mb-2 text-body-secondary">
+                        <strong>Zbývá přidělit hodin:</strong> {{ teacher.remaining_hours }}
+                    </h6>
+                    <h6 class="card-subtitle mb-2 text-body-secondary">
+                        <strong>Plnění úvazku:</strong>
+                    </h6>
+                    <div class="progress mb-3">
+                        <div class="progress-bar" role="progressbar"
+                             style="width: {{ teacher.employment_time_fulfilment }}%;"
+                             aria-valuenow="{{ teacher.employment_time_fulfilment }}" aria-valuemin="0"
+                             aria-valuemax="100">
+                            {{ teacher.employment_time_fulfilment }}%
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -31,13 +83,11 @@
 
     <div class="card mb-4">
         <div class="card-header">
-            <i class="fas fa-table me-1"></i>
-            Seznam úvazků
+            <i class="fas fa-table me-1"></i> Seznam úvazků
         </div>
 
-        <!-- Tabulka Basic -->
         <div class="card-body">
-            <table id="datatableStudents">
+            <table id="datatableStudents" class="table">
                 <thead>
                 <tr>
                     <th>Jméno souboru</th>
@@ -61,6 +111,7 @@
             </table>
         </div>
     </div>
+
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             const dataTable = new simpleDatatables.DataTable("#datatableStudents", {
