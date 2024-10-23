@@ -1,6 +1,7 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, DateField, SubmitField, IntegerField, SelectField, FloatField, HiddenField
-from wtforms.validators import DataRequired, Optional, ValidationError, NumberRange, Length
+from wtforms import StringField, DateField, SubmitField, IntegerField, SelectField, FloatField, HiddenField, \
+    PasswordField, EmailField
+from wtforms.validators import DataRequired, Optional, ValidationError, NumberRange, Length, EqualTo
 from chamber_app.models.library import Composer, Instrument
 from chamber_app.models.structure import Nationality, Teacher
 from chamber_app.models.ensemble import Ensemble
@@ -106,3 +107,19 @@ class TeacherAssignmentForm(FlaskForm):
     def populate_hour_donation(self, ensemble_id):
         ensemble = Ensemble.query.get(ensemble_id)
         self.hour_donation.choices = [(i, f"{i} hodiny") for i in range(1, ensemble.remaining_hour_donation + 1)]
+
+
+class RegistrationForm(FlaskForm):
+    first_name = StringField('First Name', validators=[DataRequired(), Length(min=1, max=150)])
+    last_name = StringField('Last Name', validators=[DataRequired(), Length(min=1, max=150)])
+    email = EmailField('Email', validators=[DataRequired()])
+    username = StringField('Username', validators=[DataRequired(), Length(min=2, max=150)])
+    password = PasswordField('Password', validators=[DataRequired()])
+    confirm_password = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password')])
+    submit = SubmitField('Sign Up')
+
+
+class LoginForm(FlaskForm):
+    username = StringField('Username', validators=[DataRequired()])
+    password = PasswordField('Password', validators=[DataRequired()])
+    submit = SubmitField('Login')
