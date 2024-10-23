@@ -13,8 +13,10 @@ release = 'beta'
 import os
 import sys
 
+extensions = ['sphinx.ext.autodoc', 'sphinx.ext.viewcode']
+
 # Add the path to your Flask app module
-sys.path.insert(0, os.path.abspath('../path_to_your_module'))
+sys.path.insert(0, os.path.abspath('../'))
 
 extensions = [
     'sphinx.ext.autodoc',  # Automatically document your code
