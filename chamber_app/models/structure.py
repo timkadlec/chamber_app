@@ -25,7 +25,7 @@ class Teacher(db.Model):
         active_hours = 0
         for a in self.active_assignments:
             active_hours += a.hour_donation
-        return active_hours
+        return math.ceil(active_hours)
 
     @property
     def required_hours(self):
@@ -42,15 +42,15 @@ class Teacher(db.Model):
         active_assignments_hours = self.active_assignments_hours
         needed_hours = self.required_hours
         required_time = needed_hours - active_assignments_hours
-        return required_time
+        return math.ceil(required_time)
 
     @property
     def employment_time_fulfilment(self):
-        if self.employment_time and self.academic_position:
-            percentage = self.required_hours / 100 * self.active_assignments_hours
-            return percentage
+        if self.required_hours > 0:  # Ensure required hours are greater than zero to avoid division by zero
+            percentage = (self.active_assignments_hours / self.required_hours) * 100
+            return round(percentage, 2)  # Round to two decimal places for better readability
         else:
-            return 0
+            return 0  # If no required hours, return 0
 
 
 
