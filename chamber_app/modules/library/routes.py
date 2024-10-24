@@ -158,7 +158,6 @@ def composer_detail(composer_id):
 @library_bp.route("/compositions", methods=["GET"])
 def show_compositions():
     form = ComposerForm()
-
     filters = request.args.copy()
 
     # Pass the full URL-encoded query string to the template
@@ -170,14 +169,15 @@ def show_compositions():
     # Convert selected instrument IDs to integers
     selected_instruments = [int(instr_id) for instr_id in selected_instruments if instr_id.isdigit()]
 
-    # Start the query
+    # Start the query, ordering compositions by the composer's last name
     query = Composition.query.join(Composer).order_by(Composer.last_name)
 
+    # Filter by instruments if any selected
     if selected_instruments:
         # Get the number of selected instruments
         num_selected_instruments = len(selected_instruments)
 
-        # Join with players and instruments, filter by selected instruments
+        # Join with players and instruments, and filter by selected instruments
         query = (
             query.join(Composition.players)
             .join(Player.instrument)
@@ -185,7 +185,6 @@ def show_compositions():
             .group_by(Composition.id)
             .having(db.func.count(db.distinct(Instrument.id)) == num_selected_instruments)
         )
-
 
     # Execute the query and get results
     compositions = query.all()
