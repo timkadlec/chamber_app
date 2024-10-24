@@ -146,6 +146,8 @@ def teacher_edit(teacher_id):
         teacher = Teacher.query.filter_by(id=teacher_id).first()
         if teacher:
             # Update teacher fields with submitted form data
+            if not teacher.import_name:
+                teacher.import_name = edit_teacher_form.name.data
             teacher.name = edit_teacher_form.name.data
             teacher.academic_position_id = edit_teacher_form.academic_position_id.data
             print(edit_teacher_form.employment_time.data)
@@ -166,11 +168,13 @@ def teacher_add():
     edit_teacher_form = EditTeacherForm()
     if not edit_teacher_form.employment_time.data:
         teacher = Teacher(
+            import_name=edit_teacher_form.name.data,
             name=edit_teacher_form.name.data,
             academic_position_id=edit_teacher_form.academic_position_id.data,
         )
     else:
         teacher = Teacher(
+            import_name=edit_teacher_form.name.data,
             name=edit_teacher_form.name.data,
             academic_position_id=edit_teacher_form.academic_position_id.data,
             employment_time=float(edit_teacher_form.employment_time.data)

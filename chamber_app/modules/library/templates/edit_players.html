@@ -12,6 +12,20 @@
     </div>
 
     <div class="row">
+    <nav class="navbar navbar-expand-lg">
+    <div class="container-fluid">
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <form class="d-flex ms-auto" action="{{ url_for('library.add_players_automation', composition_id=composition.id) }}" method="POST">
+                <button type="submit" class="btn btn-outline-primary me-2" name="action" value="string_quartet">Smyčcový kvartet</button>
+                <button type="submit" class="btn btn-outline-secondary" name="action" value="piano_trio">Klavírní trio</button>
+            </form>
+        </div>
+    </div>
+</nav>
+
+    </div>
+
+    <div class="row">
         {% for player in composition.players %}
             <div class="col-4">
                 <div class="card mt-2 mb-2">

@@ -171,7 +171,7 @@ def show_compositions():
     selected_instruments = [int(instr_id) for instr_id in selected_instruments if instr_id.isdigit()]
 
     # Start the query
-    query = Composition.query
+    query = Composition.query.join(Composer).order_by(Composer.last_name)
 
     if selected_instruments:
         # Get the number of selected instruments
@@ -185,6 +185,7 @@ def show_compositions():
             .group_by(Composition.id)
             .having(db.func.count(db.distinct(Instrument.id)) == num_selected_instruments)
         )
+
 
     # Execute the query and get results
     compositions = query.all()
@@ -276,6 +277,68 @@ def edit_players(composition_id):
     # In case of a GET request, render the template with the current composition and instruments
     instruments = Instrument.query.order_by(Instrument.order).all()  # Assuming you have a model for instruments
     return render_template('edit_players.html', composition=composition, instruments=instruments)
+
+
+def create_string_quartet_players(composition):
+    new_player_violin_1 = Player(
+        prefix="I.",
+        instrument_id=19
+    )
+    db.session.add(new_player_violin_1)
+    composition.players.append(new_player_violin_1)
+    new_player_violin_2 = Player(
+        prefix="II.",
+        instrument_id=19
+    )
+    db.session.add(new_player_violin_2)
+    composition.players.append(new_player_violin_2)
+    new_player_viola = Player(
+        instrument_id=23
+    )
+    db.session.add(new_player_viola)
+    composition.players.append(new_player_viola)
+    new_player_violoncello = Player(
+        instrument_id=21
+    )
+    db.session.add(new_player_violoncello)
+    composition.players.append(new_player_violoncello)
+
+
+def create_piano_trio_players(composition):
+    new_player_violin = Player(
+        prefix="I.",
+        instrument_id=19
+    )
+    db.session.add(new_player_violin)
+    composition.players.append(new_player_violin)
+
+    new_player_violoncello = Player(
+        instrument_id=21
+    )
+    db.session.add(new_player_violoncello)
+    composition.players.append(new_player_violoncello)
+
+    new_player_piano = Player(
+        instrument_id=10
+    )
+    db.session.add(new_player_piano)
+    composition.players.append(new_player_piano)
+
+
+@library_bp.route("/composition/<int:composition_id>/automation", methods=["POST"])
+def add_players_automation(composition_id):
+    # Fetch the composition
+    composition = Composition.query.get_or_404(composition_id)
+    action = request.form.get('action')
+    print(action)
+    if action == "string_quartet":
+        create_string_quartet_players(composition)
+    if action == "piano_trio":
+        create_piano_trio_players(composition)
+    db.session.commit()
+
+    # Redirect to the edit page after adding the player
+    return redirect(url_for('library.edit_players', composition_id=composition.id))
 
 
 @library_bp.route("composition/<int:composition_id>/player/<int:player_id>/delete", methods=['POST'])

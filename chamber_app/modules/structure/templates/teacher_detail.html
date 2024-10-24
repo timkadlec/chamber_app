@@ -19,13 +19,16 @@
                     </div>
 
                     <!-- Modal -->
-                    <div class="modal fade" id="EditTeacherModal" tabindex="-1" aria-labelledby="EditTeacherModalLabel" aria-hidden="true">
+                    <div class="modal fade" id="EditTeacherModal" tabindex="-1" aria-labelledby="EditTeacherModalLabel"
+                         aria-hidden="true">
                         <div class="modal-dialog">
                             <div class="modal-content">
-                                <form method="POST" action="{{ url_for('structure.teacher_edit', teacher_id=teacher.id) }}">
+                                <form method="POST"
+                                      action="{{ url_for('structure.teacher_edit', teacher_id=teacher.id) }}">
                                     <div class="modal-header">
                                         <h1 class="modal-title fs-5" id="EditTeacherModalLabel">Upravit pedagoga</h1>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                aria-label="Close"></button>
                                     </div>
                                     <div class="modal-body">
                                         <div class="mb-3">
@@ -42,7 +45,8 @@
                                         </div>
                                     </div>
                                     <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Zavřít</button>
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Zavřít
+                                        </button>
                                         <button type="submit" class="btn btn-primary">Uložit změny</button>
                                     </div>
                                 </form>
@@ -51,7 +55,8 @@
                     </div>
 
                     <h6 class="card-subtitle mb-2 text-body-secondary">
-                        <strong>Akademická pozice:</strong> {{ teacher.academic_position.name or "Není vyplněna akademická pozice" }}
+                        <strong>Akademická
+                            pozice:</strong> {{ teacher.academic_position.name or "Není vyplněna akademická pozice" }}
                     </h6>
                     <h6 class="card-subtitle mb-2 text-body-secondary">
                         <strong>Úvazek:</strong> {{ teacher.employment_time or "Úvazek není vyplněn" }}
@@ -81,53 +86,112 @@
         </div>
     </div>
 
-    <div class="card mb-4">
-        <div class="card-header">
-            <i class="fas fa-table me-1"></i> Seznam úvazků
-        </div>
+    {% if teacher.active_class_assignments %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="fas fa-table me-1"></i>Úvazky: Katedra
+            </div>
 
-        <div class="card-body">
-            <table id="datatableStudents" class="table">
-                <thead>
-                <tr>
-                    <th>Jméno souboru</th>
-                    <th>Hodinová dotace</th>
-                </tr>
-                </thead>
-                <tfoot>
-                <tr>
-                    <th>Jméno souboru</th>
-                    <th>Hodinová dotace</th>
-                </tr>
-                </tfoot>
-                <tbody>
-                {% for a in teacher.active_assignments %}
+            <div class="card-body">
+                <table id="datatableUvazkyKatedra" class="table">
+                    <thead>
                     <tr>
-                        <td><a href="{{ url_for('ensemble.ensemble_detail', ensemble_id=a.ensemble.id) }}">{{ a.ensemble.name }}</a></td>
-                        <td>{{ a.hour_donation }}</td>
+                        <th>Předmět</th>
+                        <th>Jméno studenta</th>
+                        <th>Ročník</th>
+                        <th>Hodinová dotace</th>
                     </tr>
-                {% endfor %}
-                </tbody>
-            </table>
+                    </thead>
+                    <tfoot>
+                    <tr>
+                        <th>Předmět</th>
+                        <th>Jméno studenta</th>
+                        <th>Ročník</th>
+                        <th>Hodinová dotace</th>
+                    </tr>
+                    </tfoot>
+                    <tbody>
+                    {% for a in teacher.active_class_assignments %}
+                        <tr>
+                            <td>{{ a.name }}</td>
+                            <td>{{ a.student.full_name }}</td>
+                            <td>{{ a.student.class_year.number }}. {{ a.student.study_program.name }}</td>
+                            <td>{{ a.hour_donation }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
-    </div>
-
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const dataTable = new simpleDatatables.DataTable("#datatableStudents", {
-                labels: {
-                    placeholder: "Hledat",
-                    perPage: "záznamů na stránku",
-                    noRows: "Žádné záznamy k zobrazení",
-                    info: "Zobrazeno {start} až {end} z {rows} záznamů",
-                    loading: "Načítání...",
-                    next: "Další",
-                    previous: "Předchozí",
-                },
-                perPage: 10,
-                perPageSelect: [10, 20, 30, 40, 50],
-                searchable: false,
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const dataTable = new simpleDatatables.DataTable("#datatableUvazkyKatedra", {
+                    labels: {
+                        placeholder: "Hledat",
+                        perPage: "záznamů na stránku",
+                        noRows: "Žádné záznamy k zobrazení",
+                        info: "Zobrazeno {start} až {end} z {rows} záznamů",
+                        loading: "Načítání...",
+                        next: "Další",
+                        previous: "Předchozí",
+                    },
+                    perPage: 20,
+                    perPageSelect: false,
+                    searchable: false,
+                });
             });
-        });
-    </script>
+        </script>
+    {% endif %}
+    {% if teacher.active_chamber_assignments %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="fas fa-table me-1"></i>Úvazky: Sekce komorní hudby
+            </div>
+
+            <div class="card-body">
+                <table id="datatableUvazkyKomorniHudba" class="table">
+                    <thead>
+                    <tr>
+                        <th>Jméno souboru</th>
+                        <th>Hodinová dotace</th>
+                    </tr>
+                    </thead>
+                    <tfoot>
+                    <tr>
+                        <th>Jméno souboru</th>
+                        <th>Hodinová dotace</th>
+                    </tr>
+                    </tfoot>
+                    <tbody>
+                    {% for a in teacher.active_chamber_assignments %}
+                        <tr>
+                            <td>
+                                <a href="{{ url_for('ensemble.ensemble_detail', ensemble_id=a.ensemble.id) }}">{{ a.ensemble.name }}</a>
+                            </td>
+                            <td>{{ a.hour_donation }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const dataTable = new simpleDatatables.DataTable("#datatableUvazkyKomorniHudba", {
+                    labels: {
+                        placeholder: "Hledat",
+                        perPage: "záznamů na stránku",
+                        noRows: "Žádné záznamy k zobrazení",
+                        info: "Zobrazeno {start} až {end} z {rows} záznamů",
+                        loading: "Načítání...",
+                        next: "Další",
+                        previous: "Předchozí",
+                    },
+                    perPage: 20,
+                    perPageSelect: false,
+                    searchable: false,
+                });
+            });
+        </script>
+    {% endif %}
 {% endblock %}

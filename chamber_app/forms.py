@@ -90,12 +90,12 @@ class HourDonationForm(FlaskForm):
         self.hour_donation.choices = [i for i in range(1, 5)]
 
 
-class TeacherAssignmentForm(FlaskForm):
+class TeacherChamberAssignmentForm(FlaskForm):
     teacher_id = SelectField('Pedagog', coerce=int, validators=[DataRequired()])
     hour_donation = SelectField('Hodinová dotace', coerce=int, validators=[DataRequired()])
 
     def __init__(self, ensemble_id=None, *args, **kwargs):
-        super(TeacherAssignmentForm, self).__init__(*args, **kwargs)
+        super(TeacherChamberAssignmentForm, self).__init__(*args, **kwargs)
         self.populate_teachers()
         if ensemble_id:
             self.populate_hour_donation(ensemble_id)

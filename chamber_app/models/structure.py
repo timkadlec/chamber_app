@@ -8,32 +8,41 @@ class Teacher(db.Model):
     __tablename__ = 'teachers'
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(256), unique=True, nullable=False)
+    name = db.Column(db.String(256))
+    import_name = db.Column(db.String(256), unique=True, nullable=False)
     employment_time = db.Column(db.Float)
     academic_position_id = db.Column(db.Integer, db.ForeignKey('academic_positions.id'))
 
     academic_position = db.relationship('AcademicPosition', backref='teachers')
-
-    assignments = db.relationship('TeacherAssignment', back_populates='teacher')
+    departments = db.relationship('TeacherDepartment', back_populates='teacher')
+    class_assignments = db.relationship('TeacherClassAssignment', back_populates='teacher')
+    chamber_assignments = db.relationship('TeacherChamberAssignment', back_populates='teacher')
 
     @property
     def full_name(self):
         if self.academic_position:
-            if self.academic_position_id == 2 or self.academic_position_id == 3:
-                return f"{self.name}"
-            else:
-                return f"{self.academic_position.shortcut} {self.name}"
+            return f"{self.academic_position.shortcut} {self.name}"
         else:
             return self.name
 
     @property
-    def active_assignments(self):
-        return [assignment for assignment in self.assignments if assignment.ended is None]
+    def active_chamber_assignments(self):
+        return [assignment for assignment in self.chamber_assignments if assignment.ended is None]
+
+    @property
+    def active_class_assignments(self):
+        active_assignments = [assignment for assignment in self.class_assignments if assignment.ended is None]
+
+        active_assignments_sorted = sorted(active_assignments, key=lambda a: a.student.last_name)
+
+        return active_assignments_sorted
 
     @property
     def active_assignments_hours(self):
         active_hours = 0
-        for a in self.active_assignments:
+        for a in self.active_chamber_assignments:
+            active_hours += a.hour_donation
+        for a in self.active_class_assignments:
             active_hours += a.hour_donation
         return math.ceil(active_hours)
 
@@ -63,16 +72,31 @@ class Teacher(db.Model):
             return 0  # If no required hours, return 0
 
 
+class TeacherClassAssignment(db.Model):
+    __tablename__ = "teacher_class_assignments"
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    hour_donation = db.Column(db.Integer)
 
-class TeacherAssignment(db.Model):
-    __tablename__ = "teacher_assignments"
+    student_id = db.Column(db.Integer, db.ForeignKey('students.id'), nullable=False)
+    teacher_id = db.Column(db.Integer, db.ForeignKey('teachers.id'), nullable=False)
+
+    teacher = db.relationship('Teacher', back_populates='class_assignments')
+    student = db.relationship('Student', back_populates="class_assignments")
+
+    created = db.Column(db.DateTime, default=datetime.utcnow)
+    ended = db.Column(db.DateTime)
+
+
+class TeacherChamberAssignment(db.Model):
+    __tablename__ = "teacher_chamber_assignments"
     id = db.Column(db.Integer, primary_key=True)
     hour_donation = db.Column(db.Integer)
 
     ensemble_id = db.Column(db.Integer, db.ForeignKey('ensembles.id'), nullable=False)
     teacher_id = db.Column(db.Integer, db.ForeignKey('teachers.id'), nullable=False)
 
-    teacher = db.relationship('Teacher', back_populates='assignments')
+    teacher = db.relationship('Teacher', back_populates='chamber_assignments')
     ensemble = db.relationship('chamber_app.models.ensemble.Ensemble', back_populates="teacher_assignments")
 
     created = db.Column(db.DateTime, default=datetime.utcnow)
@@ -84,6 +108,24 @@ class Department(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(256), unique=True, nullable=False)
+
+    teacher_departments = db.relationship('TeacherDepartment', back_populates='department')
+
+
+class TeacherDepartment(db.Model):
+    __tablename__ = 'teacher_departments'
+    id = db.Column(db.Integer, primary_key=True)
+
+    # Foreign key relationships
+    teacher_id = db.Column(db.Integer, db.ForeignKey('teachers.id'), nullable=False)
+    department_id = db.Column(db.Integer, db.ForeignKey('departments.id'), nullable=False)
+
+    # Optional fields, e.g., when the teacher was assigned to the department
+    assigned_date = db.Column(db.DateTime, default=datetime.utcnow)
+
+    # Relationships back to the Teacher and Department
+    teacher = db.relationship('Teacher', back_populates='departments')
+    department = db.relationship('Department', back_populates='teacher_departments')
 
 
 # StudyProgram model
@@ -136,7 +178,8 @@ class Student(db.Model):
     student_status_id = db.Column(db.Integer, db.ForeignKey('student_status.id'))
 
     # Relationships
-    assignments = db.relationship('StudentAssignment', back_populates='student')
+    chamber_assignments = db.relationship('StudentChamberAssignment', back_populates='student')
+    class_assignments = db.relationship('TeacherClassAssignment', back_populates='student')
     instrument = relationship("chamber_app.models.library.Instrument", backref='students', lazy=True)
     teacher = relationship("chamber_app.models.structure.Teacher", backref='students', lazy=True)
     department = relationship("chamber_app.models.structure.Department", backref='students', lazy=True)
@@ -145,12 +188,16 @@ class Student(db.Model):
     student_status = relationship("StudentStatus", backref='students', lazy=True)
 
     @property
+    def full_name(self):
+        return f"{self.last_name} {self.first_name}"
+
+    @property
     def active_assignments(self):
         return [assignment for assignment in self.assignments if assignment.ended is None]
 
 
-class StudentAssignment(db.Model):
-    __tablename__ = "student_assignments"
+class StudentChamberAssignment(db.Model):
+    __tablename__ = "student_chamber_assignments"
     id = db.Column(db.Integer, primary_key=True)
 
     ensemble_player_id = db.Column(db.Integer, db.ForeignKey('ensemble_players.id'),
@@ -158,7 +205,7 @@ class StudentAssignment(db.Model):
     student_id = db.Column(db.Integer, db.ForeignKey('students.id'), nullable=False)
 
     # Relationships
-    student = db.relationship('Student', back_populates='assignments')
+    student = db.relationship('Student', back_populates='chamber_assignments')
     ensemble_player = db.relationship('EnsemblePlayer', back_populates='student_assignments')
 
     created = db.Column(db.DateTime, default=datetime.utcnow)

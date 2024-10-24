@@ -15,7 +15,8 @@ class Ensemble(db.Model):
     composition = relationship('chamber_app.models.library.Composition', backref='ensembles', lazy=True)
 
     # One-to-many relationship to EnsembleTeacher
-    teacher_assignments = relationship("chamber_app.models.structure.TeacherAssignment", back_populates="ensemble")
+    teacher_assignments = relationship("chamber_app.models.structure.TeacherChamberAssignment",
+                                       back_populates="ensemble")
     assignments = relationship("EnsembleAssignment", back_populates="ensemble")
     # Relationship to Students
     ensemble_players = relationship(
@@ -35,7 +36,6 @@ class Ensemble(db.Model):
         if players_in_ensemble == 0:
             return "No players required"
         return round((students_assigned / players_in_ensemble) * 100)
-
 
     @property
     def no_assigned_student(self):
@@ -179,7 +179,7 @@ class EnsemblePlayer(db.Model):
 
     # Relationships
     ensemble = db.relationship('Ensemble', back_populates='ensemble_players')
-    student_assignments = db.relationship('StudentAssignment', back_populates='ensemble_player', lazy=True)
+    student_assignments = db.relationship('StudentChamberAssignment', back_populates='ensemble_player', lazy=True)
     instrument = db.relationship('Instrument', backref='ensemble_players', lazy=True)
 
     created = db.Column(db.DateTime, default=datetime.utcnow)

@@ -1,9 +1,9 @@
 from flask import render_template, request, redirect, url_for, flash, abort
 from chamber_app.models.library import Composition, Composer, Instrument
-from chamber_app.models.structure import Student, Teacher, TeacherAssignment, StudentAssignment
+from chamber_app.models.structure import Student, Teacher, TeacherChamberAssignment, StudentChamberAssignment
 from chamber_app.models.ensemble import Ensemble, EnsemblePlayer, EnsembleAssignment
 from chamber_app.extensions import db
-from chamber_app.forms import InstrumentSelectForm, HourDonationForm, TeacherAssignmentForm
+from chamber_app.forms import InstrumentSelectForm, HourDonationForm, TeacherChamberAssignmentForm
 from . import ensemble_bp
 from sqlalchemy import func, or_  # Corrected import
 from datetime import datetime
@@ -148,7 +148,7 @@ def rename_ensemble(ensemble_id):
 
 def delete_ensemble(ensemble_id):
     try:
-        teacher_assignments = TeacherAssignment.query.filter_by(ensemble_id=ensemble_id).all()
+        teacher_assignments = TeacherChamberAssignment.query.filter_by(ensemble_id=ensemble_id).all()
         for assignment in teacher_assignments:
             db.session.delete(assignment)
 
@@ -158,7 +158,7 @@ def delete_ensemble(ensemble_id):
 
         ensemble_players = EnsemblePlayer.query.filter_by(ensemble_id=ensemble_id).all()
         for player in ensemble_players:
-            student_assignments = StudentAssignment.query.filter_by(ensemble_player_id=player.id).all()
+            student_assignments = StudentChamberAssignment.query.filter_by(ensemble_player_id=player.id).all()
             for assignment in student_assignments:
                 db.session.delete(assignment)
             db.session.delete(player)
@@ -178,10 +178,10 @@ def ensemble_activities(ensemble_id):
 
     # Fetch assignments
     ensemble_assignments = EnsembleAssignment.query.filter_by(ensemble_id=ensemble_id).all()
-    student_assignments = StudentAssignment.query.filter(
-        StudentAssignment.ensemble_player_id.in_([player.id for player in ensemble.ensemble_players])
+    student_assignments = StudentChamberAssignment.query.filter(
+        StudentChamberAssignment.ensemble_player_id.in_([player.id for player in ensemble.ensemble_players])
     ).all()
-    teacher_assignments = TeacherAssignment.query.filter_by(ensemble_id=ensemble_id).all()
+    teacher_assignments = TeacherChamberAssignment.query.filter_by(ensemble_id=ensemble_id).all()
 
     # Combine all assignments
     combined_assignments = list(chain(ensemble_assignments, student_assignments, teacher_assignments))
@@ -207,7 +207,7 @@ def ensemble_activities(ensemble_id):
                     'details': Markup('Ukončeno studium skladby <b>{}: {}</b>').format(a.composition.composer_full_name,
                                                                                        a.composition.name)
                 })
-        elif isinstance(a, StudentAssignment):
+        elif isinstance(a, StudentChamberAssignment):
             if a.created:
                 activities.append({
                     'date': a.created,
@@ -230,7 +230,7 @@ def ensemble_activities(ensemble_id):
                         Markup('Odebrán host <b>{} {}, {}</b>').format(a.student.first_name, a.student.last_name,
                                                                        a.student.instrument.name))
                 })
-        elif isinstance(a, TeacherAssignment):
+        elif isinstance(a, TeacherChamberAssignment):
             if a.created:
                 activities.append({
                     'date': a.created,
@@ -259,7 +259,7 @@ def show_ensembles():
 def ensemble_detail(ensemble_id):
     instrument_form = InstrumentSelectForm()
     hour_donation_form = HourDonationForm()
-    teacher_assignment_form = TeacherAssignmentForm(ensemble_id=ensemble_id)
+    teacher_assignment_form = TeacherChamberAssignmentForm(ensemble_id=ensemble_id)
     ensemble = Ensemble.query.filter_by(id=ensemble_id).first()
     ensemble_activities_list = ensemble_activities(ensemble_id)
 
@@ -342,7 +342,7 @@ def assign_student(ensemble_player_id):
     if request.method == "POST":
         selected_student_id = request.form.get('selected_student')
         try:
-            new_assignment = StudentAssignment(
+            new_assignment = StudentChamberAssignment(
                 ensemble_player_id=ensemble_player.id,
                 student_id=selected_student_id
             )
@@ -365,7 +365,7 @@ def assign_guest(ensemble_player_id):
     if request.method == "POST":
         selected_student_id = request.form.get('selected_guest_id')
         try:
-            new_assignment = StudentAssignment(
+            new_assignment = StudentChamberAssignment(
                 ensemble_player_id=ensemble_player.id,
                 student_id=selected_student_id
             )
@@ -382,7 +382,7 @@ def assign_guest(ensemble_player_id):
 
 @ensemble_bp.route('/unassign_student/<int:active_student_assignment>', methods=["POST"])
 def unassign_student(active_student_assignment):
-    a = StudentAssignment.query.get_or_404(active_student_assignment)
+    a = StudentChamberAssignment.query.get_or_404(active_student_assignment)
     a.ended = datetime.utcnow()
     try:
         db.session.commit()
@@ -395,7 +395,7 @@ def unassign_student(active_student_assignment):
 
 @ensemble_bp.route('/<int:ensemble_id>/assign_teacher/', methods=["GET", "POST"])
 def assign_teacher(ensemble_id):
-    form = TeacherAssignmentForm(ensemble_id=ensemble_id)  # Pass the ensemble_id here
+    form = TeacherChamberAssignmentForm(ensemble_id=ensemble_id)  # Pass the ensemble_id here
     ensemble = Ensemble.query.filter_by(id=ensemble_id).first()
 
     # Ensure remaining hour donation is valid
@@ -406,7 +406,7 @@ def assign_teacher(ensemble_id):
                 hour_donation = int(form.hour_donation.data)
 
                 # Check for existing active assignment of the selected teacher
-                existing_assignment = TeacherAssignment.query.filter_by(
+                existing_assignment = TeacherChamberAssignment.query.filter_by(
                     ensemble_id=ensemble.id,
                     teacher_id=selected_teacher_id,
                     ended=None  # Ensure it's active
@@ -424,7 +424,7 @@ def assign_teacher(ensemble_id):
                         flash(f"Hodinová dotace byla zvýšena, ale pedagog nebyl nalezen.", "warning")
                 else:
                     # Create a new assignment if none exists
-                    teacher_assignment = TeacherAssignment(
+                    teacher_assignment = TeacherChamberAssignment(
                         ensemble_id=ensemble.id,
                         teacher_id=selected_teacher_id,
                         hour_donation=hour_donation
@@ -453,7 +453,7 @@ def assign_teacher(ensemble_id):
 
 @ensemble_bp.route('unassign_teacher/<int:teacher_assignment_id>', methods=["POST"])
 def unassign_teacher(teacher_assignment_id):
-    a = TeacherAssignment.query.get_or_404(teacher_assignment_id)
+    a = TeacherChamberAssignment.query.get_or_404(teacher_assignment_id)
     try:
         a.ended = datetime.utcnow()
         db.session.commit()
@@ -481,7 +481,7 @@ def delete_ensemble_player(ensemble_player_id):
     if request.method == "POST":
         ensemble_player = EnsemblePlayer.query.filter_by(id=ensemble_player_id).first()
         ensemble = Ensemble.query.filter_by(id=ensemble_player_id).first()
-        student_assignments = StudentAssignment.query.filter_by(ensemble_player_id=ensemble_player_id).all()
+        student_assignments = StudentChamberAssignment.query.filter_by(ensemble_player_id=ensemble_player_id).all()
         for assignment in student_assignments:
             db.session.delete(assignment)
         db.session.delete(ensemble_player)

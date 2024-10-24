@@ -10,6 +10,7 @@ from chamber_app.models.structure import (
     StudyProgram,
     ClassYear,
     StudentStatus,
+    TeacherDepartment
 )
 from chamber_app.models.library import Instrument
 from chamber_app.models.ensemble import EnsemblePlayer
@@ -37,14 +38,22 @@ def get_or_create_instrument(name):
         return instrument
 
 
-def get_or_create_teacher(name):
-    teacher = Teacher.query.filter_by(name=name).first()
+def get_or_create_teacher(import_name, department):
+    # TODO Also assign a department belonging to the student as well
+    teacher = Teacher.query.filter_by(import_name=import_name).first()
     if teacher is not None:
         return teacher
     else:
-        teacher = Teacher(name=name)
+        teacher = Teacher(import_name=import_name)
         db.session.add(teacher)
         db.session.commit()
+        teacher_department = TeacherDepartment(
+            teacher_id=teacher.id,
+            department_id=department.id
+        )
+        db.session.add(teacher_department)
+        db.session.commit()
+
         return teacher
 
 
@@ -118,14 +127,14 @@ def import_students():
                 for _, row in df_filtered.iterrows():
                     # Create or get related entries
                     instrument = get_or_create_instrument(row["Název oboru/specializace"])
-
+                    department = get_or_create_department(row["Oborová katedra"])
                     teacher = (
-                        get_or_create_teacher(row["Školitel"])
+                        get_or_create_teacher(row["Školitel"], department)
                         if pd.notna(row["Školitel"]) and row["Školitel"].strip() != ""
                         else None
                     )
 
-                    department = get_or_create_department(row["Oborová katedra"])
+
                     study_program = get_or_create_study_program(row["T"])
                     student_status = get_student_status(row["StS"])
                     class_year = get_class_year(row["Roč"], study_program.id)
