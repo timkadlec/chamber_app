@@ -102,7 +102,7 @@ class TeacherAssignmentForm(FlaskForm):
 
     def populate_teachers(self):
         # Populate teachers from the Teacher model
-        self.teacher_id.choices = [(i.id, i.name) for i in Teacher.query.all()]
+        self.teacher_id.choices = [(i.id, i.name) for i in Teacher.query.order_by(Teacher.name).all()]
 
     def populate_hour_donation(self, ensemble_id):
         ensemble = Ensemble.query.get(ensemble_id)
