@@ -8,7 +8,7 @@ from ...models.structure import Student, StudentChamberAssignment
 def home_view():
     students_without_active_assignments = (
         db.session.query(Student)
-        .outerjoin(Student.assignments)  # Use outer join to include students without assignments
+        .outerjoin(Student.chamber_assignments)  # Use outer join to include students without assignments
         .filter(StudentChamberAssignment.ended.is_(None))  # Check that ended is None
         .filter(Student.chamber_assignments == None)
         .filter(Student.guest == False)# Ensure no assignments exist
