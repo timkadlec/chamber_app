@@ -337,7 +337,7 @@ def unassign_composition(ensemble_assignment_id):
 @ensemble_bp.route('/assign_student/<int:ensemble_player_id>', methods=["GET", "POST"])
 def assign_student(ensemble_player_id):
     ensemble_player = EnsemblePlayer.query.get_or_404(ensemble_player_id)
-    students = Student.query.filter_by(instrument_id=ensemble_player.instrument_id).all()
+    students = Student.query.filter_by(instrument_id=ensemble_player.instrument_id, guest=0).all()
 
     if request.method == "POST":
         selected_student_id = request.form.get('selected_student')
