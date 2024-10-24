@@ -62,7 +62,7 @@
                                 Soubor v současné době nemá zadanou skladbu ke studiu.
                             {% endif %}
                         </td>
-                        <td>{{ ensemble.instrumentation_text if ensemble.ensemble_players else "" }}</td>
+                        <td>{{ ensemble.instrumentation_text }}</td>
                         <td>
                             {% if ensemble.active_student_assignments %}
                                 {% for student in ensemble.active_student_assignments %}

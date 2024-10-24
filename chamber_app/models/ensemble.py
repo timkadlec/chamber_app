@@ -80,35 +80,39 @@ class Ensemble(db.Model):
     def instrumentation_text(self):
         """Returns a dictionary where the key is the Instrument object, sorted by 'order',
         and the value is a list of all players associated with that instrument."""
-        instrument_player_dict = {}
 
-        # Group players by instruments
-        for player in self.ensemble_players:
-            instrument = player.instrument  # Get the instrument for the player
-            if instrument not in instrument_player_dict:
-                instrument_player_dict[instrument] = []  # Initialize list for this instrument
-            instrument_player_dict[instrument].append(player)  # Add player to the instrument's list
+        if self.ensemble_players:
+            instrument_player_dict = {}
 
-        # Sort the dictionary by the 'order' attribute of Instrument
-        sorted_instrument_player_dict = dict(
-            sorted(instrument_player_dict.items(), key=lambda item: item[0].order)
-        )
-        instrumentation_text = ""
-        dict_length = len(sorted_instrument_player_dict)
+            # Group players by instruments
+            for player in self.ensemble_players:
+                instrument = player.instrument  # Get the instrument for the player
+                if instrument not in instrument_player_dict:
+                    instrument_player_dict[instrument] = []  # Initialize list for this instrument
+                instrument_player_dict[instrument].append(player)  # Add player to the instrument's list
 
-        for index, (key, value) in enumerate(sorted_instrument_player_dict.items()):
-            if len(value) == 1:
-                if index == dict_length - 1:  # Last iteration
-                    instrumentation_text += f"{key.name}"
+            # Sort the dictionary by the 'order' attribute of Instrument
+            sorted_instrument_player_dict = dict(
+                sorted(instrument_player_dict.items(), key=lambda item: item[0].order)
+            )
+            instrumentation_text = ""
+            dict_length = len(sorted_instrument_player_dict)
+
+            for index, (key, value) in enumerate(sorted_instrument_player_dict.items()):
+                if len(value) == 1:
+                    if index == dict_length - 1:  # Last iteration
+                        instrumentation_text += f"{key.name}"
+                    else:
+                        instrumentation_text += f"{key.name}, "
                 else:
-                    instrumentation_text += f"{key.name}, "
-            else:
-                if index == dict_length - 1:  # Last iteration
-                    instrumentation_text += f"{len(value)} {key.name}"
-                else:
-                    instrumentation_text += f"{len(value)} {key.name}, "
+                    if index == dict_length - 1:  # Last iteration
+                        instrumentation_text += f"{len(value)} {key.name}"
+                    else:
+                        instrumentation_text += f"{len(value)} {key.name}, "
 
-        return instrumentation_text
+            return instrumentation_text
+        else:
+            return "Instrumentace není k dispozici"
 
     @property
     def active_ensemble_assignments(self):

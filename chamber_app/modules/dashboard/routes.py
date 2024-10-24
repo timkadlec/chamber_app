@@ -10,7 +10,8 @@ def home_view():
         db.session.query(Student)
         .outerjoin(Student.assignments)  # Use outer join to include students without assignments
         .filter(StudentAssignment.ended.is_(None))  # Check that ended is None
-        .filter(Student.assignments == None)  # Ensure no assignments exist
+        .filter(Student.assignments == None)
+        .filter(Student.guest == False)# Ensure no assignments exist
         .distinct()  # Get distinct students
         .all()
     )
