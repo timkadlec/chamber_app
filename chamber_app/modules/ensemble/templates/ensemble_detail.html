@@ -25,13 +25,13 @@
                                         <span>{{ a.composition.composer.full_name }} - {{ a.composition.name }}</span>
                                         <div>
                                             <a href="{{ url_for('ensemble.assign_composition', ensemble_id=ensemble.id) }}"
-                                               class="btn btn-primary btn-sm me-2">
+                                               class="btn btn-primary btn-sm mb-2 me-2">
                                                 <i class="fas fa-edit"></i> Změnit
                                             </a>
                                             <form method="POST"
                                                   action="{{ url_for('ensemble.unassign_composition', ensemble_id=ensemble.id, ensemble_assignment_id=a.id) }}"
                                                   class="d-inline">
-                                                <button type="submit" class="btn btn-danger btn-sm">
+                                                <button type="submit" class="btn btn-danger btn-sm mb-2 me-2">
                                                     <i class="fas fa-trash"></i> Odebrat
                                                 </button>
                                             </form>
