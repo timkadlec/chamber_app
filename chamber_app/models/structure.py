@@ -17,6 +17,16 @@ class Teacher(db.Model):
     assignments = db.relationship('TeacherAssignment', back_populates='teacher')
 
     @property
+    def full_name(self):
+        if self.academic_position:
+            if self.academic_position_id == 2 or self.academic_position_id == 3:
+                return f"{self.name}"
+            else:
+                return f"{self.academic_position.shortcut} {self.name}"
+        else:
+            return self.name
+
+    @property
     def active_assignments(self):
         return [assignment for assignment in self.assignments if assignment.ended is None]
 

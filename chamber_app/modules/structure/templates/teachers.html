@@ -36,7 +36,7 @@
                     <tr>
                         <td>
                             <a href="{{ url_for('structure.teacher_detail', teacher_id=teacher.id) }}">
-                                {{ teacher.academic_position.shortcut if teacher.academic_position.shortcut }} {{ teacher.name }}
+                                {{ teacher.full_name}}
                             </a>
                         </td>
                         <td>{{ teacher.employment_time if teacher.employment_time else "Úvazek není vyplněn" }}</td>
