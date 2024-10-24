@@ -75,7 +75,7 @@ class InstrumentSelectForm(FlaskForm):
         self.populate_instruments(self)
 
     def populate_instruments(self, obj):
-        self.instrument_id.choices = [(i.id, i.name) for i in Instrument.query.all()]
+        self.instrument_id.choices = [(i.id, i.name) for i in Instrument.query.order_by(Instrument.order).all()]
 
 
 class HourDonationForm(FlaskForm):
