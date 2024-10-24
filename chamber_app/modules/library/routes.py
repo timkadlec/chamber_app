@@ -206,9 +206,6 @@ def show_compositions():
 def add_composition():
     form_composition = CompositionForm()
     form_composer = ComposerForm()
-    selected_composer = int(request.args.get('composer_id'))
-    if selected_composer:
-        form_composition.composer_id.data = selected_composer
     if form_composition.validate_on_submit():
         new_composition = Composition(
             name=form_composition.name.data,
