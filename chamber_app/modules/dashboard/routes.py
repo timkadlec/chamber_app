@@ -12,6 +12,7 @@ def home_view():
         .filter(StudentAssignment.ended.is_(None))  # Check that ended is None
         .filter(Student.assignments == None)
         .filter(Student.guest == False)# Ensure no assignments exist
+        .order_by(Student.last_name)
         .distinct()  # Get distinct students
         .all()
     )
