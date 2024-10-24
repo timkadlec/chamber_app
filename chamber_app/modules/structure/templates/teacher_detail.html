@@ -103,7 +103,7 @@
                 <tbody>
                 {% for a in teacher.active_assignments %}
                     <tr>
-                        <td>{{ a.ensemble.name }}</td>
+                        <td><a href="{{ url_for('ensemble.ensemble_detail', ensemble_id=a.ensemble.id) }}">{{ a.ensemble.name }}</a></td>
                         <td>{{ a.hour_donation }}</td>
                     </tr>
                 {% endfor %}
