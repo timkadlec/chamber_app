@@ -34,7 +34,8 @@ class Ensemble(db.Model):
         students_assigned = self.count_assigned_students
         if players_in_ensemble == 0:
             return "No players required"
-        return (students_assigned / players_in_ensemble) * 100
+        return round((students_assigned / players_in_ensemble) * 100)
+
 
     @property
     def no_assigned_student(self):
