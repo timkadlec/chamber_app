@@ -92,12 +92,12 @@
                         </td>
                         <td class="text-end">
                             <button class="btn btn-sm btn-danger" data-bs-toggle="modal"
-                                    data-bs-target="#deleteEnsembleModal">
+                                    data-bs-target="#deleteEnsembleModal{{ ensemble.id }}">
                                 <i class="fas fa-trash"></i> Smazat
                             </button>
 
                             <!-- Modal -->
-                            <div class="modal fade" id="deleteEnsembleModal" tabindex="-1"
+                            <div class="modal fade" id="deleteEnsembleModal{{ ensemble.id }}" tabindex="-1"
                                  aria-labelledby="deleteEnsembleModalLabel"
                                  aria-hidden="true">
                                 <div class="modal-dialog">
