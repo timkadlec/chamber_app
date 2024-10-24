@@ -7,6 +7,11 @@ from chamber_app.forms import AddGuestForm, EditTeacherForm
 from chamber_app.extensions import db
 
 
+@structure_bp.route('/')
+def index():
+    return render_template('structure.html')
+
+
 @structure_bp.route('/students', methods=['GET'])
 def show_students():
     filters = request.args.copy()
@@ -137,30 +142,39 @@ def teacher_edit(teacher_id):
     # Create the form instance with submitted data
     edit_teacher_form = EditTeacherForm()
     # Check if the form is submitted and validated
+    if request.method == "POST":
+        teacher = Teacher.query.filter_by(id=teacher_id).first()
+        if teacher:
+            # Update teacher fields with submitted form data
+            teacher.name = edit_teacher_form.name.data
+            teacher.academic_position_id = edit_teacher_form.academic_position_id.data
+            print(edit_teacher_form.employment_time.data)
+            if edit_teacher_form.employment_time.data:
+                teacher.employment_time = float(edit_teacher_form.employment_time.data)
 
-    teacher = Teacher.query.filter_by(id=teacher_id).first()
-    if teacher:
-        # Update teacher fields with submitted form data
-        teacher.name = edit_teacher_form.name.data
-        teacher.academic_position_id = edit_teacher_form.academic_position_id.data
-        print(edit_teacher_form.employment_time.data)
-        teacher.employment_time = float(edit_teacher_form.employment_time.data)
+            # Commit changes to the database
+            db.session.commit()
+            flash("Pedagog úspěšně aktualizován", "success")
 
-        # Commit changes to the database
-        db.session.commit()
-        flash("Pedagog úspěšně aktualizován", "success")
-
+            return redirect(url_for('structure.teacher_detail', teacher_id=teacher_id))
+    else:
         return redirect(url_for('structure.teacher_detail', teacher_id=teacher_id))
 
 
 @structure_bp.route('teacher/add', methods=['POST'])
 def teacher_add():
     edit_teacher_form = EditTeacherForm()
-    teacher = Teacher(
-        name=edit_teacher_form.name.data,
-        academic_position_id=edit_teacher_form.academic_position_id.data,
-        employment_time=float(edit_teacher_form.employment_time.data)
-    )
+    if not edit_teacher_form.employment_time.data:
+        teacher = Teacher(
+            name=edit_teacher_form.name.data,
+            academic_position_id=edit_teacher_form.academic_position_id.data,
+        )
+    else:
+        teacher = Teacher(
+            name=edit_teacher_form.name.data,
+            academic_position_id=edit_teacher_form.academic_position_id.data,
+            employment_time=float(edit_teacher_form.employment_time.data)
+        )
     db.session.add(teacher)
     db.session.commit()
     flash("Pedagog úspěšně přidán", "success")

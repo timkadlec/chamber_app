@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relation Map with Cards and JavaScript</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .card-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 50px;
+            position: relative;
+        }
+
+        /* Lines connecting the cards */
+        .line-vertical {
+            width: 2px;
+            height: 60px;
+            background-color: black;
+            position: absolute;
+            bottom: -60px;
+            left: 50%;
+            transform: translateX(-50%);
+            transition: all 0.5s ease; /* Smooth line animation */
+        }
+
+        .line-left {
+            width: 2px;
+            height: 100px;
+            background-color: black;
+            position: absolute;
+            bottom: -60px;
+            left: 50%;
+            transform: translateX(-50%) rotate(-45deg);
+            transition: all 0.5s ease;
+        }
+
+        .line-right {
+            width: 2px;
+            height: 100px;
+            background-color: black;
+            position: absolute;
+            bottom: -60px;
+            left: 50%;
+            transform: translateX(-50%) rotate(45deg);
+            transition: all 0.5s ease;
+        }
+
+        .card-row {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            margin-top: 80px;
+        }
+
+        .card-row .col {
+            display: flex;
+            justify-content: center;
+        }
+
+        /* Custom styling for cards */
+        .custom-card {
+            width: 150px;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        /* Hover effect for cards */
+        .custom-card:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        /* Animate lines on hover */
+        .custom-card:hover ~ .line-left,
+        .custom-card:hover ~ .line-right,
+        .custom-card:hover ~ .line-vertical {
+            background-color: blue; /* Change line color on hover */
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <!-- First row with central card (School) -->
+        <div class="row">
+            <div class="col-12 card-wrapper">
+                <div class="card custom-card" data-bs-toggle="tooltip" data-bs-placement="top" title="This is the School">
+                    <div class="card-body">
+                        <i class="bi bi-building fs-1"></i>
+                        <h5 class="card-title">School</h5>
+                    </div>
+                </div>
+                <div class="line-vertical"></div>
+                <div class="line-left"></div>
+                <div class="line-right"></div>
+            </div>
+        </div>
+
+        <!-- Second row with teacher and student cards -->
+        <div class="row card-row">
+            <div class="col-6">
+                <div class="card custom-card" data-bs-toggle="tooltip" data-bs-placement="top" title="This is the Teacher">
+                    <div class="card-body">
+                        <i class="bi bi-person-fill fs-1"></i>
+                        <h5 class="card-title">Teacher</h5>
+                        <p class="card-text">Teaching subjects and roles.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="card custom-card" data-bs-toggle="tooltip" data-bs-placement="top" title="This is the Student">
+                    <div class="card-body">
+                        <i class="bi bi-person fs-1"></i>
+                        <h5 class="card-title">Student</h5>
+                        <p class="card-text">Learning path and progress.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap and JS for tooltips -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Initialize tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+
+        // Add line color change when card is hovered
+        document.querySelectorAll('.custom-card').forEach(function (card) {
+            card.addEventListener('mouseenter', function () {
+                this.nextElementSibling.style.backgroundColor = 'blue'; // Change the line color
+            });
+            card.addEventListener('mouseleave', function () {
+                this.nextElementSibling.style.backgroundColor = 'black'; // Reset the line color
+            });
+        });
+    </script>
+</body>
+</html>

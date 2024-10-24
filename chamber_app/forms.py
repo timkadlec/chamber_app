@@ -128,7 +128,7 @@ class LoginForm(FlaskForm):
 class EditTeacherForm(FlaskForm):
     name = StringField('Jméno pedagoga', validators=[DataRequired(), Length(min=1, max=150)])
     academic_position_id = SelectField('Akademický pozice', coerce=int, validators=[DataRequired()])
-    employment_time = FloatField("Úvazek", validators=[Optional()])  # Optional to avoid issues with empty fields
+    employment_time = FloatField("Úvazek")  # Optional to avoid issues with empty fields
     submit = SubmitField('Uložit')
 
     def __init__(self, *args, **kwargs):
@@ -138,3 +138,4 @@ class EditTeacherForm(FlaskForm):
 
     def populate_academic_positions(self, obj):
         self.academic_position_id.choices = [(p.id, p.name) for p in AcademicPosition.query.all()]
+

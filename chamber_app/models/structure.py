@@ -46,8 +46,8 @@ class Teacher(db.Model):
 
     @property
     def employment_time_fulfilment(self):
-        if self.required_hours > 0:  # Ensure required hours are greater than zero to avoid division by zero
-            percentage = (self.active_assignments_hours / self.required_hours) * 100
+        if self.employment_time:  # Ensure required hours are greater than zero to avoid division by zero
+            percentage = (int(self.active_assignments_hours) / int(self.required_hours)) * 100
             return round(percentage, 2)  # Round to two decimal places for better readability
         else:
             return 0  # If no required hours, return 0
