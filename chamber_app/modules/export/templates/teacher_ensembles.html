@@ -17,7 +17,7 @@
         }
 
         .header img {
-            width: 150px;
+            width: 150px; /* Adjust the size as needed */
         }
 
         .content {
@@ -37,11 +37,19 @@
 
         .ensemble {
             margin-bottom: 10px; /* Reduced space between ensembles */
+            page-break-inside: avoid; /* Prevents page breaks inside the ensemble */
+            break-inside: avoid; /* Ensures the ensemble stays together */
         }
-
 
         p {
             margin: 3px 0; /* Reduced default paragraph margin */
+        }
+
+        /* Optional: Force a page break after the last assignment if needed */
+        @media print {
+            .teacher-name:last-of-type {
+                page-break-after: always; /* Ensures a break after the last teacher's assignments */
+            }
         }
     </style>
 </head>
@@ -62,7 +70,6 @@
                     {% endfor %}
                     ({{ a.hour_donation }}h)
                 </p>
-
             {% endfor %}
         {% endif %}
     {% endfor %}

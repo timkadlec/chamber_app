@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>PDF Export with Logo and Table</title>
+    <style>
+        /* Style for PDF layout */
+        body {
+            font-family: Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .header {
+            text-align: center;
+            padding: 10px;
+        }
+
+        .header img {
+            width: 150px; /* Adjust the size as needed */
+            margin-bottom: 10px; /* Space below the logo */
+        }
+
+        .content {
+            margin: 20px;
+        }
+
+        h1 {
+            color: #008cd7; /* HAMU Color */
+            margin-bottom: 15px;
+        }
+
+        .teacher-name {
+            font-weight: bold;
+            margin-top: 15px;
+            font-size: 1.2em;
+        }
+
+        .ensemble {
+            margin-bottom: 10px; /* Reduced space between ensembles */
+            page-break-inside: avoid; /* Prevents page breaks inside the ensemble */
+            break-inside: avoid; /* Ensures the ensemble stays together */
+        }
+
+        p {
+            margin: 3px 0; /* Reduced default paragraph margin */
+        }
+
+        /* Optional: To force a page break after the last ensemble if needed */
+        @media print {
+            .ensemble:last-child {
+                page-break-after: always; /* Ensure a break after the last ensemble if needed */
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <img src="{{ logo }}" alt="Logo">
+    </div>
+    <div class="content">
+        <h1>Seznam komorních souborů</h1>
+        {% for ensemble in ensembles %}
+            <div class="ensemble"> <!-- New div for each ensemble -->
+                <p class="teacher-name">{{ ensemble.name }}</p>
+                <p><b>Obsazení:</b> {{ ensemble.instrumentation_text }}</p>
+                <p><b>Pedagogové:</b>
+                    {% for a in ensemble.active_teacher_assignments %}
+                        {{ a.teacher.full_name }} ({{ a.hour_donation }}h){% if not loop.last %}, {% endif %}
+                    {% endfor %}
+                </p>
+                <p><b>Studenti:</b>
+                    {% for student in ensemble.active_student_assignments %}
+                        <i>{{ student.instrument.shortcut }}</i> {{ student.full_name }}{% if not loop.last %}, {% endif %}
+                    {% endfor %}
+                </p>
+                <p><b>Repertoár:</b>
+                    {% for a in ensemble.assignments %}
+                        {{ a.composition.composer.full_name }} - {{ a.composition.name }}{% if not loop.last %}, {% endif %}
+                    {% endfor %}
+                </p>
+                <hr>
+            </div> <!-- Closing ensemble div -->
+        {% endfor %}
+    </div>
+</body>
+</html>

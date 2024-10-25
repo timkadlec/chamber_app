@@ -1,0 +1,36 @@
+{% extends "index.html" %}
+
+{% block content %}
+    <h1 class="mt-4">Konzole exportů</h1>
+    <div class="row">
+        <p>Místo, kde můžete exportovat.</p>
+
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Pedagogové a jejich soubory</h5>
+                    <p class="card-text">Exportujte pedagogy a jejich soubory.</p>
+                    <form method="post" action="{{ url_for('export.teacher_ensembles') }}">
+                        <button type="submit" class="btn btn-outline-success">
+                            <i class="fas fa-wand-magic-sparkles me-1"></i>Exportovat
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Pouze soubor</h5>
+                    <p class="card-text">Exportujte soubory bez pedagogů.</p>
+                    <form method="post" action="{{ url_for('export.ensembles') }}">
+                        <button type="submit" class="btn btn-outline-success">
+                            <i class="fas fa-wand-magic-sparkles me-1"></i>Exportovat
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -4,39 +4,55 @@
 #  Proin dapibus sapien vel ante. Aliquam erat volutpat. Pellentesque sagittis ligula eget metus.
 #  Vestibulum commodo. Ut rhoncus gravida arcu.
 
-from flask import render_template, make_response, request, redirect, url_for, jsonify, abort, flash
+from flask import render_template, make_response, url_for
 from weasyprint import HTML
 from . import export_bp
-from chamber_app.models.library import (
-    Composer,
-    Composition,
-    Instrument,
-    Player,
-    composition_player
-)
-from chamber_app.models.structure import Teacher
-from chamber_app.forms import ComposerForm, CompositionForm
-from chamber_app.extensions import db
-import os
 from datetime import datetime
-import pandas as pd
-from werkzeug.utils import secure_filename
-from urllib.parse import urlencode
+
+from chamber_app.models.structure import Teacher
+from chamber_app.models.ensemble import Ensemble
 
 
-@export_bp.route('/download-pdf')
-def download_pdf():
+@export_bp.route('/console')
+def console():
+    return render_template('console.html')
 
+@export_bp.route('/teacher-ensembles-pdf', methods=['POST'])
+def teacher_ensembles():
     teachers = Teacher.query.order_by(Teacher.name).all()
     # Render HTML template to a string
-    html_content = render_template('teacher_chamber_ensembles.html', content="Hello, PDF!", teachers=teachers)
+    html_content = render_template('teacher_ensembles.html', content="Hello, PDF!", teachers=teachers)
 
     # Generate PDF
     pdf = HTML(string=html_content).write_pdf()
 
-    # Create a response to download the PDF
+    today_date = datetime.now().strftime("%Y-%m-%d")
+    filename = f"HAMU_teacher_ensembles_{today_date}.pdf"
+
     response = make_response(pdf)
     response.headers['Content-Type'] = 'application/pdf'
-    response.headers['Content-Disposition'] = 'inline; filename="export.pdf"'
+    response.headers['Content-Disposition'] = f'attachment; filename="{filename}"'
+
+    return response
+
+
+@export_bp.route('/ensembles-pdf', methods=['POST'])
+def ensembles():
+    ensembles = Ensemble.query.filter_by(ended=None).order_by(Ensemble.name).all()
+    logo = url_for('static', filename='HAMU.jpg')
+
+    print(logo)
+    # Render HTML template to a string
+    html_content = render_template('ensembles.html', logo=logo, ensembles=ensembles)
+
+    # Generate PDF
+    pdf = HTML(string=html_content).write_pdf()
+
+    today_date = datetime.now().strftime("%Y-%m-%d")
+    filename = f"HAMU_ensembles_{today_date}.pdf"
+
+    response = make_response(pdf)
+    response.headers['Content-Type'] = 'application/pdf'
+    response.headers['Content-Disposition'] = f'attachment; filename="{filename}"'
 
     return response
