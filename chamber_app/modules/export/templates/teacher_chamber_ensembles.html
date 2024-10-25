@@ -13,44 +13,35 @@
 
         .header {
             text-align: center;
-            padding: 20px;
+            padding: 10px;
         }
 
         .header img {
-            width: 150px; /* Adjust logo size as needed */
+            width: 150px;
         }
 
         .content {
-            margin: 40px;
+            margin: 20px;
         }
 
         h1 {
-            color: #008cd7;
-            margin-bottom: 20px; /* Space below the header */
+            color: #008cd7; /* HAMU Color */
+            margin-bottom: 15px;
         }
 
         .teacher-name {
             font-weight: bold;
-            margin-top: 20px; /* Space before teacher's name */
-            font-size: 1.2em; /* Slightly larger font for clarity */
+            margin-top: 15px;
+            font-size: 1.2em;
         }
 
         .ensemble {
-            margin-bottom: 10px; /* Space between ensembles */
+            margin-bottom: 10px; /* Reduced space between ensembles */
         }
 
-        .composer {
-            font-style: italic; /* Italic style for composers */
-        }
 
-        .students {
-            display: inline; /* Keep students on the same line */
-            margin-left: 5px; /* Space after composer */
-        }
-
-        /* Add padding for better readability */
         p {
-            margin: 5px 0; /* Reduce default paragraph margin */
+            margin: 3px 0; /* Reduced default paragraph margin */
         }
     </style>
 </head>
@@ -64,15 +55,14 @@
                 <p class="ensemble">
                     <b>{{ a.ensemble.name }}</b>
                     {% for comp in a.ensemble.assignments %}
-                        <span class="composer">{{ comp.composition.composer.last_name }} {{ comp.composition.composer.first_name }}</span>{% if not loop.last %}, {% endif %}
-                    {% endfor %}:
-                    <span class="students">
-                        {% for student in a.ensemble.active_student_assignments %}
-                            <i>{{ student.instrument.shortcut }}.</i> {{ student.full_name }}{% if not loop.last %}, {% endif %}
-                        {% endfor %}
-                    </span>
-                 ({{ a.hour_donation }}h)
+                        ({{ comp.composition.composer.full_name }}{% if not loop.last %}, {% endif %}{% endfor %}):
+                    {% for student in a.ensemble.active_student_assignments %}
+                        <i>{{ student.instrument.shortcut }}.</i>
+                        {{ student.full_name }}{% if not loop.last %}, {% endif %}
+                    {% endfor %}
+                    ({{ a.hour_donation }}h)
                 </p>
+
             {% endfor %}
         {% endif %}
     {% endfor %}
