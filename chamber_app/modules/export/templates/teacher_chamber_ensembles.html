@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>PDF Export with Logo and Table</title>
+    <style>
+        /* Style for PDF layout */
+        body {
+            font-family: Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .header {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .header img {
+            width: 150px; /* Adjust logo size as needed */
+        }
+
+        .content {
+            margin: 40px;
+        }
+
+        h1 {
+            color: #008cd7;
+            margin-bottom: 20px; /* Space below the header */
+        }
+
+        .teacher-name {
+            font-weight: bold;
+            margin-top: 20px; /* Space before teacher's name */
+            font-size: 1.2em; /* Slightly larger font for clarity */
+        }
+
+        .ensemble {
+            margin-bottom: 10px; /* Space between ensembles */
+        }
+
+        .composer {
+            font-style: italic; /* Italic style for composers */
+        }
+
+        .students {
+            display: inline; /* Keep students on the same line */
+            margin-left: 5px; /* Space after composer */
+        }
+
+        /* Add padding for better readability */
+        p {
+            margin: 5px 0; /* Reduce default paragraph margin */
+        }
+    </style>
+</head>
+<body>
+<div class="content">
+    <h1>Seznam komorních souborů</h1>
+    {% for teacher in teachers %}
+        {% if teacher.active_chamber_assignments %}
+            <p class="teacher-name">{{ teacher.academic_position.shortcut }} {{ teacher.name }}</p>
+            {% for a in teacher.active_chamber_assignments %}
+                <p class="ensemble">
+                    <b>{{ a.ensemble.name }}</b>
+                    {% for comp in a.ensemble.assignments %}
+                        <span class="composer">{{ comp.composition.composer.last_name }} {{ comp.composition.composer.first_name }}</span>{% if not loop.last %}, {% endif %}
+                    {% endfor %}:
+                    <span class="students">
+                        {% for student in a.ensemble.active_student_assignments %}
+                            <i>{{ student.instrument.shortcut }}.</i> {{ student.full_name }}{% if not loop.last %}, {% endif %}
+                        {% endfor %}
+                    </span>
+                 ({{ a.hour_donation }}h)
+                </p>
+            {% endfor %}
+        {% endif %}
+    {% endfor %}
+</div>
+</body>
+</html>
