@@ -2,12 +2,14 @@ alabaster==1.0.0
 alembic==1.13.3
 babel==2.16.0
 blinker==1.8.2
+Brotli==1.1.0
 certifi==2024.8.30
 cffi==1.17.1
--e git+https://github.com/timkadlec/chamber_app.git@96038d14a7ebca5e7d169cef8181781367d5f575#egg=chamber_app
+-e git+https://github.com/timkadlec/chamber_app.git@52c3d8e086db470eeab12fb4bfb347affa938b86#egg=chamber_app
 charset-normalizer==3.4.0
 click==8.1.7
 cryptography==43.0.1
+cssselect2==0.7.0
 docutils==0.21.2
 et-xmlfile==1.1.0
 Flask==3.0.3
@@ -15,6 +17,8 @@ Flask-Login==0.6.3
 Flask-Migrate==4.0.7
 Flask-SQLAlchemy==3.1.1
 Flask-WTF==1.2.1
+fonttools==4.54.1
+html5lib==1.1
 idna==3.10
 imagesize==1.4.1
 itsdangerous==2.2.0
@@ -25,9 +29,12 @@ numpy==2.1.2
 openpyxl==3.1.5
 packaging==24.1
 pandas==2.2.3
+pillow==11.0.0
 pycparser==2.22
+pydyf==0.11.0
 Pygments==2.18.0
 PyMySQL==1.1.1
+pyphen==0.16.0
 python-dateutil==2.9.0.post0
 python-dotenv==1.0.1
 pytz==2024.2
@@ -42,8 +49,12 @@ sphinxcontrib-jsmath==1.0.1
 sphinxcontrib-qthelp==2.0.0
 sphinxcontrib-serializinghtml==2.0.0
 SQLAlchemy==2.0.35
+tinycss2==1.4.0
 typing_extensions==4.12.2
 tzdata==2024.2
 urllib3==2.2.3
+weasyprint==62.3
+webencodings==0.5.1
 Werkzeug==3.0.4
 WTForms==3.1.2
+zopfli==0.2.3.post1
