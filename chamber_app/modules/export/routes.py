@@ -21,7 +21,7 @@ def console():
 def teacher_ensembles():
     teachers = Teacher.query.order_by(Teacher.name).all()
     # Render HTML template to a string
-    html_content = render_template('teacher_ensembles.html', content="Hello, PDF!", teachers=teachers)
+    html_content = render_template('export_teacher_ensembles.html', content="Hello, PDF!", teachers=teachers)
 
     # Generate PDF
     pdf = HTML(string=html_content).write_pdf()
@@ -43,7 +43,7 @@ def ensembles():
 
     print(logo)
     # Render HTML template to a string
-    html_content = render_template('ensembles.html', logo=logo, ensembles=ensembles)
+    html_content = render_template('export_ensembles.html', logo=logo, ensembles=ensembles)
 
     # Generate PDF
     pdf = HTML(string=html_content).write_pdf()
