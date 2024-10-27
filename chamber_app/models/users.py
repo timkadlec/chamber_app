@@ -1,6 +1,33 @@
 from flask_login import UserMixin
 from chamber_app.extensions import db
 from werkzeug.security import generate_password_hash, check_password_hash
+from datetime import datetime
+
+
+class UserRoles(db.Model):
+    """Association model to manage the many-to-many relationship between User and Role."""
+    __tablename__ = 'user_roles'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    role_id = db.Column(db.Integer, db.ForeignKey('roles.id'), nullable=False)
+    date_assigned = db.Column(db.DateTime, default=datetime.utcnow)
+
+    # Relationships for accessing related User and Role objects
+    user = db.relationship('User', back_populates='user_roles')
+    role = db.relationship('Role', back_populates='user_roles')
+
+
+class Role(db.Model):
+    """Role model for defining different roles within the application."""
+    __tablename__ = 'roles'
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), unique=True, nullable=False)
+    user_roles = db.relationship('UserRoles', back_populates='role', cascade="all, delete-orphan")
+
+    def __repr__(self):
+        return f"<Role {self.name}>"
 
 
 class User(db.Model, UserMixin):
@@ -25,7 +52,7 @@ class User(db.Model, UserMixin):
     first_name = db.Column(db.String(150), nullable=True)
     last_name = db.Column(db.String(150), nullable=True)
     email = db.Column(db.String(150), nullable=True)
-    role = db.Column(db.String(50), nullable=True)
+    user_roles = db.relationship('UserRoles', back_populates='user', cascade="all, delete-orphan")
 
     def set_password(self, password):
         """Hashes the password and stores it in the database.
@@ -45,3 +72,11 @@ class User(db.Model, UserMixin):
             bool: True if the password matches, False otherwise.
         """
         return check_password_hash(self.password_hash, password)
+
+    def has_role(self, role_name):
+        """Check if the user has a specific role."""
+        return any(user_role.role.name == role_name for user_role in self.user_roles)
+
+    def is_admin(self):
+        """Check if the user has the admin role."""
+        return self.has_role('admin')
