@@ -61,7 +61,7 @@ class Composition(db.Model):
                            secondary=composition_player,
                            back_populates='compositions')
     ensemble_assignments = relationship('chamber_app.models.ensemble.EnsembleAssignment', back_populates='composition')
-    performances = relationship('EnsemblePerformance', back_populates='ensemble')
+    performances = relationship('EnsemblePerformance', back_populates='composition')
 
     @property
     def composer_full_name(self):
