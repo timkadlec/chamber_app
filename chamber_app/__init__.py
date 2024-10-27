@@ -28,7 +28,8 @@ def create_app(config=Config):  # You can set a default config here
 
     @app.before_request
     def require_login():
-        if not current_user.is_authenticated and request.endpoint != 'users.login':
+        # Check if the request is for a static file or the login page
+        if not current_user.is_authenticated and request.endpoint not in ['users.login', 'static']:
             return redirect(url_for('users.login'))
 
     with app.app_context():
