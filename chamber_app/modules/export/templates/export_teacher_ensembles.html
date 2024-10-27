@@ -62,8 +62,12 @@
             {% for a in teacher.active_chamber_assignments %}
                 <p class="ensemble">
                     <b>{{ a.ensemble.name }}</b>
-                    {% for comp in a.ensemble.assignments %}
-                        ({{ comp.composition.composer.full_name }}{% if not loop.last %}, {% endif %}{% endfor %}):
+                    {% if a.ensemble.assignments %}
+                        {% for comp in a.ensemble.assignments %}
+                            ({{ comp.composition.composer.full_name }}{% if not loop.last %}, {% endif %}{% endfor %}):
+                    {% else %}
+                        (Není zadaná skladba):
+                    {% endif %}
                     {% for student in a.ensemble.active_student_assignments %}
                         <i>{{ student.instrument.shortcut }}.</i>
                         {{ student.full_name }}{% if not loop.last %}, {% endif %}
