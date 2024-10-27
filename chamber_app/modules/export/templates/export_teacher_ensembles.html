@@ -50,6 +50,9 @@
             .teacher-name:last-of-type {
                 page-break-after: always; /* Ensures a break after the last teacher's assignments */
             }
+            .teacher-card:last-of-type {
+                page-break-after: always; /* Ensures a break after the last teacher's assignments */
+            }
         }
     </style>
 </head>
@@ -57,6 +60,7 @@
 <div class="content">
     <h1>Seznam komorních souborů</h1>
     {% for teacher in teachers %}
+        <div class="teacher-card">
         {% if teacher.active_chamber_assignments %}
             <p class="teacher-name">{{ teacher.academic_position.shortcut }} {{ teacher.name }}</p>
             {% for a in teacher.active_chamber_assignments %}
@@ -76,6 +80,7 @@
                 </p>
             {% endfor %}
         {% endif %}
+        </div>
     {% endfor %}
 </div>
 </body>
