@@ -433,6 +433,41 @@
         </div>
     </div>
 
+    <!-- EnsemblePerformance section -->
+    {% if ensemble.performances %}
+    <div class="row">
+        <h5 class="mb-4">Vystoupení souboru</h5>
+
+        <div class="table-responsive">
+            <table class="table table-striped align-middle">
+                <thead>
+                <tr>
+                    <th scope="col">Datum</th>
+                    <th scope="col">Název</th>
+                    <th scope="col">Skladba</th>
+
+                </tr>
+                </thead>
+                <tbody>
+                {% for performance in ensemble.performances %}
+                    <tr>
+                        <td>
+                            {{ performance.date }}
+                        </td>
+                        <td>
+                            {{performance.name}}
+                        </td>
+                        <td>
+                            {{performance.composition.composer_full_name}} {{ performance.composition.name }}
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
 
     <div class="row">
         <div class="col-12">

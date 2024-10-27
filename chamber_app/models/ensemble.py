@@ -188,7 +188,6 @@ class EnsemblePerformance(db.Model):
     created_by = relationship('User')
 
 
-
 class EnsemblePlayer(db.Model):
     __tablename__ = 'ensemble_players'
 

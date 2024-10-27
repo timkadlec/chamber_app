@@ -1,7 +1,7 @@
 from flask import render_template, request, redirect, url_for, flash, abort
 from chamber_app.models.library import Composition, Composer, Instrument
 from chamber_app.models.structure import Student, Teacher, TeacherChamberAssignment, StudentChamberAssignment
-from chamber_app.models.ensemble import Ensemble, EnsemblePlayer, EnsembleAssignment
+from chamber_app.models.ensemble import Ensemble, EnsemblePlayer, EnsembleAssignment, EnsemblePerformance
 from chamber_app.extensions import db
 from chamber_app.forms import InstrumentSelectForm, HourDonationForm, TeacherChamberAssignmentForm
 from . import ensemble_bp
@@ -9,6 +9,7 @@ from sqlalchemy import func, or_  # Corrected import
 from datetime import datetime
 from itertools import chain
 from markupsafe import Markup
+from flask_login import current_user
 
 
 def name_ensemble(num_players):
@@ -262,7 +263,6 @@ def ensemble_detail(ensemble_id):
     teacher_assignment_form = TeacherChamberAssignmentForm(ensemble_id=ensemble_id)
     ensemble = Ensemble.query.filter_by(id=ensemble_id).first()
     ensemble_activities_list = ensemble_activities(ensemble_id)
-
     return render_template('ensemble_detail.html',
                            ensemble=ensemble,
                            ensemble_activities_list=ensemble_activities_list,
