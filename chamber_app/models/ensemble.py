@@ -179,12 +179,14 @@ class EnsemblePerformance(db.Model):
 
     ensemble_id = db.Column(db.Integer, db.ForeignKey('ensembles.id'), nullable=False)
     composition_id = db.Column(db.Integer, db.ForeignKey('compositions.id'), nullable=False)
+    created_by_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
 
     ensemble = relationship('Ensemble', back_populates='performances')
     composition = relationship('Composition', back_populates='performances')
 
     created = db.Column(db.DateTime, default=datetime.utcnow)
-    ended = db.Column(db.DateTime)
+    created_by = relationship('User')
+
 
 
 class EnsemblePlayer(db.Model):
