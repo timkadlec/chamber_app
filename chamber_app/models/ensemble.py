@@ -23,7 +23,7 @@ class Ensemble(db.Model):
         'EnsemblePlayer',
         back_populates='ensemble',
     )
-
+    performances = relationship('EnsemblePerformance', back_populates='ensemble')
     hour_donation = db.Column(db.Integer, default=2)
 
     created = db.Column(db.DateTime, default=datetime.utcnow)
@@ -169,7 +169,24 @@ class EnsembleAssignment(db.Model):
     ended = db.Column(db.DateTime)
 
 
-# Table to link students with ensembles and their instruments
+class EnsemblePerformance(db.Model):
+    __tablename__ = "ensemble_performances"
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(256), nullable=False)
+    date = db.Column(db.Date, nullable=False)
+    venue = db.Column(db.String(100), nullable=False)
+
+    ensemble_id = db.Column(db.Integer, db.ForeignKey('ensembles.id'), nullable=False)
+    composition_id = db.Column(db.Integer, db.ForeignKey('compositions.id'), nullable=False)
+
+    ensemble = relationship('Ensemble', back_populates='performances')
+    composition = relationship('Composition', back_populates='performances')
+
+    created = db.Column(db.DateTime, default=datetime.utcnow)
+    ended = db.Column(db.DateTime)
+
+
 class EnsemblePlayer(db.Model):
     __tablename__ = 'ensemble_players'
 
