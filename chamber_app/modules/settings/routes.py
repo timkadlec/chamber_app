@@ -10,10 +10,13 @@ from chamber_app.models.structure import (
     StudyProgram,
     ClassYear,
     StudentStatus,
-    TeacherDepartment
+    TeacherDepartment,
+    AcademicYear,
+    Semester
 )
 from chamber_app.models.library import Instrument
 from chamber_app.models.ensemble import EnsemblePlayer
+from chamber_app.forms import AcademicYearForm
 
 
 def get_or_create_department(name):
@@ -134,7 +137,6 @@ def import_students():
                         else None
                     )
 
-
                     study_program = get_or_create_study_program(row["T"])
                     student_status = get_student_status(row["StS"])
                     class_year = get_class_year(row["Roč"], study_program.id)
@@ -215,3 +217,34 @@ def delete_students():
         delete_student(student)
     flash("Všichni studenti vymazáni", "success")
     return redirect(url_for("settings.import_students"))
+
+
+@settings_bp.route('academic-years', methods=["GET", "POST"])
+def academic_years():
+    form = AcademicYearForm()
+    years = AcademicYear.query.all()
+    if form.validate_on_submit():
+        new_year = AcademicYear(
+            start=form.start.data,
+            end=form.end.data
+        )
+        db.session.add(new_year)
+        db.session.commit()
+        # zimni semestr
+        zs = Semester(
+            name="ZS",
+            order=1,
+            academic_year_id=new_year.id
+        )
+        db.session.add(zs)
+        ls = Semester(
+            name="LS",
+            order=2,
+            academic_year_id=new_year.id
+        )
+        db.session.add(ls)
+        db.session.commit()
+
+    return render_template('academic_years.html',
+                           form=form,
+                           years=years)

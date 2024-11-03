@@ -139,3 +139,8 @@ class EditTeacherForm(FlaskForm):
     def populate_academic_positions(self, obj):
         self.academic_position_id.choices = [(p.id, p.name) for p in AcademicPosition.query.all()]
 
+
+class AcademicYearForm(FlaskForm):
+    start = DateField()
+    end = DateField()
+    submit = SubmitField('Založit')

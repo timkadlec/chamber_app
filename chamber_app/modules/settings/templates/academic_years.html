@@ -1,0 +1,46 @@
+{% extends "index.html" %}
+
+{% block content %}
+
+    <h1 class="mt-4">Akademické roky</h1>
+    <div class="row">
+        <div class="col-md-8">
+            <p class="lead">
+                V této sekci můžete importovat studenty z poskytnutých .xlsx souborů ze studijního oddělení či
+                sekretářek, které mají přístup k plnému KOS.
+            </p>
+        </div>
+    </div>
+    <div class="row">
+        {% for y in years %}
+            <p>{{ y.start.year }}/{{ y.end.year }}</p>
+            <p>
+            {% for semester in y.semesters %}
+                {{ semester.name }}
+            {% endfor %}
+            </p>
+        {% endfor %}
+    </div>
+    <div class="row">
+        <h1>Quick Form</h1>
+        <form method="post" action="{{ url_for('settings.academic_years') }}">
+            {{ form.hidden_tag() }}
+
+            <div>
+                {{ form.start.label }}
+                {{ form.start(class="form-control") }}
+            </div>
+
+            <div>
+                {{ form.end.label }}
+                {{ form.end(class="form-control") }}
+            </div>
+
+            <div>
+                {{ form.submit(class="btn btn-primary") }}
+            </div>
+        </form>
+
+    </div>
+
+{% endblock %}
