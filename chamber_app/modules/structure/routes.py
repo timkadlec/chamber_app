@@ -49,7 +49,7 @@ def show_students():
         query = query.filter(Student.class_year_id.in_(selected_class_years))
 
     # Execute the query and get results
-    students = query.all()
+    students = query.filter(Student.guest == 0).all()
 
     return render_template("students.html",
                            students=students,
