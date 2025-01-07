@@ -53,6 +53,7 @@ class User(db.Model, UserMixin):
     last_name = db.Column(db.String(150), nullable=True)
     email = db.Column(db.String(150), nullable=True)
     user_roles = db.relationship('UserRoles', back_populates='user', cascade="all, delete-orphan")
+    enabled_modules = db.Column(db.PickleType, default=list)  # List of enabled module names
 
     def set_password(self, password):
         """Hashes the password and stores it in the database.
