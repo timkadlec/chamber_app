@@ -17,6 +17,19 @@ class UserRoles(db.Model):
     user = db.relationship('User', back_populates='user_roles')
     role = db.relationship('Role', back_populates='user_roles')
 
+class UserModules(db.Model):
+    """Association model to manage the many-to-many relationship between User and Module."""
+    __tablename__ = 'user_modules'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    module_id = db.Column(db.Integer, db.ForeignKey('modules.id'), nullable=False)
+    date_assigned = db.Column(db.DateTime, default=datetime.utcnow)
+
+    # Relationships for accessing related User and Role objects
+    user = db.relationship('User', back_populates='user_modules')
+    module = db.relationship('Module', back_populates='user_modules')
+
 
 class Role(db.Model):
     """Role model for defining different roles within the application."""
@@ -90,3 +103,24 @@ class User(db.Model, UserMixin):
     def is_admin(self):
         """Check if the user has the admin role."""
         return self.has_role('admin')
+
+
+class Module(db.Model):
+    """Role model for defining different roles within the application."""
+    __tablename__ = 'modules'
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), unique=True, nullable=False)
+    user_modules = db.relationship('UserModules', back_populates='module', cascade="all, delete-orphan")
+
+    def __repr__(self):
+        return f"<Role {self.name}>"
+
+    @property
+    def all_users(self):
+        users = []
+        user_modules = UserModules.query.filter_by(module_id=self.id).all()
+        for u in user_modules:
+            user = User.query.filter_by(id=u.user_id).first()
+            users.append(user)
+        return users

@@ -6,19 +6,19 @@
 
 from flask import render_template, make_response, url_for
 from weasyprint import HTML
-from . import export_bp
+from .. import settings_bp
 from datetime import datetime
 
 from chamber_app.models.structure import Teacher
 from chamber_app.models.ensemble import Ensemble
 
 
-@export_bp.route('/console')
-def console():
-    return render_template('console.html')
+@settings_bp.route('/console')
+def export_console():
+    return render_template('export_console.html')
 
-@export_bp.route('/teacher-ensembles-pdf', methods=['POST'])
-def teacher_ensembles():
+@settings_bp.route('/teacher-ensembles-pdf', methods=['POST'])
+def export_teacher_ensembles():
     teachers = Teacher.query.order_by(Teacher.name).all()
     # Render HTML template to a string
     html_content = render_template('export_teacher_ensembles.html', content="Hello, PDF!", teachers=teachers)
@@ -36,8 +36,8 @@ def teacher_ensembles():
     return response
 
 
-@export_bp.route('/ensembles-pdf', methods=['POST'])
-def ensembles():
+@settings_bp.route('/ensembles-pdf', methods=['POST'])
+def export_ensembles():
     ensembles = Ensemble.query.filter_by(ended=None).order_by(Ensemble.name).all()
     logo = url_for('static', filename='HAMU.jpg')
 
