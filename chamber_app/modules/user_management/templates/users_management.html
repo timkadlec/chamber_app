@@ -1,0 +1,69 @@
+{% extends "index.html" %}
+
+{% block content %}
+    <h1 class="mt-4">Správa uživatelů</h1>
+    <div class="row">
+        <p>Místo, kde můžete upravovat uživatele.</p>
+    </div>
+
+    <div class="row mb-2">
+
+
+        <!-- Tabulka Basic -->
+        <div class="card-body">
+            <table id="datatableUsers">
+                <thead>
+                <tr>
+                    <th>username</th>
+                    <th>Jméno</th>
+                    <th>Příjmení</th>
+                    <th>Akce</th>
+                </tr>
+                </thead>
+                <tfoot>
+                <tr>
+                    <th>username</th>
+                    <th>Jméno</th>
+                    <th>Příjmení</th>
+                    <th>Akce</th>
+                </tr>
+                </tfoot>
+                <tbody>
+
+                {% for user in users %}
+                    <tr>
+                        <td>{{ user.username }} {{ user.id }}</td>
+                        <td>{{ user.first_name }}</td>
+                        <td>{{ user.last_name }}</td>
+                    <td>
+                        <a href="#">Edit</a>
+                    </td>
+                    </tr>
+
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <!-- Student JavaScript table settings -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const dataTable = new simpleDatatables.DataTable("#datatableUsers", {
+                labels: {
+                    placeholder: "Hledat",
+                    perPage: "záznamů na stránku",
+                    noRows: "Žádné záznamy k zobrazení",
+                    info: "Zobrazeno {start} až {end} z {rows} záznamů",
+                    loading: "Načítání...",
+                    next: "Další",
+                    previous: "Předchozí",
+                },
+                perPage: 10,
+                perPageSelect: [10, 20, 30, 40, 50],
+                searchable: true,
+            });
+        });
+    </script>
+{% endblock %}

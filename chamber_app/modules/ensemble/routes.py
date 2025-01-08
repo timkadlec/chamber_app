@@ -480,7 +480,8 @@ def add_ensemble_player(ensemble_id):
 def delete_ensemble_player(ensemble_player_id):
     if request.method == "POST":
         ensemble_player = EnsemblePlayer.query.filter_by(id=ensemble_player_id).first()
-        ensemble = Ensemble.query.filter_by(id=ensemble_player_id).first()
+        ensemble = Ensemble.query.filter_by(id=ensemble_player.ensemble.id).first()
+        print(ensemble)
         student_assignments = StudentChamberAssignment.query.filter_by(ensemble_player_id=ensemble_player_id).all()
         for assignment in student_assignments:
             db.session.delete(assignment)

@@ -29,6 +29,15 @@ class Role(db.Model):
     def __repr__(self):
         return f"<Role {self.name}>"
 
+    @property
+    def all_users(self):
+        users = []
+        user_roles = UserRoles.query.filter_by(role_id=self.id).all()
+        for u in user_roles:
+            user = User.query.filter_by(id=u.user_id).first()
+            users.append(user)
+        return users
+
 
 class User(db.Model, UserMixin):
     """

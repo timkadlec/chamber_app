@@ -3,10 +3,12 @@ from flask_login import LoginManager, login_user, logout_user, login_required
 from chamber_app.forms import RegistrationForm, LoginForm
 from chamber_app.models.users import User
 from chamber_app.extensions import db
-from . import users_bp
+from . import auth_bp
+from ...decorators import is_admin
+import string, random
 
 
-@users_bp.route('/register', methods=['GET', 'POST'])
+@auth_bp.route('/register', methods=['GET', 'POST'])
 def register():
     form = RegistrationForm()
     if form.validate_on_submit():
@@ -21,11 +23,11 @@ def register():
         db.session.add(new_user)
         db.session.commit()
         flash('Your account has been created!', 'success')
-        return redirect(url_for('users.login'))
+        return redirect(url_for('auth.login'))
     return render_template('register.html', form=form)
 
 
-@users_bp.route('/login', methods=['GET', 'POST'])
+@auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
     form = LoginForm()
     if form.validate_on_submit():
@@ -46,9 +48,17 @@ def login():
     return render_template('login.html', form=form)
 
 
-@users_bp.route('/logout')
+@auth_bp.route('/logout')
 @login_required
 def logout():
     session['logged_in'] = False
     logout_user()
-    return redirect(url_for('users.login'))
+    return redirect(url_for('auth.login'))
+
+
+@auth_bp.route('/change_password')
+@login_required
+def change_password():
+
+    logout_user()
+    return redirect(url_for('auth.login'))

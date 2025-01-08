@@ -144,3 +144,8 @@ class AcademicYearForm(FlaskForm):
     start = DateField()
     end = DateField()
     submit = SubmitField('Založit')
+
+
+class AddRoleForm(FlaskForm):
+    name = StringField("Název role", validators=[DataRequired()])
+    submit = SubmitField("Vytvořit")

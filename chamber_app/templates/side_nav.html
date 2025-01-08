@@ -11,6 +11,10 @@
                     <div class="sb-nav-link-icon"><i class="fas fa-graduation-cap"></i></div>
                     Studenti
                 </a>
+                <a class="nav-link" href="{{ url_for('structure.show_guests') }}">
+                    <div class="sb-nav-link-icon"><i class="fas fa-people-arrows"></i></div>
+                    Hosté
+                </a>
                 <a class="nav-link" href="{{ url_for('structure.show_teachers') }}">
                     <div class="sb-nav-link-icon"><i class="fas fa-person-chalkboard"></i></div>
                     Pedagogové
@@ -19,15 +23,12 @@
                     <div class="sb-nav-link-icon"><i class="fas fa-users"></i></div>
                     Komorní soubory
                 </a>
-                <a class="nav-link" href="{{ url_for('structure.show_guests') }}">
-                    <div class="sb-nav-link-icon"><i class="fas fa-people-arrows"></i></div>
-                    Hosté
-                </a>
+
                 <div class="sb-sidenav-menu-heading">Nastavení</div>
                 <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseLayouts"
                    aria-expanded="false" aria-controls="collapseLayouts">
                     <div class="sb-nav-link-icon"><i class="fas fa-book-open"></i></div>
-                    Repertoár
+                    Knihovna
                     <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
                 </a>
                 <div class="collapse" id="collapseLayouts" aria-labelledby="headingOne"
@@ -82,6 +83,14 @@
                 <a class="nav-link" href="{{ url_for('export.console') }}">
                     <div class="sb-nav-link-icon"><i class="fas fa-file-export"></i></div>
                     Export
+                </a>
+                <a class="nav-link" href="{{ url_for('user_management.users') }}">
+                    <div class="sb-nav-link-icon"><i class="fas fa-users"></i></div>
+                    Uživatelé
+                </a>
+                <a class="nav-link" href="{{ url_for('user_management.roles') }}">
+                    <div class="sb-nav-link-icon"><i class="fas fa-users"></i></div>
+                    Role
                 </a>
                 <!-- <a class="nav-link" href="tables.html">
                     <div class="sb-nav-link-icon"><i class="fas fa-table"></i></div>

@@ -1,0 +1,72 @@
+{% extends "index.html" %}
+
+{% block content %}
+    <h1 class="mt-4">Správa rolí</h1>
+    <div class="row">
+        <p>Místo, kde můžete upravovat role.</p>
+    </div>
+
+    <div class="row mb-2">
+        <!-- Filtering navbar -->
+        {% include "/elements/roles_filtering_navbar.html" %}
+    </div>
+
+    <div class="row mb-2">
+
+
+        <!-- Tabulka Basic -->
+        <div class="card-body">
+            <table id="datatableUsers">
+                <thead>
+                <tr>
+                    <th>Název</th>
+                    <th>Uživatelé</th>
+                    <th>Akce</th>
+                </tr>
+                </thead>
+                <tfoot>
+                <tr>
+                    <th>Název</th>
+                    <th>Uživatelé</th>
+                    <th>Akce</th>
+                </tr>
+                </tfoot>
+                <tbody>
+
+                {% for role in roles %}
+                    <tr>
+                        <td>{{ role.name }}</td>
+                        <td>{% for user in role.all_users %}{{ user.username }}{% if not loop.last %},
+                        {% endif %}{% endfor %}</td>
+                        <td>
+                            <a href="#">Edit</a>
+                        </td>
+                    </tr>
+
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <!-- Student JavaScript table settings -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const dataTable = new simpleDatatables.DataTable("#datatableUsers", {
+                labels: {
+                    placeholder: "Hledat",
+                    perPage: "záznamů na stránku",
+                    noRows: "Žádné záznamy k zobrazení",
+                    info: "Zobrazeno {start} až {end} z {rows} záznamů",
+                    loading: "Načítání...",
+                    next: "Další",
+                    previous: "Předchozí",
+                },
+                perPage: 10,
+                perPageSelect: [10, 20, 30, 40, 50],
+                searchable: true,
+            });
+        });
+    </script>
+{% endblock %}

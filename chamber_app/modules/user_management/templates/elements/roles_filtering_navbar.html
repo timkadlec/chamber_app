@@ -1,0 +1,24 @@
+<nav class="navbar navbar-expand-lg">
+    <div class="container-fluid">
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <div class="row d-flex ms-auto">
+                <button class="btn btn-primary me-2" type="button" data-bs-toggle="modal"
+                        data-bs-target="#addRoleModal">
+                    <i class="fas fa-plus me-2"></i>Přidat roli
+                </button>
+            </div>
+
+
+        </div>
+    </div>
+</nav>
+
+{% import "includes/form_macros.html" as form_macros %}
+{{ form_macros.render_modal_form(
+    modal_id="addRoleModal",
+    modal_title="Přidání novou roli",
+    form=form,
+    form_id="AddRoleForm",
+    action_url=url_for('user_management.add_role'),
+    submit_label="Vytvořit roli"
+) }}
