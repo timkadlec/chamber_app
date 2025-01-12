@@ -1,18 +1,15 @@
 from . import structure_bp
-from chamber_app.models.structure import Student, Teacher, ClassYear, Department
+from chamber_app.models.structure import Student, Teacher, ClassYear, Department, AcademicYear
 from chamber_app.models.library import Instrument
 from flask import request, render_template, flash, redirect, url_for
 from urllib.parse import urlencode
 from chamber_app.forms import AddGuestForm, EditTeacherForm
 from chamber_app.extensions import db
-
-
-@structure_bp.route('/')
-def index():
-    return render_template('structure.html')
+from chamber_app.decorators import module_required, is_admin
 
 
 @structure_bp.route('/students', methods=['GET'])
+@module_required("Studenti")
 def show_students():
     filters = request.args.copy()
 
@@ -63,6 +60,7 @@ def show_students():
 
 
 @structure_bp.route('/guests', methods=['GET'])
+@module_required("Hosté")
 def show_guests():
     filters = request.args.copy()
     form = AddGuestForm()
@@ -96,6 +94,7 @@ def show_guests():
 
 
 @structure_bp.route('/guests/add', methods=['POST'])
+@module_required("Hosté")
 def add_guest():
     form = AddGuestForm()
     new_guest = Student(
@@ -116,6 +115,7 @@ def add_guest():
 
 
 @structure_bp.route('/teachers')
+@module_required("Učitelé")
 def show_teachers():
     teachers = Teacher.query.order_by(Teacher.name).all()
     edit_teacher_form = EditTeacherForm()
@@ -124,6 +124,7 @@ def show_teachers():
 
 
 @structure_bp.route("teacher_detail/<int:teacher_id>")
+@module_required("Učitelé")
 def teacher_detail(teacher_id):
     teacher = Teacher.query.filter_by(id=teacher_id).first()
     edit_teacher_form = EditTeacherForm()
@@ -138,6 +139,7 @@ def teacher_detail(teacher_id):
 
 
 @structure_bp.route('teacher/<int:teacher_id>/edit', methods=['POST'])
+@module_required("Učitelé")
 def teacher_edit(teacher_id):
     # Create the form instance with submitted data
     edit_teacher_form = EditTeacherForm()
@@ -164,6 +166,7 @@ def teacher_edit(teacher_id):
 
 
 @structure_bp.route('teacher/add', methods=['POST'])
+@module_required("Učitelé")
 def teacher_add():
     edit_teacher_form = EditTeacherForm()
     if not edit_teacher_form.employment_time.data:
@@ -184,3 +187,10 @@ def teacher_add():
     flash("Pedagog úspěšně přidán", "success")
 
     return redirect(url_for('structure.teacher_detail', teacher_id=teacher.id))
+
+
+@structure_bp.route('academic-years')
+@is_admin
+def show_academic_years():
+    academic_years = AcademicYear.query.all()
+    return render_template("academic_years.html", academic_years=academic_years)

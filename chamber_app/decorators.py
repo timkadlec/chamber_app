@@ -14,7 +14,27 @@ def is_admin(func):
     def decorated_function(*args, **kwargs):
         # Check if the user is logged in and has the 'admin' role
         if not current_user.has_role('admin'):
-            abort(404)  # Redirect to an error page
+            abort(401)  # Redirect to an error page
         return func(*args, **kwargs)
 
     return decorated_function
+
+
+def module_required(module_name):
+    """
+    Decorator to check if the current user has access to a specific module.
+    If not, it aborts with a 403 error (Forbidden).
+    """
+
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            # Check if the user is an admin, or if the user has the required module
+            if current_user.is_admin or current_user.has_module(module_name):
+                return func(*args, **kwargs)
+            else:
+                abort(401)  # Forbidden, if the user does not have access to the module
+
+        return wrapper
+
+    return decorator

@@ -1,0 +1,53 @@
+{% extends "index.html" %}
+
+{% block content %}
+    <h1 class="mt-4">Detail uživatele: {{ user.username }}</h1>
+    <div class="row">
+        <p>Místo, kde můžete upravovat uživatele.</p>
+    </div>
+
+    <!-- Table to display the user's modules -->
+    <div class="row mb-4">
+        <h3>Seznam modulů</h3>
+        <table class="table table-bordered">
+            <thead>
+            <tr>
+                <th>Modul</th>
+                <th>Akce</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for user_module in user.user_modules %}
+                <tr>
+                    <td>{{ user_module.module.name }}</td>  <!-- Display module name -->
+                    <td>
+                        <!-- Option to remove the module -->
+                        <form method="POST"
+                              action="{{ url_for('user_management.user_remove_module', user_id=user.id, module_id=user_module.module.id) }}">
+                            <button type="submit" class="btn btn-danger">Odebrat</button>
+                        </form>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+
+        </table>
+    </div>
+
+    <!-- Form to add a new module to the user -->
+    <div class="row">
+        <h3>Přidat nový modul</h3>
+        <form method="POST" action="{{ url_for('user_management.user_detail', user_id=user.id) }}">
+            <div class="form-group">
+                <label for="module">Vyberte modul:</label>
+                <select class="form-control" id="module" name="module_id" required>
+                    {% for module in all_modules %}
+                        <option value="{{ module.id }}">{{ module.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary mt-3">Přidat modul</button>
+        </form>
+    </div>
+
+{% endblock %}

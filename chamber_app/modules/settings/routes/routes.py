@@ -20,6 +20,7 @@ from chamber_app.models.structure import (
     AcademicYear,
     Semester
 )
+from chamber_app.decorators import module_required, is_admin
 from chamber_app.models.library import Instrument
 from chamber_app.models.ensemble import EnsemblePlayer
 from chamber_app.forms import AcademicYearForm
@@ -95,6 +96,8 @@ def get_student_status(shortcut):
 
 
 @settings_bp.route("/import_students", methods=["GET", "POST"])
+@module_required('Nastavení')
+@is_admin
 def import_students():
     if request.method == "POST":
         if "file" not in request.files:
@@ -217,6 +220,8 @@ def delete_student(student):
 
 
 @settings_bp.route("/delete_students", methods=["POST"])
+@module_required('Nastavení')
+@is_admin
 def delete_students():
     students = Student.query.all()
     for student in students:
@@ -224,33 +229,3 @@ def delete_students():
     flash("Všichni studenti vymazáni", "success")
     return redirect(url_for("settings.import_students"))
 
-
-@settings_bp.route('academic-years', methods=["GET", "POST"])
-def academic_years():
-    form = AcademicYearForm()
-    years = AcademicYear.query.all()
-    if form.validate_on_submit():
-        new_year = AcademicYear(
-            start=form.start.data,
-            end=form.end.data
-        )
-        db.session.add(new_year)
-        db.session.commit()
-        # zimni semestr
-        zs = Semester(
-            name="ZS",
-            order=1,
-            academic_year_id=new_year.id
-        )
-        db.session.add(zs)
-        ls = Semester(
-            name="LS",
-            order=2,
-            academic_year_id=new_year.id
-        )
-        db.session.add(ls)
-        db.session.commit()
-
-    return render_template('academic_years.html',
-                           form=form,
-                           years=years)

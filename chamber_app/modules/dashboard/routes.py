@@ -1,4 +1,4 @@
-from flask import render_template
+from flask import render_template, request, session, redirect, url_for
 from . import dashboard_bp
 from ...extensions import db
 from ...models.structure import Student, StudentChamberAssignment
@@ -17,3 +17,13 @@ def home_view():
         .all()
     )
     return render_template("dashboard_index.html", students=students_without_active_assignments)
+
+
+@dashboard_bp.route('/set-active-academic-year', methods=['POST'])
+def set_active_academic_year():
+    active_value = request.form.get('active')  # Get the selected value from the form
+    if active_value:
+        session['active_academic_year'] = active_value
+        print(session['active_academic_year'])
+        return redirect(url_for('dashboard.home_view'))  # Redirect back to the dashboard
+    return "No active value provided", 400

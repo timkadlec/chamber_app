@@ -7,14 +7,18 @@
                     Dashboard
                 </a>
                 <div class="sb-sidenav-menu-heading">Struktura</div>
-                <a class="nav-link" href="{{ url_for('structure.show_students') }}">
-                    <div class="sb-nav-link-icon"><i class="fas fa-graduation-cap"></i></div>
-                    Studenti
-                </a>
-                <a class="nav-link" href="{{ url_for('structure.show_guests') }}">
-                    <div class="sb-nav-link-icon"><i class="fas fa-people-arrows"></i></div>
-                    Hosté
-                </a>
+                {% if current_user.has_module('Studenti') or current_user.is_admin %}
+                    <a class="nav-link" href="{{ url_for('structure.show_students') }}">
+                        <div class="sb-nav-link-icon"><i class="fas fa-graduation-cap"></i></div>
+                        Studenti
+                    </a>
+                {% endif %}
+                {% if current_user.has_module('Hosté') or current_user.is_admin %}
+                    <a class="nav-link" href="{{ url_for('structure.show_guests') }}">
+                        <div class="sb-nav-link-icon"><i class="fas fa-people-arrows"></i></div>
+                        Hosté
+                    </a>
+                {% endif %}
                 <a class="nav-link" href="{{ url_for('structure.show_teachers') }}">
                     <div class="sb-nav-link-icon"><i class="fas fa-person-chalkboard"></i></div>
                     Pedagogové
@@ -23,7 +27,10 @@
                     <div class="sb-nav-link-icon"><i class="fas fa-users"></i></div>
                     Komorní soubory
                 </a>
-
+                <a class="nav-link" href="{{ url_for('structure.show_academic_years') }}">
+                    <div class="sb-nav-link-icon"><i class="fas fa-people-arrows"></i></div>
+                    Akademické roky
+                </a>
                 <div class="sb-sidenav-menu-heading">Nastavení</div>
                 <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseLayouts"
                    aria-expanded="false" aria-controls="collapseLayouts">
@@ -76,21 +83,30 @@
                     <div class="sb-nav-link-icon"><i class="fas fa-chart-area"></i></div>
                     Charts
                 </a> -->
-                <a class="nav-link" href="{{ url_for('settings.import_students') }}">
-                    <div class="sb-nav-link-icon"><i class="fas fa-gears"></i></div>
-                    Import
-                </a>
-                <a class="nav-link" href="{{ url_for('settings.export_console') }}">
-                    <div class="sb-nav-link-icon"><i class="fas fa-file-export"></i></div>
-                    Export
-                </a>
+                {% if current_user.has_module("Nastavení") or current_user.is_admin %}
+                    <a class="nav-link" href="{{ url_for('settings.import_students') }}">
+                        <div class="sb-nav-link-icon"><i class="fas fa-gears"></i></div>
+                        Import
+                    </a>
+                {% endif %}
+                {% if current_user.has_module("Nastavení") or current_user.is_admin %}
+                    <a class="nav-link" href="{{ url_for('settings.export_console') }}">
+                        <div class="sb-nav-link-icon"><i class="fas fa-file-export"></i></div>
+                        Export
+                    </a>
+                {% endif %}
                 <a class="nav-link" href="{{ url_for('user_management.users') }}">
                     <div class="sb-nav-link-icon"><i class="fas fa-users"></i></div>
                     Uživatelé
                 </a>
+
                 <a class="nav-link" href="{{ url_for('user_management.roles') }}">
                     <div class="sb-nav-link-icon"><i class="fas fa-users"></i></div>
                     Role
+                </a>
+                <a class="nav-link" href="{{ url_for('user_management.modules') }}">
+                    <div class="sb-nav-link-icon"><i class="fas fa-users"></i></div>
+                    Moduly
                 </a>
                 <!-- <a class="nav-link" href="tables.html">
                     <div class="sb-nav-link-icon"><i class="fas fa-table"></i></div>

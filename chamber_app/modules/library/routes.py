@@ -15,6 +15,7 @@ from datetime import datetime
 import pandas as pd
 from werkzeug.utils import secure_filename
 from urllib.parse import urlencode
+from ...decorators import module_required, is_admin
 
 
 def get_unique_musical_periods():
@@ -28,6 +29,7 @@ def get_unique_musical_periods():
 
 
 @library_bp.route("/composers")
+@module_required('Knihovna')
 def show_composers():
     form_composer = ComposerForm()
     form_composer.populate_nationalities()
@@ -56,6 +58,7 @@ def validate_composer(form):
 
 
 @library_bp.route("/composer/add", methods=["POST"])
+@module_required('Knihovna')
 def add_composer():
     form_composer = ComposerForm()
     if form_composer.validate_on_submit() and validate_composer(form_composer):
@@ -81,6 +84,7 @@ def add_composer():
 
 
 @library_bp.route("/composer/import", methods=["POST"])
+@module_required('Knihovna')
 def import_composer():
     if "file" not in request.files:
         return jsonify({"success": False, "error": "No file part in the request"}), 400
@@ -146,6 +150,7 @@ def import_composer():
 
 
 @library_bp.route("composer/detail/<int:composer_id>")
+@module_required('Knihovna')
 def composer_detail(composer_id):
     composer = Composer.query.get(composer_id)
 
@@ -156,6 +161,7 @@ def composer_detail(composer_id):
 
 
 @library_bp.route("/compositions", methods=["GET"])
+@module_required('Knihovna')
 def show_compositions():
     form = ComposerForm()
     filters = request.args.copy()
@@ -203,6 +209,7 @@ def show_compositions():
 
 
 @library_bp.route("/composition/add", methods=["GET", "POST"])
+@module_required('Knihovna')
 def add_composition():
     form_composition = CompositionForm()
     form_composer = ComposerForm()
@@ -235,6 +242,7 @@ def add_composition():
 
 
 @library_bp.route('composition/<int:composition_id>/delete', methods=['POST'])
+@module_required('Knihovna')
 def delete_composition(composition_id):
     composition = Composition.query.filter_by(id=composition_id).first()
     for player in composition.players:
@@ -246,6 +254,7 @@ def delete_composition(composition_id):
 
 
 @library_bp.route("/composition/<int:composition_id>/edit_players", methods=["GET", "POST"])
+@module_required('Knihovna')
 def edit_players(composition_id):
     # Fetch the composition
     composition = Composition.query.get_or_404(composition_id)
@@ -325,6 +334,7 @@ def create_piano_trio_players(composition):
 
 
 @library_bp.route("/composition/<int:composition_id>/automation", methods=["POST"])
+@module_required('Knihovna')
 def add_players_automation(composition_id):
     # Fetch the composition
     composition = Composition.query.get_or_404(composition_id)
@@ -341,6 +351,7 @@ def add_players_automation(composition_id):
 
 
 @library_bp.route("composition/<int:composition_id>/player/<int:player_id>/delete", methods=['POST'])
+@module_required('Knihovna')
 def delete_player(composition_id, player_id):
     # Retrieve the player by ID
     player = Player.query.filter_by(id=player_id).first()
@@ -358,6 +369,7 @@ def delete_player(composition_id, player_id):
 
 
 @library_bp.route("/composition/detail/<int:composition_id>", methods=["GET", "POST"])
+@module_required('Knihovna')
 def composition_detail(composition_id):
     composition = Composition.query.get_or_404(composition_id)
     composition.players.sort(key=lambda x: x.id)
@@ -365,6 +377,7 @@ def composition_detail(composition_id):
 
 
 @library_bp.route("/get_instruments", methods=["GET"])
+@module_required('Knihovna')
 def get_instruments():
     instruments = Instrument.query.all()
     instrument_choices = [(inst.id, inst.name) for inst in instruments]

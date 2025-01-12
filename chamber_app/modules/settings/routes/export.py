@@ -1,23 +1,20 @@
-#  Copyright (c) 2024. Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-#  Morbi non lorem porttitor neque feugiat blandit. Ut vitae ipsum eget quam lacinia accumsan.
-#  Etiam sed turpis ac ipsum condimentum fringilla. Maecenas magna.
-#  Proin dapibus sapien vel ante. Aliquam erat volutpat. Pellentesque sagittis ligula eget metus.
-#  Vestibulum commodo. Ut rhoncus gravida arcu.
-
 from flask import render_template, make_response, url_for
 from weasyprint import HTML
 from .. import settings_bp
 from datetime import datetime
-
+from chamber_app.decorators import module_required
 from chamber_app.models.structure import Teacher
 from chamber_app.models.ensemble import Ensemble
 
 
 @settings_bp.route('/console')
+@module_required('Export')
 def export_console():
     return render_template('export_console.html')
 
+
 @settings_bp.route('/teacher-ensembles-pdf', methods=['POST'])
+@module_required('Export')
 def export_teacher_ensembles():
     teachers = Teacher.query.order_by(Teacher.name).all()
     # Render HTML template to a string
@@ -37,6 +34,7 @@ def export_teacher_ensembles():
 
 
 @settings_bp.route('/ensembles-pdf', methods=['POST'])
+@module_required('Export')
 def export_ensembles():
     ensembles = Ensemble.query.filter_by(ended=None).order_by(Ensemble.name).all()
     logo = url_for('static', filename='HAMU.jpg')

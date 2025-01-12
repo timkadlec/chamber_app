@@ -1,0 +1,24 @@
+<nav class="navbar navbar-expand-lg">
+    <div class="container-fluid">
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <div class="row d-flex ms-auto">
+                <button class="btn btn-primary me-2" type="button" data-bs-toggle="modal"
+                        data-bs-target="#addModuleModal">
+                    <i class="fas fa-plus me-2"></i>Přidat modul
+                </button>
+            </div>
+
+
+        </div>
+    </div>
+</nav>
+
+{% import "includes/form_macros.html" as form_macros %}
+{{ form_macros.render_modal_form(
+    modal_id="addModuleModal",
+    modal_title="Přidat nový modul",
+    form=form,
+    form_id="AddModuleForm",
+    action_url=url_for('user_management.modules'),
+    submit_label="Vytvořit modul"
+) }}

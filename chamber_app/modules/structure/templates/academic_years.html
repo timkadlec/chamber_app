@@ -1,0 +1,68 @@
+{% extends "index.html" %}
+
+{% block content %}
+    <h1 class="mt-4">Akademické roky</h1>
+    <div class="row">
+        <p>Místo, kde můžete prohlížet akademické roky</p>
+    </div>
+
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-table me-1"></i>
+            Seznam AR
+        </div>
+
+
+        <div class="card-body">
+            <table id="datatableAcademicYears">
+                <thead>
+                <tr>
+                    <th>Akademický rok</th>
+                    <th>Začátek</th>
+                    <th>Konec</th>
+                </tr>
+                </thead>
+                <tfoot>
+                <tr>
+                    <th>Akademický rok</th>
+                    <th>Začátek</th>
+                    <th>Konec</th>
+                </tr>
+                </tfoot>
+                <tbody>
+                {% for ay in academic_years %}
+                    <tr>
+                        <td>{{ ay.start.year }}/{{ ay.end.year }}</td>
+                        <td>{{ ay.start }}</td>
+                        <td>{{ ay.end }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const dataTable = new simpleDatatables.DataTable("#datatableAcademicYears", {
+                    labels: {
+                        placeholder: "Hledat",
+                        perPage: "záznamů na stránku",
+                        noRows: "Žádné záznamy k zobrazení",
+                        info: "Zobrazeno {start} až {end} z {rows} záznamů",
+                        loading: "Načítání...",
+                        next: "Další",
+                        previous: "Předchozí",
+                    },
+                    perPage: 10,
+                    perPageSelect: [10, 20, 30, 40, 50],
+                    searchable: true,
+                });
+
+            });
+        </script>
+
+    </div>
+
+
+{% endblock %}

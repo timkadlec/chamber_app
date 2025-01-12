@@ -10,7 +10,7 @@
                 <div class="card-body">
                     <h5 class="card-title">Pedagogové a jejich soubory</h5>
                     <p class="card-text">Exportujte pedagogy a jejich soubory.</p>
-                    <form method="post" action="{{ url_for('export.export_teacher_ensembles') }}">
+                    <form method="post" action="{{ url_for('settings.export_teacher_ensembles') }}">
                         <button type="submit" class="btn btn-outline-success">
                             <i class="fas fa-wand-magic-sparkles me-1"></i>Exportovat
                         </button>
@@ -24,7 +24,7 @@
                 <div class="card-body">
                     <h5 class="card-title">Pouze soubor</h5>
                     <p class="card-text">Exportujte soubory bez pedagogů.</p>
-                    <form method="post" action="{{ url_for('export.export_ensembles') }}">
+                    <form method="post" action="{{ url_for('settings.export_ensembles') }}">
                         <button type="submit" class="btn btn-outline-success">
                             <i class="fas fa-wand-magic-sparkles me-1"></i>Exportovat
                         </button>

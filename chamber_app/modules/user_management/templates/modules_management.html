@@ -1,9 +1,14 @@
 {% extends "index.html" %}
 
 {% block content %}
-    <h1 class="mt-4">Správa uživatelů</h1>
+    <h1 class="mt-4">Správa modulů</h1>
     <div class="row">
-        <p>Místo, kde můžete upravovat uživatele.</p>
+        <p>Místo, kde můžete upravovat moduly.</p>
+    </div>
+
+    <div class="row mb-2">
+        <!-- Filtering navbar -->
+        {% include "/elements/modules_filtering_navbar.html" %}
     </div>
 
     <div class="row mb-2">
@@ -11,33 +16,31 @@
 
         <!-- Tabulka Basic -->
         <div class="card-body">
-            <table id="datatableUsers">
+            <table id="datatableModules">
                 <thead>
                 <tr>
-                    <th>username</th>
-                    <th>Jméno</th>
-                    <th>Příjmení</th>
+                    <th>Název</th>
+                    <th>Uživatelé</th>
                     <th>Akce</th>
                 </tr>
                 </thead>
                 <tfoot>
                 <tr>
-                    <th>username</th>
-                    <th>Jméno</th>
-                    <th>Příjmení</th>
+                    <th>Název</th>
+                    <th>Uživatelé</th>
                     <th>Akce</th>
                 </tr>
                 </tfoot>
                 <tbody>
 
-                {% for user in users %}
+                {% for module in modules %}
                     <tr>
-                        <td>{{ user.username }} {{ user.id }}</td>
-                        <td>{{ user.first_name }}</td>
-                        <td>{{ user.last_name }}</td>
-                    <td>
-                        <a href="{{ url_for('user_management.user_detail', user_id=user.id) }}">View</a>
-                    </td>
+                        <td>{{ module.name }}</td>
+                        <td>{% for user in module.all_users %}{{ user.username }}{% if not loop.last %},
+                        {% endif %}{% endfor %}</td>
+                        <td>
+                            <a href="#">Edit</a>
+                        </td>
                     </tr>
 
                 {% endfor %}
@@ -50,7 +53,7 @@
     <!-- Student JavaScript table settings -->
     <script>
         document.addEventListener("DOMContentLoaded", function () {
-            const dataTable = new simpleDatatables.DataTable("#datatableUsers", {
+            const dataTable = new simpleDatatables.DataTable("#datatableModules", {
                 labels: {
                     placeholder: "Hledat",
                     perPage: "záznamů na stránku",

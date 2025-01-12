@@ -9,6 +9,7 @@ import string, random
 
 
 @auth_bp.route('/register', methods=['GET', 'POST'])
+@is_admin
 def register():
     form = RegistrationForm()
     if form.validate_on_submit():
@@ -56,9 +57,8 @@ def logout():
     return redirect(url_for('auth.login'))
 
 
-@auth_bp.route('/change_password')
+@auth_bp.route('/change-password')
 @login_required
 def change_password():
-
     logout_user()
     return redirect(url_for('auth.login'))

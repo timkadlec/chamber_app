@@ -17,7 +17,8 @@ class UserRoles(db.Model):
     user = db.relationship('User', back_populates='user_roles')
     role = db.relationship('Role', back_populates='user_roles')
 
-class UserModules(db.Model):
+
+class UserModule(db.Model):
     """Association model to manage the many-to-many relationship between User and Module."""
     __tablename__ = 'user_modules'
 
@@ -44,11 +45,7 @@ class Role(db.Model):
 
     @property
     def all_users(self):
-        users = []
-        user_roles = UserRoles.query.filter_by(role_id=self.id).all()
-        for u in user_roles:
-            user = User.query.filter_by(id=u.user_id).first()
-            users.append(user)
+        users = User.query.join(UserRoles).filter(UserRoles.role_id == self.id).all()
         return users
 
 
@@ -75,7 +72,7 @@ class User(db.Model, UserMixin):
     last_name = db.Column(db.String(150), nullable=True)
     email = db.Column(db.String(150), nullable=True)
     user_roles = db.relationship('UserRoles', back_populates='user', cascade="all, delete-orphan")
-    enabled_modules = db.Column(db.PickleType, default=list)  # List of enabled module names
+    user_modules = db.relationship('UserModule', back_populates='user', cascade="all, delete-orphan")
 
     def set_password(self, password):
         """Hashes the password and stores it in the database.
@@ -100,18 +97,24 @@ class User(db.Model, UserMixin):
         """Check if the user has a specific role."""
         return any(user_role.role.name == role_name for user_role in self.user_roles)
 
+    def has_module(self, module_name):
+        """Check if the user has access to a specific module or is an admin."""
+        if self.is_admin():  # Check if user is admin
+            return True
+        # Check if the user has the module by checking the relationship
+        return any(user_module.module and user_module.module.name == module_name for user_module in self.user_modules)
+
     def is_admin(self):
         """Check if the user has the admin role."""
         return self.has_role('admin')
 
 
 class Module(db.Model):
-    """Role model for defining different roles within the application."""
     __tablename__ = 'modules'
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(50), unique=True, nullable=False)
-    user_modules = db.relationship('UserModules', back_populates='module', cascade="all, delete-orphan")
+    name = db.Column(db.String(50), nullable=False)
+    user_modules = db.relationship('UserModule', back_populates='module', cascade="all, delete-orphan")
 
     def __repr__(self):
         return f"<Role {self.name}>"
@@ -119,7 +122,7 @@ class Module(db.Model):
     @property
     def all_users(self):
         users = []
-        user_modules = UserModules.query.filter_by(module_id=self.id).all()
+        user_modules = UserModule.query.filter_by(module_id=self.id).all()
         for u in user_modules:
             user = User.query.filter_by(id=u.user_id).first()
             users.append(user)
