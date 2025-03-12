@@ -48,40 +48,15 @@
         }
 
 
-        /* Optional: Force a page break after the last assignment if needed */
-        @media print {
-            .teacher-name:last-of-type {
-                page-break-after: always; /* Ensures a break after the last teacher's assignments */
-            }
-
-            .teacher-card:last-of-type {
-                page-break-after: always; /* Ensures a break after the last teacher's assignments */
-            }
-        }
     </style>
 </head>
 <body>
 <div class="content">
-    <h1>Seznam komorních souborů</h1>
+    <h1>Seznam aktivních pedagogů</h1>
     {% for teacher in teachers %}
         <div class="teacher-card">
             {% if teacher.active_chamber_assignments %}
                 <p class="teacher-name">{{ teacher.academic_position.shortcut }} {{ teacher.name }}</p>
-                {% for a in teacher.active_chamber_assignments %}
-                    <p class="ensemble">
-                        {% if a.ensemble.assignments %}
-                            {% for comp in a.ensemble.assignments %}
-                                (
-                                {{ comp.composition.composer.full_name }}{% if not loop.last %}, {% endif %}{% endfor %}
-                            ):
-                        {% endif %}
-                        {% for student in a.ensemble.active_student_assignments %}
-                            <i>{{ student.instrument.shortcut }} - </i>
-                            {{ student.full_name }}{% if not loop.last %}, {% endif %}
-                        {% endfor %}
-                        ({{ a.hour_donation }}h)
-                    </p>
-                {% endfor %}
             {% endif %}
         </div>
     {% endfor %}

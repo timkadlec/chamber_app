@@ -1,0 +1,34 @@
+{% extends "index.html" %}
+
+{% block content %}
+
+    <h1 class="mt-4">Rozcestník importování</h1>
+    <div class="row">
+        <div class="col-md-8">
+            <p class="lead">
+                V této sekci můžete importovat studenty z poskytnutých .xlsx souborů ze studijního oddělení či
+                sekretářek, které mají přístup k plnému KOS.
+            </p>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Aktualizace údajů</h5>
+                    <p class="card-text">Pro aktualizaci volíme seznamy podle kateder.</p>
+                    <a href="{{url_for('settings.update_students')}}" class="card-link">Aktualizovat</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Aktivace předmětů</h5>
+                    <p class="card-text">Aktivace jednotlivých předmětů studentů.</p>
+                    <a href="#" class="card-link">Aktivovat</a>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

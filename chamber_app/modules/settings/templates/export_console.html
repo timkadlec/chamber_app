@@ -22,6 +22,20 @@
         <div class="col-md-6 mb-4">
             <div class="card">
                 <div class="card-body">
+                    <h5 class="card-title">Aktivní pedagogové</h5>
+                    <p class="card-text">Exportujte aktivní pedagogy.</p>
+                    <form method="post" action="{{ url_for('settings.export_active_teachers') }}">
+                        <button type="submit" class="btn btn-outline-success">
+                            <i class="fas fa-wand-magic-sparkles me-1"></i>Exportovat
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-body">
                     <h5 class="card-title">Pouze soubor</h5>
                     <p class="card-text">Exportujte soubory bez pedagogů.</p>
                     <form method="post" action="{{ url_for('settings.export_ensembles') }}">

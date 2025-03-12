@@ -153,12 +153,14 @@
                     <thead>
                     <tr>
                         <th>Jméno souboru</th>
+                        <th>Studenti</th>
                         <th>Hodinová dotace</th>
                     </tr>
                     </thead>
                     <tfoot>
                     <tr>
                         <th>Jméno souboru</th>
+                        <th>Studenti</th>
                         <th>Hodinová dotace</th>
                     </tr>
                     </tfoot>
@@ -167,6 +169,15 @@
                         <tr>
                             <td>
                                 <a href="{{ url_for('ensemble.ensemble_detail', ensemble_id=a.ensemble.id) }}">{{ a.ensemble.name }}</a>
+                            </td>
+                            <td>
+                                {% if a.ensemble %}
+                                    {% for student in a.ensemble.active_student_assignments %}
+                                        {{ student.last_name }}{% if not loop.last %}, {% endif %}
+                                    {% else %}
+                                        Žádní studenti
+                                    {% endfor %}
+                                {% endif %}
                             </td>
                             <td>{{ a.hour_donation }}</td>
                         </tr>

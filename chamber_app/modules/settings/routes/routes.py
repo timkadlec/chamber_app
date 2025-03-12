@@ -16,14 +16,11 @@ from chamber_app.models.structure import (
     StudyProgram,
     ClassYear,
     StudentStatus,
-    TeacherDepartment,
-    AcademicYear,
-    Semester
+    TeacherDepartment
 )
 from chamber_app.decorators import module_required, is_admin
 from chamber_app.models.library import Instrument
 from chamber_app.models.ensemble import EnsemblePlayer
-from chamber_app.forms import AcademicYearForm
 
 
 def get_or_create_department(name):
@@ -42,7 +39,7 @@ def get_or_create_instrument(name):
     if instrument is not None:
         return instrument
     else:
-        instrument = Instrument(name=name, is_obligatory=False)
+        instrument = Instrument(name=name)
         db.session.add(instrument)
         db.session.commit()
         return instrument
@@ -95,10 +92,129 @@ def get_student_status(shortcut):
         return None
 
 
-@settings_bp.route("/import_students", methods=["GET", "POST"])
+@settings_bp.route("/import-home", methods=["GET", "POST"])
+def import_home():
+    return render_template("import_home.html")
+
+
+@settings_bp.route("/update-students", methods=["GET", "POST"])
 @module_required('Nastavení')
-@is_admin
-def import_students():
+def update_students():
+    departments = Department.query.all()
+    if request.method == "POST":
+        if "file" not in request.files:
+            flash("Nebyl přiložen soubor")
+            return redirect(request.url)
+
+        file = request.files["file"]
+        department_id = request.form.get('department_select')
+        if file.filename == "":
+            flash("No selected file")
+            return redirect(request.url)
+
+        if file and file.filename.endswith(".xlsx"):
+            # Save the uploaded file temporarily
+            file_path = os.path.join("uploaded_file.xlsx")
+            file.save(file_path)
+
+            # Process the file
+            df = pd.read_excel(file_path)
+
+            required_columns = [
+                "Příjmení",
+                "Jméno",
+                "Osobní čís.",
+                "Název oboru/specializace",
+                "Školitel",
+                "T",
+                "Roč",
+                "StS"
+            ]
+
+            # If "K" column is present, include it in required columns
+            if "K" in df.columns:
+                required_columns.append("K")
+
+            df_filtered = df[required_columns]
+            try:
+                new_students = []
+                for _, row in df_filtered.iterrows():
+                    # Create or get related entries
+                    instrument = get_or_create_instrument(row["Název oboru/specializace"])
+                    department = department_id
+                    teacher = (
+                        get_or_create_teacher(row["Školitel"], department)
+                        if pd.notna(row["Školitel"]) and row["Školitel"].strip() != ""
+                        else None
+                    )
+
+                    study_program = get_or_create_study_program(row["T"])
+                    student_status = get_student_status(row["StS"])
+                    class_year = get_class_year(row["Roč"], study_program.id)
+                    active = True  # Default to active if "K" is not present
+                    if "K" in df.columns and pd.notna(row.get("K")):
+                        active = False if row["K"] == "N" else True
+                    # Check if the student already exists
+                    student_db = Student.query.filter_by(osobni_cislo=row["Osobní čís."]).first()
+
+                    if student_db:
+                        # Update the existing student's details
+                        student_db.last_name = row["Příjmení"]
+                        student_db.first_name = row["Jméno"]
+                        student_db.department_id = department_id
+
+                        # Check if teacher, student_status, and class_year are found before assigning
+                        student_db.teacher_id = teacher.id if teacher else None
+                        student_db.active = active
+                        student_db.guest = False
+                        student_db.student_status_id = student_status.id if student_status else None
+                        student_db.instrument_id = instrument.id
+                        student_db.study_program_id = study_program.id
+                        student_db.class_year_id = class_year.id if class_year else None
+                    else:
+                        # Create a new student object
+                        student_db = Student(
+                            last_name=row["Příjmení"],
+                            first_name=row["Jméno"],
+                            osobni_cislo=row["Osobní čís."],
+                            department_id=department_id,
+                            teacher_id=teacher.id if teacher else None,
+                            active=active,
+                            guest=False,
+                            student_status_id=student_status.id if student_status else None,
+                            instrument_id=instrument.id,
+                            study_program_id=study_program.id,
+                            class_year_id=class_year.id if class_year else None,
+                        )
+
+                    new_students.append(student_db)
+
+                # After processing all students, commit the changes
+                db.session.add_all(new_students)
+                db.session.commit()
+
+                flash(f"{len(new_students)} studentů bylo přidáno nebo aktualizováno.", "info", )
+            except Exception as e:
+                db.session.rollback()
+                flash(f"Vyskytla se chyba: {e} ", "danger", )
+
+            # Remove the temporary file
+            os.remove(file_path)
+
+            # Redirect to the page showing newly added records
+            return redirect(
+                url_for(
+                    "structure.show_students",
+                    student_ids=[student.id for student in new_students],
+                )
+            )
+
+    return render_template("update_students.html", departments=departments)
+
+
+@settings_bp.route("/activate_students", methods=["GET", "POST"])
+@module_required('Nastavení')
+def activate_students():
     if request.method == "POST":
         if "file" not in request.files:
             flash("No file part")
@@ -118,15 +234,67 @@ def import_students():
             df = pd.read_excel(file_path)
 
             required_columns = [
-                "Příjmení",
-                "Jméno",
                 "Osobní čís.",
-                "Název oboru/specializace",
-                "Školitel",
-                "Oborová katedra",
-                "T",
-                "Roč",
-                "StS"
+            ]
+
+            df_filtered = df[required_columns]
+            try:
+                activated_students = []
+                for _, row in df_filtered.iterrows():
+                    active = True  # Default to active if "K" is not present
+                    student_db = Student.query.filter_by(osobni_cislo=row["Osobní čís."]).first()
+
+                    if student_db:
+                        student_db.active = active
+
+                    activated_students.append(student_db)
+
+                # After processing all students, commit the changes
+                db.session.add_all(activated_students)
+                db.session.commit()
+
+                flash(f"{len(activated_students)} studentů bylo aktualizováno.", "info", )
+            except Exception as e:
+                db.session.rollback()
+                flash(f"Vyskytla se chyba: {e} ", "danger", )
+
+            # Remove the temporary file
+            os.remove(file_path)
+
+            # Redirect to the page showing newly added records
+            return redirect(
+                url_for(
+                    "structure.show_students",
+                    student_ids=[student.id for student in activated_students],
+                )
+            )
+
+    return render_template("import_students.html")
+
+
+@settings_bp.route("/update_student_dep", methods=["GET", "POST"])
+@module_required('Nastavení')
+def update_student_dep():
+    if request.method == "POST":
+        if "file" not in request.files:
+            flash("No file part")
+            return redirect(request.url)
+
+        file = request.files["file"]
+        if file.filename == "":
+            flash("No selected file")
+            return redirect(request.url)
+
+        if file and file.filename.endswith(".xlsx"):
+            # Save the uploaded file temporarily
+            file_path = os.path.join("uploaded_file.xlsx")
+            file.save(file_path)
+
+            # Process the file
+            df = pd.read_excel(file_path)
+
+            required_columns = [
+                "Os. číslo",
             ]
 
             # If "K" column is present, include it in required columns
@@ -147,7 +315,7 @@ def import_students():
                     )
 
                     study_program = get_or_create_study_program(row["T"])
-                    student_status = get_student_status(row["StS"])
+                    student_status = get_student_status(row["SS"])
                     class_year = get_class_year(row["Roč"], study_program.id)
                     active = True  # Default to active if "K" is not present
                     if "K" in df.columns and pd.notna(row.get("K")):
@@ -228,4 +396,3 @@ def delete_students():
         delete_student(student)
     flash("Všichni studenti vymazáni", "success")
     return redirect(url_for("settings.import_students"))
-

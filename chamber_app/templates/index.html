@@ -26,37 +26,6 @@
 
     <!-- Navbar-->
     <ul class="navbar-nav ms-auto ms-md-0 me-3 me-lg-4">
-        <!-- Active Selection Dropdown -->
-        <li class="nav-item dropdown me-3">
-            <form action="{{ url_for('dashboard.set_active_academic_year') }}" method="post" id="activeForm">
-                <a class="nav-link dropdown-toggle" id="activeDropdown" href="#" role="button" data-bs-toggle="dropdown"
-                   aria-expanded="false">
-                    {% if session.get('active_academic_year') %}
-                        {% for ay in academic_years %}
-                            {% if ay.id == session.get('active_academic_year') %}
-                                {{ ay.start.year }}/{{ ay.end.year }}
-                            {% endif %}
-                        {% endfor %}
-                    {% else %}
-                        Vyberte aktivní
-                    {% endif %}
-                </a>
-                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="activeDropdown">
-                    {% for ay in academic_years %}
-                        <li>
-                            <button class="dropdown-item {% if ay.id == session.get('active_academic_year') %}active{% endif %}"
-                                    type="submit"
-                                    name="active"
-                                    value="{{ ay.id }}">
-                                {{ ay.start.year }}/{{ ay.end.year }}
-                            </button>
-                        </li>
-                    {% endfor %}
-                </ul>
-            </form>
-
-        </li>
-
         <!-- User Options Dropdown -->
         <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown"

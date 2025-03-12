@@ -33,6 +33,26 @@ def export_teacher_ensembles():
     return response
 
 
+@settings_bp.route('/active-teachers-pdf', methods=['POST'])
+@module_required('Export')
+def export_active_teachers():
+    teachers = Teacher.query.order_by(Teacher.name).all()
+    # Render HTML template to a string
+    html_content = render_template('export_active_teachers.html', content="Hello, PDF!", teachers=teachers)
+
+    # Generate PDF
+    pdf = HTML(string=html_content).write_pdf()
+
+    today_date = datetime.now().strftime("%Y-%m-%d")
+    filename = f"HAMU_active_teachers_{today_date}.pdf"
+
+    response = make_response(pdf)
+    response.headers['Content-Type'] = 'application/pdf'
+    response.headers['Content-Disposition'] = f'attachment; filename="{filename}"'
+
+    return response
+
+
 @settings_bp.route('/ensembles-pdf', methods=['POST'])
 @module_required('Export')
 def export_ensembles():

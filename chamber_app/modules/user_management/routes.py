@@ -9,7 +9,6 @@ from ...decorators import is_admin
 
 
 @user_management_bp.route('<int:user_id>/generate_password')
-@is_admin
 def generate_password(user_id):
     all_characters = list(string.ascii_lowercase + string.ascii_uppercase + string.digits + string.punctuation)
     password = ''.join(random.sample(all_characters, 8))
@@ -21,14 +20,12 @@ def generate_password(user_id):
 
 
 @user_management_bp.route('/users')
-@is_admin
 def users():
     users = User.query.all()
     return render_template('users_management.html', users=users)
 
 
 @user_management_bp.route('/user/<int:user_id>', methods=['GET', 'POST'])
-@is_admin
 def user_detail(user_id):
     user = User.query.get_or_404(user_id)
 
@@ -65,7 +62,6 @@ def user_detail(user_id):
 
 
 @user_management_bp.route('/user/<int:user_id>/remove_module/<int:module_id>', methods=['POST'])
-@is_admin
 def user_remove_module(user_id, module_id):
     user = User.query.get_or_404(user_id)
     module = Module.query.get_or_404(module_id)
@@ -81,7 +77,6 @@ def user_remove_module(user_id, module_id):
 
 
 @user_management_bp.route('/roles')
-@is_admin
 def roles():
     form = AddRoleForm()
     roles = Role.query.all()
@@ -89,7 +84,6 @@ def roles():
 
 
 @user_management_bp.route('/role/add', methods=["POST"])
-@is_admin
 def add_role():
     form = AddRoleForm()
     if form.validate_on_submit():
@@ -101,7 +95,6 @@ def add_role():
 
 
 @user_management_bp.route("/modules", methods=["POST", "GET"])
-@is_admin
 def modules():
     modules = Module.query.all()
     form = AddModuleForm()

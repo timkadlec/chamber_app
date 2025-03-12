@@ -33,15 +33,10 @@ def create_app(config=Config):  # You can set a default config here
         # Function to load a user by ID
         return User.query.get(int(user_id))
 
-    @app.before_request
-    def set_active_academic_year():
-        if not session.get('active_academic_year'):
-            session['active_academic_year']
     def require_login():
         # Check if the request is for a static file or the login page
         if not current_user.is_authenticated and request.endpoint not in ['auth.login', 'static']:
             return redirect(url_for('auth.login'))
-
 
     with app.app_context():
         # Import models here to avoid circular imports

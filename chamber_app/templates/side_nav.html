@@ -7,13 +7,13 @@
                     Dashboard
                 </a>
                 <div class="sb-sidenav-menu-heading">Struktura</div>
-                {% if current_user.has_module('Studenti') or current_user.is_admin %}
+                {% if current_user.is_admin %}
                     <a class="nav-link" href="{{ url_for('structure.show_students') }}">
                         <div class="sb-nav-link-icon"><i class="fas fa-graduation-cap"></i></div>
                         Studenti
                     </a>
                 {% endif %}
-                {% if current_user.has_module('Hosté') or current_user.is_admin %}
+                {% if current_user.is_admin %}
                     <a class="nav-link" href="{{ url_for('structure.show_guests') }}">
                         <div class="sb-nav-link-icon"><i class="fas fa-people-arrows"></i></div>
                         Hosté
@@ -83,13 +83,13 @@
                     <div class="sb-nav-link-icon"><i class="fas fa-chart-area"></i></div>
                     Charts
                 </a> -->
-                {% if current_user.has_module("Nastavení") or current_user.is_admin %}
-                    <a class="nav-link" href="{{ url_for('settings.import_students') }}">
+                {% if current_user.is_admin %}
+                    <a class="nav-link" href="{{ url_for('settings.import_home') }}">
                         <div class="sb-nav-link-icon"><i class="fas fa-gears"></i></div>
                         Import
                     </a>
                 {% endif %}
-                {% if current_user.has_module("Nastavení") or current_user.is_admin %}
+                {% if current_user.is_admin %}
                     <a class="nav-link" href="{{ url_for('settings.export_console') }}">
                         <div class="sb-nav-link-icon"><i class="fas fa-file-export"></i></div>
                         Export

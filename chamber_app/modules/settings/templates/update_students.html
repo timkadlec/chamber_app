@@ -1,0 +1,48 @@
+{% extends "index.html" %}
+
+{% block content %}
+
+    <h1 class="mt-4">Aktualizace studentů</h1>
+    <div class="row">
+        <div class="col-md-8">
+            <p class="lead">
+                V této sekci můžete aktualizovat studenty z poskytnutých .xlsx souborů ze studijního oddělení či od
+                sekretariátu, které mají přístup k plnému KOS.
+            </p>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <form method="POST" enctype="multipart/form-data" class="mt-4">
+                <div class="mb-3">
+                    <label for="select" class="form-label">Volba katedry</label>
+                    <select class="form-select" aria-label="Department selection" name="department_select">
+                        <option selected>Zvolte katedru</option>
+                        {% for d in departments %}
+                            <option value={{ d.id }}>{{ d.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="file" class="form-label">Vyberte soubor</label>
+                    <input type="file" name="file" accept=".xlsx" class="form-control" id="file">
+                </div>
+                <div>
+                    <input type="submit" value="Aktualizovat" class="btn btn-primary">
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <h4>Vymazat studenty</h4>
+            <form method="POST" action="{{ url_for('settings.delete_students') }}" class="mt-4" disabled="">
+                <div>
+                    <button type="submit" class="btn btn-danger">Vymazat studenty</button>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}
